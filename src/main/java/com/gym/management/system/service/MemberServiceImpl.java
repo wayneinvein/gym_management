@@ -3,10 +3,12 @@ package com.gym.management.system.service;
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.exception.MemberNotFoundException;
 import com.gym.management.system.repository.MemberRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class MemberServiceImpl implements MemberService{
 
     private final MemberRepository memberRepository;
@@ -39,8 +41,9 @@ public class MemberServiceImpl implements MemberService{
     }
 
     @Override
-    public Optional<Members> getMemberById(Long id) {
-        return memberRepository.findById(id);
+    public Members getMemberById(Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new MemberNotFoundException("Member not found with id: " + id));
     }
 
     @Override
