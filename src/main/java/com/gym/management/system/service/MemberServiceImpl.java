@@ -20,7 +20,11 @@ public class MemberServiceImpl implements MemberService{
 
     @Override
     public List<Members> getAllMembers() {
-        return memberRepository.findAll();
+        List<Members> members = memberRepository.findAll();
+        if (members.isEmpty()) {
+            throw new MemberNotFoundException("Members not created yet!!");
+        }
+        return members;
     }
 
     @Override
