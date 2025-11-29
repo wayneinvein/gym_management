@@ -22,20 +22,6 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    // Create a new member
-    @PostMapping
-    public ResponseEntity<Members> addMember(@RequestBody Members member) {
-        Members savedMember = memberService.addMember(member);
-        return new ResponseEntity<>(savedMember, HttpStatus.CREATED); // 201 Created
-    }
-
-    // Update existing member
-    @PutMapping("/{id}")
-    public ResponseEntity<Members> updateMember(@PathVariable Long id, @RequestBody Members member) {
-        Members updatedMember = memberService.updateMember(id, member); // will throw exception if not found
-        return new ResponseEntity<>(updatedMember, HttpStatus.OK);
-    }
-
     // Get all members
     @GetMapping
     public ResponseEntity<List<Members>> getAllMembers() {
@@ -48,6 +34,20 @@ public class MemberController {
     public ResponseEntity<Members> getMemberById(@PathVariable Long id) {
         Members member = memberService.getMemberById(id); // throws MemberNotFoundException if not found
         return new ResponseEntity<>(member, HttpStatus.OK);
+    }
+
+    // Create a new member
+    @PostMapping
+    public ResponseEntity<Members> addMember(@RequestBody Members member) {
+        Members savedMember = memberService.addMember(member);
+        return new ResponseEntity<>(savedMember, HttpStatus.CREATED); // 201 Created
+    }
+
+    // Update existing member
+    @PutMapping("/{id}")
+    public ResponseEntity<Members> updateMember(@PathVariable Long id, @RequestBody Members member) {
+        Members updatedMember = memberService.updateMember(id, member); // throws MemberNotFoundException if not found
+        return new ResponseEntity<>(updatedMember, HttpStatus.OK);
     }
 
     // delete member

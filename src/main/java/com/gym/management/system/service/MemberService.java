@@ -6,13 +6,13 @@ import java.util.List;
 
 public interface MemberService {
 
+    List<Members> getAllMembers();
+
+    Members getMemberById(Long id);
+
     Members addMember(Members member);
 
     Members updateMember(Long id, Members member);
 
     void deleteMember(Long id);
-
-    Members getMemberById(Long id);
-
-    List<Members> getAllMembers();
 }

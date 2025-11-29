@@ -19,6 +19,17 @@ public class MemberServiceImpl implements MemberService{
     }
 
     @Override
+    public List<Members> getAllMembers() {
+        return memberRepository.findAll();
+    }
+
+    @Override
+    public Members getMemberById(Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new MemberNotFoundException("Member not found with id: " + id));
+    }
+
+    @Override
     public Members addMember(Members member){
         return memberRepository.save(member);
     }
@@ -37,17 +48,12 @@ public class MemberServiceImpl implements MemberService{
 
     @Override
     public void deleteMember(Long id){
-        memberRepository.deleteById(id);
+        Optional<Members> existing = memberRepository.findById(id);
+        if(existing.isPresent()) {
+            memberRepository.deleteById(id);
+        }else{
+            throw new MemberNotFoundException("Member not found with id:" + id);
+        }
     }
 
-    @Override
-    public Members getMemberById(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new MemberNotFoundException("Member not found with id: " + id));
-    }
-
-    @Override
-    public List<Members> getAllMembers() {
-        return memberRepository.findAll();
-    }
 }
