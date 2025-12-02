@@ -11,8 +11,17 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    //handling member not found
     @ExceptionHandler(MemberNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleMemberNotFoundException(MemberNotFoundException ex){
+        Map<String, String> response = new HashMap<>();
+        response.put("Status: 404 NOT FOUND", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    //handling trainer not found
+    @ExceptionHandler(TrainerNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleTrainerNotFoundException(TrainerNotFoundException ex){
         Map<String, String> response = new HashMap<>();
         response.put("Status: 404 NOT FOUND", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
