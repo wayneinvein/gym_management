@@ -56,7 +56,8 @@ public class TrainerServiceImpl implements TrainerService{
         Optional<Trainers> existing = trainerRepository.findById(id);
         if(existing.isPresent()){
             trainerRepository.deleteById(id);
+        }else {
+            throw new TrainerNotFoundException("trainer with id " + id + " dosen't exist!!");
         }
-        throw new TrainerNotFoundException("trainer with id " + id + " dosen't exist!!");
     }
 }
