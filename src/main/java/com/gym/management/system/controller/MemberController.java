@@ -56,4 +56,11 @@ public class MemberController {
         memberService.deleteMember(id);
         return ResponseEntity.ok("Member deleted successfully with id: " + id);
     }
+
+    //assigning a member to a trainer
+    @PutMapping("/{memberId}/assign-trainer/{trainerId}")
+    public String assignTrainer(@PathVariable Long memberId, @PathVariable Long trainerId) {
+        return memberService.assignTrainer(memberId, trainerId);
+    }
+
 }

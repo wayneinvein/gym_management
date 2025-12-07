@@ -15,4 +15,6 @@ public interface MemberService {
     Members updateMember(Long id, Members member);
 
     void deleteMember(Long id);
+
+    public String assignTrainer(Long memberId, Long trainerId);
 }

@@ -1,10 +1,9 @@
 package com.gym.management.system.entity;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 @JsonPropertyOrder({"trainerId", "trainerName", "trainerGender"}) //to set the order of response
@@ -15,6 +14,9 @@ public class Trainers {
     private Long trainerId;
     private String trainerName;
     private String trainerGender;
+
+    @OneToMany(mappedBy = "trainer")
+    private List<Members> members;
 
     public Trainers() {
     }
