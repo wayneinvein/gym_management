@@ -1,11 +1,13 @@
 package com.gym.management.system.entity;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
+@JsonPropertyOrder({"memberId", "memberName", "memberGender", }) //to set the order of response
 public class Members {
 
     @Id
@@ -24,10 +26,6 @@ public class Members {
 
     public Long getMemberId() {
         return memberId;
-    }
-
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
     }
 
     public String getMemberName() {
