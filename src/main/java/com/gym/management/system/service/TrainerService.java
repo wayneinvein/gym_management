@@ -1,5 +1,6 @@
 package com.gym.management.system.service;
 
+import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
 import org.springframework.stereotype.Service;
 
@@ -16,4 +17,6 @@ public interface TrainerService {
     public Trainers updateTrainer(Long id, Trainers trainer);
 
     public void deleteTrainer(Long id);
+
+    public List<Members> getMembersByTrainer(Long trainerId);
 }

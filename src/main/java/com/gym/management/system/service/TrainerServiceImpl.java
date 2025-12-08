@@ -1,7 +1,10 @@
 package com.gym.management.system.service;
 
+import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
+import com.gym.management.system.exception.MemberNotFoundException;
 import com.gym.management.system.exception.TrainerNotFoundException;
+import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.TrainerRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,10 +15,12 @@ import java.util.Optional;
 public class TrainerServiceImpl implements TrainerService{
 
     private final TrainerRepository trainerRepository;
+    private final MemberRepository memberRepository;
 
     //injecting dependency of trainer repository through constructor
-    public TrainerServiceImpl(TrainerRepository trainerRepository){
+    public TrainerServiceImpl(TrainerRepository trainerRepository, MemberRepository memberRepository){
         this.trainerRepository = trainerRepository;
+        this.memberRepository = memberRepository;
     }
 
     //get all trainers
@@ -59,5 +64,17 @@ public class TrainerServiceImpl implements TrainerService{
         }else {
             throw new TrainerNotFoundException("trainer with id " + id + " dosen't exist!!");
         }
+    }
+
+    //get member assigned to a particular trainer
+    @Override
+    public List<Members>  getMembersByTrainer(Long trainerId) {
+        System.out.println("Fetching members for trainerId: " + trainerId);
+        List<Members> members = memberRepository.findByTrainerTrainerId(trainerId);
+        System.out.println("Members found: " + members.size());
+        if (members.isEmpty()) {
+            throw new MemberNotFoundException("No members found for trainer id: " + trainerId);
+        }
+        return members;
     }
 }

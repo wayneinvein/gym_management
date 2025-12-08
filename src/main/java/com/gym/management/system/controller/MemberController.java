@@ -58,7 +58,7 @@ public class MemberController {
     }
 
     //assigning a member to a trainer
-    @PutMapping("/{memberId}/{trainerId}")
+    @PutMapping("/member/{memberId}/trainer/{trainerId}")
     public ResponseEntity<Members> assignTrainer(@PathVariable Long memberId, @PathVariable Long trainerId) {
         Members updatedMember = memberService.assignTrainer(memberId, trainerId);
         return new ResponseEntity<>(updatedMember, HttpStatus.OK);

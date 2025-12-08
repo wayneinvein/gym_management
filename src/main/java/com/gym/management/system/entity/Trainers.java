@@ -1,5 +1,6 @@
 package com.gym.management.system.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.*;
 
@@ -16,6 +17,7 @@ public class Trainers {
     private String trainerGender;
 
     @OneToMany(mappedBy = "trainer")
+    @JsonIgnore
     private List<Members> members;
 
     public Trainers() {
@@ -23,6 +25,10 @@ public class Trainers {
 
     public Long getTrainerId() {
         return trainerId;
+    }
+
+    public void setTrainerId(Long trainerId) {
+        this.trainerId = trainerId;
     }
 
     public String getTrainerName() {
@@ -39,5 +45,13 @@ public class Trainers {
 
     public void setTrainerGender(String trainerGender) {
         this.trainerGender = trainerGender;
+    }
+
+    public List<Members> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<Members> members) {
+        this.members = members;
     }
 }

@@ -20,13 +20,12 @@ public class Members {
     public Members() {
     }
 
-    public Members(String memberName, String memberGender) {
-        this.memberName = memberName;
-        this.memberGender = memberGender;
-    }
-
     public Long getMemberId() {
         return memberId;
+    }
+
+    public void setMemberId(Long memberId) {
+        this.memberId = memberId;
     }
 
     public String getMemberName() {
@@ -45,7 +44,11 @@ public class Members {
         this.memberGender = memberGender;
     }
 
-    public Trainers getTrainer() {return trainer;}
+    public Trainers getTrainer() {
+        return trainer;
+    }
 
-    public void setTrainer(Trainers trainer) {this.trainer = trainer;}
+    public void setTrainer(Trainers trainer) {
+        this.trainer = trainer;
+    }
 }

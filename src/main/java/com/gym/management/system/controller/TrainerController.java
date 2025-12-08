@@ -1,5 +1,6 @@
 package com.gym.management.system.controller;
 
+import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
 import com.gym.management.system.service.TrainerService;
 import org.springframework.http.HttpStatus;
@@ -49,5 +50,12 @@ public class TrainerController {
         trainerService.deleteTrainer(id);
         return new ResponseEntity<>("trainer with id: " + id + " has been successfully deleted", HttpStatus.CREATED);
     }
+
+    //find members assigned to a particular trainer
+    @GetMapping("/{trainerId}/members")
+    public List<Members> getMembersByTrainer(@PathVariable Long trainerId) {
+        return trainerService.getMembersByTrainer(trainerId);
+    }
+
 
 }
