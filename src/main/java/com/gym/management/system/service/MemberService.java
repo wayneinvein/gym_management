@@ -16,5 +16,5 @@ public interface MemberService {
 
     void deleteMember(Long id);
 
-    public String assignTrainer(Long memberId, Long trainerId);
+    public Members assignTrainer(Long memberId, Long trainerId);
 }

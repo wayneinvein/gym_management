@@ -66,7 +66,7 @@ public class MemberServiceImpl implements MemberService{
     }
 
     @Override
-    public String assignTrainer(Long memberId, Long trainerId) {
+    public Members assignTrainer(Long memberId, Long trainerId) {
         Members member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("Member not found with id: " + memberId));
 
@@ -74,7 +74,8 @@ public class MemberServiceImpl implements MemberService{
                 .orElseThrow(() -> new TrainerNotFoundException("Trainer not found with id: " + trainerId));
 
         member.setTrainer(trainer);
+        memberRepository.save(member);
 
-        return "member with id: " + memberId + " is assigned to trainer with id: " + trainerId +" successfully";
+        return member;
     }
 }
