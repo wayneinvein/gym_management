@@ -2,11 +2,15 @@ package com.gym.management.system.service;
 
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Membership;
+import com.gym.management.system.exception.MemberNotFoundException;
+import com.gym.management.system.exception.MembershipAlreadyPresentException;
+import com.gym.management.system.exception.MembershipNotFoundException;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.MembershipRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MembershipServiceImpl implements MembershipService {
@@ -22,17 +26,28 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public Membership createMembership(Long memberId, Membership membership) {
+
         Members member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("Member not found with ID: " + memberId));
+                .orElseThrow(() -> new MemberNotFoundException("Member not found with ID: " + memberId));
+
+        // Correct check: does this member already have a membership?
+        Membership existingMembership = membershipRepository.findByMemberMemberId(memberId);
+
+        if (existingMembership != null) {
+            throw new MembershipAlreadyPresentException(
+                    "Membership for member ID " + memberId + " is already present."
+            );
+        }
 
         membership.setMember(member);
         return membershipRepository.save(membership);
     }
 
+
     @Override
     public Membership updateMembership(Long membershipId, Membership updatedMembership) {
         Membership existingMembership = membershipRepository.findById(membershipId)
-                .orElseThrow(() -> new RuntimeException("Membership not found with ID: " + membershipId));
+                .orElseThrow(() -> new MembershipNotFoundException("Membership not found with ID: " + membershipId));
 
         existingMembership.setType(updatedMembership.getType());
         existingMembership.setStartDate(updatedMembership.getStartDate());
@@ -48,7 +63,7 @@ public class MembershipServiceImpl implements MembershipService {
         Membership membership = membershipRepository.findByMember_MemberId(memberId);
 
         if (membership == null) {
-            throw new RuntimeException("No membership found for member ID: " + memberId);
+            throw new MembershipNotFoundException("No membership found for member ID: " + memberId);
         }
 
         return membership;
@@ -61,7 +76,11 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public List<Membership> getMembershipsByStatus(String status) {
-        return membershipRepository.findByStatus(status);
+        List<Membership> membershipExisting = membershipRepository.findByStatus(status);
+        if(membershipExisting.isEmpty()){
+            throw new MembershipNotFoundException("membership with status: '" + status + "' not found");
+        }
+        return membershipExisting;
     }
 
     @Override

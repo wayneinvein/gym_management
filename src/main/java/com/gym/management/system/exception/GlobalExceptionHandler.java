@@ -26,4 +26,20 @@ public class GlobalExceptionHandler {
         response.put("Status: 404 NOT FOUND", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+
+    //handling membership not found exception
+    @ExceptionHandler(MembershipNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleMembershipNotFoundException(MembershipNotFoundException ex){
+        Map<String, String> response = new HashMap<>();
+        response.put("Status: 404 NOT FOUND", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    //handling membership already present exception
+    @ExceptionHandler(MembershipAlreadyPresentException.class)
+    public ResponseEntity<Map<String, String>> MembershipAlreadyPresentException(MembershipAlreadyPresentException ex){
+        Map<String, String> response = new HashMap<>();
+        response.put("Status: 409 Conflict, Already Present", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
 }
