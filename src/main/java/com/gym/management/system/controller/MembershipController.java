@@ -1,6 +1,7 @@
 package com.gym.management.system.controller;
 
 import com.gym.management.system.entity.Membership;
+import com.gym.management.system.enums.MembershipStatus;
 import com.gym.management.system.service.MembershipService;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,7 +40,7 @@ public class MembershipController {
     }
 
     @GetMapping("/status/{status}")
-    public List<Membership> getByStatus(@PathVariable String status) {
+    public List<Membership> getByStatus(@PathVariable MembershipStatus status) {
         return membershipService.getMembershipsByStatus(status);
     }
 

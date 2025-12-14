@@ -2,6 +2,7 @@ package com.gym.management.system.service;
 
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Membership;
+import com.gym.management.system.enums.MembershipStatus;
 import com.gym.management.system.exception.InvalidInputException;
 import com.gym.management.system.exception.MemberNotFoundException;
 import com.gym.management.system.exception.MembershipAlreadyPresentException;
@@ -52,32 +53,34 @@ public class MembershipServiceImpl implements MembershipService {
 
         // AUTO-CALCULATE STATUS
         membership.setStatus(
-                calculateStatus(
-                        membership.getStartDate(),
-                        membership.getEndDate()
-                )
+                calculateStatus(membership.getStartDate(), membership.getEndDate())
         );
+
 
         // Save
         return membershipRepository.save(membership);
     }
 
 
-    private String calculateStatus(LocalDate startDate, LocalDate endDate) {
+    private MembershipStatus calculateStatus(LocalDate startDate, LocalDate endDate) {
 
-        if(startDate.isAfter(endDate)){
-            throw new InvalidInputException("invalid input!!!");
+        if (startDate.isAfter(endDate)) {
+            throw new InvalidInputException("Start date cannot be after end date");
         }
+
         LocalDate today = LocalDate.now();
 
         if (today.isBefore(startDate)) {
-            return "UPCOMING";
-        } else if (!today.isAfter(endDate)) {
-            return "ACTIVE";
-        } else {
-            return "EXPIRED";
+            return MembershipStatus.UPCOMING;
+        }
+        else if (!today.isAfter(endDate)) {
+            return MembershipStatus.ACTIVE;
+        }
+        else {
+            return MembershipStatus.EXPIRED;
         }
     }
+
 
 
     @Override
@@ -111,7 +114,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public List<Membership> getMembershipsByStatus(String status) {
+    public List<Membership> getMembershipsByStatus(MembershipStatus status) {
         List<Membership> membershipExisting = membershipRepository.findByStatus(status);
         if(membershipExisting.isEmpty()){
             throw new MembershipNotFoundException("membership with status: '" + status + "' not found");

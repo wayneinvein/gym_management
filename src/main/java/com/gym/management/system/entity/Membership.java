@@ -2,6 +2,7 @@ package com.gym.management.system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.gym.management.system.enums.MembershipStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -22,7 +23,9 @@ public class Membership {
 
     private Double price;
 
-    private String status; // ACTIVE, EXPIRED, UPCOMING
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MembershipStatus status; // ACTIVE, EXPIRED, UPCOMING
 
     @OneToOne
     @JoinColumn(name = "member_id", unique = true)
@@ -72,11 +75,9 @@ public class Membership {
         this.price = price;
     }
 
-    public String getStatus() {
-        return status;
-    }
+    public MembershipStatus getStatus() {return status;}
 
-    public void setStatus(String status) {
+    public void setStatus(MembershipStatus status) {
         this.status = status;
     }
 

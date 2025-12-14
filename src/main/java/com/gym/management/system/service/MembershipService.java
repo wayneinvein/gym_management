@@ -1,6 +1,8 @@
 package com.gym.management.system.service;
 
 import com.gym.management.system.entity.Membership;
+import com.gym.management.system.enums.MembershipStatus;
+
 import java.util.List;
 
 public interface MembershipService {
@@ -13,7 +15,7 @@ public interface MembershipService {
 
     List<Membership> getAllMemberships();
 
-    List<Membership> getMembershipsByStatus(String status);
+    List<Membership> getMembershipsByStatus(MembershipStatus status);
 
     String deleteMembership(Long membershipId);
 }
