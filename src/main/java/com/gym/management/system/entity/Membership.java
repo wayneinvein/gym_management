@@ -1,11 +1,13 @@
 package com.gym.management.system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
 @Entity
+@JsonPropertyOrder({"membershipId", "type", "startDate", "endDate", "price", "status"})
 public class Membership {
 
     @Id

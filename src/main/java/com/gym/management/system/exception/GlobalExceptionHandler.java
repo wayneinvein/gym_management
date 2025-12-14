@@ -42,4 +42,12 @@ public class GlobalExceptionHandler {
         response.put("Status: 409 Conflict, Already Present", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
+
+    //handling invalid input exception
+    @ExceptionHandler(InvalidInputException.class)
+    public ResponseEntity<Map<String, String>> InvalidInputException(InvalidInputException ex){
+        Map<String, String> response = new HashMap<>();
+        response.put("Status: NOT ACCEPTABLE", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_ACCEPTABLE);
+    }
 }

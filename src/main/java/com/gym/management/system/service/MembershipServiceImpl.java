@@ -2,6 +2,7 @@ package com.gym.management.system.service;
 
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Membership;
+import com.gym.management.system.exception.InvalidInputException;
 import com.gym.management.system.exception.MemberNotFoundException;
 import com.gym.management.system.exception.MembershipAlreadyPresentException;
 import com.gym.management.system.exception.MembershipNotFoundException;
@@ -9,15 +10,17 @@ import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.MembershipRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MembershipServiceImpl implements MembershipService {
 
+    //dependencies
     private final MembershipRepository membershipRepository;
     private final MemberRepository memberRepository;
 
+    //injecting dependencies using constructor
     public MembershipServiceImpl(MembershipRepository membershipRepository,
                                  MemberRepository memberRepository) {
         this.membershipRepository = membershipRepository;
@@ -27,11 +30,16 @@ public class MembershipServiceImpl implements MembershipService {
     @Override
     public Membership createMembership(Long memberId, Membership membership) {
 
+        // Validate member exists
         Members member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException("Member not found with ID: " + memberId));
+                .orElseThrow(() ->
+                        new MemberNotFoundException(
+                                "Member not found with ID: " + memberId
+                        ));
 
-        // Correct check: does this member already have a membership?
-        Membership existingMembership = membershipRepository.findByMemberMemberId(memberId);
+        // Prevent duplicate membership
+        Membership existingMembership =
+                membershipRepository.findByMemberMemberId(memberId);
 
         if (existingMembership != null) {
             throw new MembershipAlreadyPresentException(
@@ -39,8 +47,36 @@ public class MembershipServiceImpl implements MembershipService {
             );
         }
 
+        // Attach member
         membership.setMember(member);
+
+        // AUTO-CALCULATE STATUS
+        membership.setStatus(
+                calculateStatus(
+                        membership.getStartDate(),
+                        membership.getEndDate()
+                )
+        );
+
+        // Save
         return membershipRepository.save(membership);
+    }
+
+
+    private String calculateStatus(LocalDate startDate, LocalDate endDate) {
+
+        if(startDate.isAfter(endDate)){
+            throw new InvalidInputException("invalid input!!!");
+        }
+        LocalDate today = LocalDate.now();
+
+        if (today.isBefore(startDate)) {
+            return "UPCOMING";
+        } else if (!today.isAfter(endDate)) {
+            return "ACTIVE";
+        } else {
+            return "EXPIRED";
+        }
     }
 
 
