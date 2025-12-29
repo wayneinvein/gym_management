@@ -12,6 +12,8 @@ public class Members {
     private Long memberId;
     private String memberName;
     private String memberGender;
+    @Column(length = 15)
+    private String phoneNumber;
 
     @ManyToOne
     @JoinColumn(name = "trainer_id")   // foreign key in members table
@@ -50,5 +52,13 @@ public class Members {
 
     public void setTrainer(Trainers trainer) {
         this.trainer = trainer;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

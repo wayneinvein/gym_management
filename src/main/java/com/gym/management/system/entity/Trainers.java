@@ -15,6 +15,8 @@ public class Trainers {
     private Long trainerId;
     private String trainerName;
     private String trainerGender;
+    @Column(length = 15)
+    private String phoneNumber;
 
     @OneToMany(mappedBy = "trainer")
     @JsonIgnore
@@ -53,5 +55,13 @@ public class Trainers {
 
     public void setMembers(List<Members> members) {
         this.members = members;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

@@ -88,10 +88,8 @@ public class MembershipServiceImpl implements MembershipService {
         Membership existingMembership = membershipRepository.findById(membershipId)
                 .orElseThrow(() -> new MembershipNotFoundException("Membership not found with ID: " + membershipId));
 
-        existingMembership.setType(updatedMembership.getType());
         existingMembership.setStartDate(updatedMembership.getStartDate());
         existingMembership.setEndDate(updatedMembership.getEndDate());
-        existingMembership.setPrice(updatedMembership.getPrice());
         existingMembership.setStatus(updatedMembership.getStatus());
 
         return membershipRepository.save(existingMembership);

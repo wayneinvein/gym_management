@@ -15,13 +15,9 @@ public class Membership {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long membershipId;
 
-    private String type;
-
     private LocalDate startDate;
 
     private LocalDate endDate;
-
-    private Double price;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -32,6 +28,10 @@ public class Membership {
     @JsonIgnore
     private Members member;
 
+    @ManyToOne
+    @JoinColumn(name = "plan_id")
+    private MembershipPlan plan;
+
     public Membership() {
     }
 
@@ -41,14 +41,6 @@ public class Membership {
 
     public void setMembershipId(Long membershipId) {
         this.membershipId = membershipId;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public LocalDate getStartDate() {
@@ -63,17 +55,7 @@ public class Membership {
         return endDate;
     }
 
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
+    public void setEndDate(LocalDate endDate) {this.endDate = endDate;}
 
     public MembershipStatus getStatus() {return status;}
 
@@ -88,4 +70,8 @@ public class Membership {
     public void setMember(Members member) {
         this.member = member;
     }
+
+    public MembershipPlan getPlan() { return plan; }
+
+    public void setPlan(MembershipPlan plan) { this.plan = plan; }
 }
