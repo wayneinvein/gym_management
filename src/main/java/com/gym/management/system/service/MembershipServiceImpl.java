@@ -2,12 +2,11 @@ package com.gym.management.system.service;
 
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Membership;
+import com.gym.management.system.entity.MembershipPlan;
 import com.gym.management.system.enums.MembershipStatus;
-import com.gym.management.system.exception.InvalidInputException;
-import com.gym.management.system.exception.MemberNotFoundException;
-import com.gym.management.system.exception.MembershipAlreadyPresentException;
-import com.gym.management.system.exception.MembershipNotFoundException;
+import com.gym.management.system.exception.*;
 import com.gym.management.system.repository.MemberRepository;
+import com.gym.management.system.repository.MembershipPlanRepository;
 import com.gym.management.system.repository.MembershipRepository;
 import org.springframework.stereotype.Service;
 
@@ -20,23 +19,27 @@ public class MembershipServiceImpl implements MembershipService {
     //dependencies
     private final MembershipRepository membershipRepository;
     private final MemberRepository memberRepository;
+    private final MembershipPlanRepository membershipPlanRepository;
 
     //injecting dependencies using constructor
     public MembershipServiceImpl(MembershipRepository membershipRepository,
-                                 MemberRepository memberRepository) {
+                                 MemberRepository memberRepository, MembershipPlanRepository membershipPlanRepository) {
         this.membershipRepository = membershipRepository;
         this.memberRepository = memberRepository;
+        this.membershipPlanRepository = membershipPlanRepository;
     }
 
     @Override
-    public Membership createMembership(Long memberId, Membership membership) {
+    public Membership createMembership(Long memberId, Long planId, Membership membership) {
 
         // Validate member exists
         Members member = memberRepository.findById(memberId)
                 .orElseThrow(() ->
-                        new MemberNotFoundException(
-                                "Member not found with ID: " + memberId
-                        ));
+                        new MemberNotFoundException("Member not found with ID: " + memberId));
+
+        // Validate membership plan exists
+        MembershipPlan membershipPlan = membershipPlanRepository.findById(planId)
+                .orElseThrow(() -> new PlanDoNotExistException("Plan not found"));
 
         // Prevent duplicate membership
         Membership existingMembership =
@@ -51,13 +54,24 @@ public class MembershipServiceImpl implements MembershipService {
         // Attach member
         membership.setMember(member);
 
-        // AUTO-CALCULATE STATUS
+        // Default start date if null
+        if (membership.getStartDate() == null) {
+            membership.setStartDate(LocalDate.now());
+        }
+
+        // Attach plan
+        membership.setPlan(membershipPlan);
+
+        // Auto derive end date from plan
+        membership.setEndDate(
+                membership.getStartDate().plusDays(membershipPlan.getDurationDays())
+        );
+
+        // Now safely calculate status
         membership.setStatus(
                 calculateStatus(membership.getStartDate(), membership.getEndDate())
         );
 
-
-        // Save
         return membershipRepository.save(membership);
     }
 

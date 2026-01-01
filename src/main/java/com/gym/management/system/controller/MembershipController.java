@@ -17,10 +17,9 @@ public class MembershipController {
         this.membershipService = membershipService;
     }
 
-    @PostMapping("/create/{memberId}")
-    public Membership createMembership(@PathVariable Long memberId,
-                                       @RequestBody Membership membership) {
-        return membershipService.createMembership(memberId, membership);
+    @PostMapping("/create/{memberId}/{planId}")
+    public Membership createMembership(@PathVariable Long memberId, @PathVariable Long planId, @RequestBody Membership membership) {
+        return membershipService.createMembership(memberId, planId, membership);
     }
 
     @PutMapping("/update/{membershipId}")

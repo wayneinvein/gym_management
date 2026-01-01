@@ -50,4 +50,12 @@ public class GlobalExceptionHandler {
         response.put("Status: NOT ACCEPTABLE", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_ACCEPTABLE);
     }
+
+    //handling plan not exist exception
+    @ExceptionHandler(PlanDoNotExistException.class)
+    public ResponseEntity<Map<String, String>> PlanDoNotExistException(PlanDoNotExistException ex){
+        Map<String, String> response = new HashMap<>();
+        response.put("Status: NOT FOUND", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
 }

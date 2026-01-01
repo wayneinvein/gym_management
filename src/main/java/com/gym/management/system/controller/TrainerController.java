@@ -21,6 +21,12 @@ public class TrainerController {
         this.trainerService = trainerService;
     }
 
+    @PostMapping
+    public ResponseEntity<Trainers> addTrainer(@RequestBody Trainers trainer) {
+        Trainers savedTrainer = trainerService.addTrainer(trainer);
+        return new ResponseEntity<>(savedTrainer, HttpStatus.CREATED);
+    }
+
     @GetMapping
     public ResponseEntity<List<Trainers>> getAllTrainers() {
         List<Trainers> trainer = trainerService.getAllTrainers();
@@ -31,12 +37,6 @@ public class TrainerController {
     public ResponseEntity<Trainers> getTrainerById(@PathVariable Long id) {
         Trainers trainer = trainerService.getTrainerById(id);
         return new ResponseEntity<>(trainer, HttpStatus.OK);
-    }
-
-    @PostMapping
-    public ResponseEntity<Trainers> addTrainer(@RequestBody Trainers trainer) {
-        Trainers savedTrainer = trainerService.addTrainer(trainer);
-        return new ResponseEntity<>(savedTrainer, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")

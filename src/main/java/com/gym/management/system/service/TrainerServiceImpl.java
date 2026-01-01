@@ -50,6 +50,7 @@ public class TrainerServiceImpl implements TrainerService{
             Trainers obj = existing.get();
             obj.setTrainerName(trainer.getTrainerName());
             obj.setTrainerGender(trainer.getTrainerGender());
+            obj.setPhoneNumber(trainer.getPhoneNumber());
             return trainerRepository.save(obj);
         }
         throw new TrainerNotFoundException("trainer not found with id: " + id);

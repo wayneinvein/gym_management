@@ -24,12 +24,12 @@ public class Membership {
     private MembershipStatus status; // ACTIVE, EXPIRED, UPCOMING
 
     @OneToOne
-    @JoinColumn(name = "member_id", unique = true)
+    @JoinColumn(name = "member_id", unique = true, nullable = false)
     @JsonIgnore
     private Members member;
 
-    @ManyToOne
-    @JoinColumn(name = "plan_id")
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    @JoinColumn(name = "plan_id", nullable = false)
     private MembershipPlan plan;
 
     public Membership() {

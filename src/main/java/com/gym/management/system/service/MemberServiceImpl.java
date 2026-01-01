@@ -50,6 +50,7 @@ public class MemberServiceImpl implements MemberService{
             Members m = existing.get();
             m.setMemberName(member.getMemberName());
             m.setMemberGender(member.getMemberGender());
+            m.setPhoneNumber(member.getPhoneNumber());
             return memberRepository.save(m);
         }
         throw new MemberNotFoundException("Member not found with id:" + id);

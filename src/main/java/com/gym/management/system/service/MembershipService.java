@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MembershipService {
 
-    Membership createMembership(Long memberId, Membership membership);
+    Membership createMembership(Long memberId, Long planId, Membership membership);
 
     Membership updateMembership(Long membershipId, Membership membership);
 

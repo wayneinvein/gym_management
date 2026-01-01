@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-@JsonPropertyOrder({"trainerId", "trainerName", "trainerGender"}) //to set the order of response
+@JsonPropertyOrder({"trainerId", "trainerName", "trainerGender", "phoneNumber"}) //to set the order of response
 public class Trainers {
 
     @Id
