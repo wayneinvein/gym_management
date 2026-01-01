@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.*;
 
 @Entity
-@JsonPropertyOrder({"memberId", "memberName", "memberGender", "trainer"}) //to set the order of response
+@JsonPropertyOrder({"memberId", "memberName", "memberGender", "phoneNumber", "membership", "trainer"}) //to set the order of response
 public class Members {
 
     @Id
@@ -18,6 +18,9 @@ public class Members {
     @ManyToOne
     @JoinColumn(name = "trainer_id")   // foreign key in members table
     private Trainers trainer;
+
+    @OneToOne(mappedBy = "member")
+    private Membership membership;
 
     public Members() {
     }
@@ -60,5 +63,13 @@ public class Members {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public Membership getMembership() {
+        return membership;
+    }
+
+    public void setMembership(Membership membership) {
+        this.membership = membership;
     }
 }
