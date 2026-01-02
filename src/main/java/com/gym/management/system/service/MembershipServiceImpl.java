@@ -8,26 +8,20 @@ import com.gym.management.system.exception.*;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.MembershipPlanRepository;
 import com.gym.management.system.repository.MembershipRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class MembershipServiceImpl implements MembershipService {
 
     //dependencies
     private final MembershipRepository membershipRepository;
     private final MemberRepository memberRepository;
     private final MembershipPlanRepository membershipPlanRepository;
-
-    //injecting dependencies using constructor
-    public MembershipServiceImpl(MembershipRepository membershipRepository,
-                                 MemberRepository memberRepository, MembershipPlanRepository membershipPlanRepository) {
-        this.membershipRepository = membershipRepository;
-        this.memberRepository = memberRepository;
-        this.membershipPlanRepository = membershipPlanRepository;
-    }
 
     @Override
     public Membership createMembership(Long memberId, Long planId, Membership membership) {

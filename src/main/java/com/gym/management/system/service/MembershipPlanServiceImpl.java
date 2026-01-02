@@ -2,16 +2,17 @@ package com.gym.management.system.service;
 
 import com.gym.management.system.entity.MembershipPlan;
 import com.gym.management.system.repository.MembershipPlanRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class MembershipPlanServiceImpl implements MembershipPlanService {
 
-    @Autowired
-    private MembershipPlanRepository membershipPlanRepository;
+    private final MembershipPlanRepository membershipPlanRepository;
 
     public MembershipPlan createPlan(MembershipPlan plan) {
         if (membershipPlanRepository.existsByName(plan.getName())) {

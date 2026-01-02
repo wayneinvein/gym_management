@@ -6,22 +6,18 @@ import com.gym.management.system.exception.MemberNotFoundException;
 import com.gym.management.system.exception.TrainerNotFoundException;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.TrainerRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService{
 
     private final MemberRepository memberRepository;
     private final TrainerRepository trainerRepository;
-
-    //constructor dependency injection
-    public MemberServiceImpl(MemberRepository memberRepository, TrainerRepository trainerRepository) {
-        this.memberRepository = memberRepository;  // Spring injects automatically
-        this.trainerRepository = trainerRepository;
-    }
 
     @Override
     public List<Members> getAllMembers() {
