@@ -2,6 +2,7 @@ package com.gym.management.system.controller;
 
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.service.MemberService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,16 +12,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/members")
+@RequiredArgsConstructor // used instead of @Autowired and manual constructor for injecting dependency
 public class MemberController {
 
     //dependency of member service
     private final MemberService memberService;
-
-    //injecting dependency using constructor
-    @Autowired
-    public MemberController(MemberService memberService){
-        this.memberService = memberService;
-    }
 
     // Get all members
     @GetMapping

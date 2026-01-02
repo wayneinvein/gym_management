@@ -2,6 +2,7 @@ package com.gym.management.system.controller;
 
 import com.gym.management.system.entity.MembershipPlan;
 import com.gym.management.system.service.MembershipPlanService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,14 +10,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/plans")
+@RequiredArgsConstructor
 public class MembershipPlanController {
 
     @Autowired
     private final MembershipPlanService membershipPlanService;
-
-    public MembershipPlanController(MembershipPlanService membershipPlanService) {
-        this.membershipPlanService = membershipPlanService;
-    }
 
     @PostMapping
     public MembershipPlan createPlan(@RequestBody MembershipPlan plan) {

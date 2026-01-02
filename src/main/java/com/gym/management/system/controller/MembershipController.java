@@ -3,19 +3,17 @@ package com.gym.management.system.controller;
 import com.gym.management.system.entity.Membership;
 import com.gym.management.system.enums.MembershipStatus;
 import com.gym.management.system.service.MembershipService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/memberships")
+@RequiredArgsConstructor
 public class MembershipController {
 
     private final MembershipService membershipService;
-
-    public MembershipController(MembershipService membershipService) {
-        this.membershipService = membershipService;
-    }
 
     @PostMapping("/create/{memberId}/{planId}")
     public Membership createMembership(@PathVariable Long memberId, @PathVariable Long planId, @RequestBody Membership membership) {

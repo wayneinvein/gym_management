@@ -3,6 +3,7 @@ package com.gym.management.system.controller;
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
 import com.gym.management.system.service.TrainerService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,15 +12,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/trainers")
+@RequiredArgsConstructor
 public class TrainerController {
 
     //dependency
     private final TrainerService trainerService;
-
-    //constructor dependency injection
-    public TrainerController(TrainerService trainerService) {
-        this.trainerService = trainerService;
-    }
 
     @PostMapping
     public ResponseEntity<Trainers> addTrainer(@RequestBody Trainers trainer) {
