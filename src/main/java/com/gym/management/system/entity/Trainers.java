@@ -3,10 +3,16 @@ package com.gym.management.system.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonPropertyOrder({"trainerId", "trainerName", "trainerGender", "phoneNumber"}) //to set the order of response
 public class Trainers {
 
@@ -21,47 +27,4 @@ public class Trainers {
     @OneToMany(mappedBy = "trainer")
     @JsonIgnore
     private List<Members> members;
-
-    public Trainers() {
-    }
-
-    public Long getTrainerId() {
-        return trainerId;
-    }
-
-    public void setTrainerId(Long trainerId) {
-        this.trainerId = trainerId;
-    }
-
-    public String getTrainerName() {
-        return trainerName;
-    }
-
-    public void setTrainerName(String trainerName) {
-        this.trainerName = trainerName;
-    }
-
-    public String getTrainerGender() {
-        return trainerGender;
-    }
-
-    public void setTrainerGender(String trainerGender) {
-        this.trainerGender = trainerGender;
-    }
-
-    public List<Members> getMembers() {
-        return members;
-    }
-
-    public void setMembers(List<Members> members) {
-        this.members = members;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
 }
