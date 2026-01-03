@@ -1,4 +1,4 @@
-package com.gym.management.system.service;
+package com.gym.management.system.service.implememtationclasses;
 
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Membership;
@@ -8,6 +8,7 @@ import com.gym.management.system.exception.*;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.MembershipPlanRepository;
 import com.gym.management.system.repository.MembershipRepository;
+import com.gym.management.system.service.interfaces.MembershipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

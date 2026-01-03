@@ -1,4 +1,4 @@
-package com.gym.management.system.service;
+package com.gym.management.system.service.implememtationclasses;
 
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
@@ -6,6 +6,7 @@ import com.gym.management.system.exception.MemberNotFoundException;
 import com.gym.management.system.exception.TrainerNotFoundException;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.TrainerRepository;
+import com.gym.management.system.service.interfaces.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class MemberServiceImpl implements MemberService{
+public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final TrainerRepository trainerRepository;

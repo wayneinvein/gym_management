@@ -1,9 +1,9 @@
-package com.gym.management.system.service;
+package com.gym.management.system.service.implememtationclasses;
 
 import com.gym.management.system.entity.MembershipPlan;
 import com.gym.management.system.repository.MembershipPlanRepository;
+import com.gym.management.system.service.interfaces.MembershipPlanService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

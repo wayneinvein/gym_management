@@ -2,7 +2,7 @@ package com.gym.management.system.controller;
 
 import com.gym.management.system.entity.Membership;
 import com.gym.management.system.enums.MembershipStatus;
-import com.gym.management.system.service.MembershipService;
+import com.gym.management.system.service.interfaces.MembershipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

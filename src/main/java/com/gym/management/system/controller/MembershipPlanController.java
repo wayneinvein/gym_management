@@ -1,7 +1,7 @@
 package com.gym.management.system.controller;
 
 import com.gym.management.system.entity.MembershipPlan;
-import com.gym.management.system.service.MembershipPlanService;
+import com.gym.management.system.service.interfaces.MembershipPlanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

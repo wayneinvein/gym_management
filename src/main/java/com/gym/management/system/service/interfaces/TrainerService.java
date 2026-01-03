@@ -1,8 +1,7 @@
-package com.gym.management.system.service;
+package com.gym.management.system.service.interfaces;
 
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 

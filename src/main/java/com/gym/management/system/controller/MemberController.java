@@ -1,9 +1,8 @@
 package com.gym.management.system.controller;
 
 import com.gym.management.system.entity.Members;
-import com.gym.management.system.service.MemberService;
+import com.gym.management.system.service.interfaces.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

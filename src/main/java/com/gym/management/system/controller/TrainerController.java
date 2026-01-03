@@ -2,7 +2,7 @@ package com.gym.management.system.controller;
 
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
-import com.gym.management.system.service.TrainerService;
+import com.gym.management.system.service.interfaces.TrainerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
