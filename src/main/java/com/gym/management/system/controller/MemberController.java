@@ -1,6 +1,7 @@
 package com.gym.management.system.controller;
 
-import com.gym.management.system.entity.Members;
+import com.gym.management.system.dto.request.MemberRequest;
+import com.gym.management.system.dto.response.MemberResponse;
 import com.gym.management.system.service.interfaces.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,30 +20,30 @@ public class MemberController {
 
     // Get all members
     @GetMapping
-    public ResponseEntity<List<Members>> getAllMembers() {
-        List<Members> members = memberService.getAllMembers();
-        return new ResponseEntity<>(members, HttpStatus.OK);
+    public ResponseEntity<List<MemberResponse>> getAllMembers() {
+        List<MemberResponse> memberResponse = memberService.getAllMembers();
+        return new ResponseEntity<>(memberResponse, HttpStatus.OK);
     }
 
     // Get member by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Members> getMemberById(@PathVariable Long id) {
-        Members member = memberService.getMemberById(id); // throws MemberNotFoundException if not found
-        return new ResponseEntity<>(member, HttpStatus.OK);
+    public ResponseEntity<MemberResponse> getMemberById(@PathVariable Long id) {
+        MemberResponse memberResponse = memberService.getMemberById(id); // throws MemberNotFoundException if not found
+        return new ResponseEntity<>(memberResponse, HttpStatus.OK);
     }
 
     // Create a new member
     @PostMapping
-    public ResponseEntity<Members> addMember(@RequestBody Members member) {
-        Members savedMember = memberService.addMember(member);
-        return new ResponseEntity<>(savedMember, HttpStatus.CREATED); // 201 Created
+    public ResponseEntity<MemberResponse> addMember(@RequestBody MemberRequest memberRequest) {
+        MemberResponse memberResponse = memberService.addMember(memberRequest);
+        return new ResponseEntity<>(memberResponse, HttpStatus.CREATED); // 201 Created
     }
 
     // Update existing member
     @PutMapping("/{id}")
-    public ResponseEntity<Members> updateMember(@PathVariable Long id, @RequestBody Members member) {
-        Members updatedMember = memberService.updateMember(id, member); // throws MemberNotFoundException if not found
-        return new ResponseEntity<>(updatedMember, HttpStatus.OK);
+    public ResponseEntity<MemberResponse> updateMember(@PathVariable Long id, @RequestBody MemberRequest memberRequest) {
+        MemberResponse memberResponse = memberService.updateMember(id, memberRequest); // throws MemberNotFoundException if not found
+        return new ResponseEntity<>(memberResponse, HttpStatus.OK);
     }
 
     // delete member
@@ -54,9 +55,9 @@ public class MemberController {
 
     //assigning a member to a trainer
     @PutMapping("/member/{memberId}/trainer/{trainerId}")
-    public ResponseEntity<Members> assignTrainer(@PathVariable Long memberId, @PathVariable Long trainerId) {
-        Members updatedMember = memberService.assignTrainer(memberId, trainerId);
-        return new ResponseEntity<>(updatedMember, HttpStatus.OK);
+    public ResponseEntity<MemberResponse> assignTrainer(@PathVariable Long memberId, @PathVariable Long trainerId) {
+        MemberResponse memberResponse  = memberService.assignTrainer(memberId, trainerId);
+        return new ResponseEntity<>(memberResponse, HttpStatus.OK);
     }
 
 }
