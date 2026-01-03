@@ -1,20 +1,22 @@
 package com.gym.management.system.service.interfaces;
 
+import com.gym.management.system.dto.request.MemberRequest;
+import com.gym.management.system.dto.response.MemberResponse;
 import com.gym.management.system.entity.Members;
 
 import java.util.List;
 
 public interface MemberService {
 
-    List<Members> getAllMembers();
+    List<MemberResponse> getAllMembers();
 
-    Members getMemberById(Long id);
+    MemberResponse getMemberById(Long id);
 
-    Members addMember(Members member);
+    MemberResponse addMember(MemberRequest memberRequest);
 
-    Members updateMember(Long id, Members member);
+    MemberResponse updateMember(Long id, MemberRequest memberRequest);
 
     void deleteMember(Long id);
 
-     Members assignTrainer(Long memberId, Long trainerId);
+    MemberResponse assignTrainer(Long memberId, Long trainerId);
 }
