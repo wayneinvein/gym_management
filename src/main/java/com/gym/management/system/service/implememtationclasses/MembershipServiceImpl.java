@@ -1,5 +1,8 @@
 package com.gym.management.system.service.implememtationclasses;
 
+import com.gym.management.system.dto.mapper.MembershipDtoMapper;
+import com.gym.management.system.dto.request.MembershipRequestDto;
+import com.gym.management.system.dto.response.MembershipResponseDto;
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Membership;
 import com.gym.management.system.entity.MembershipPlan;
@@ -23,51 +26,75 @@ public class MembershipServiceImpl implements MembershipService {
     private final MembershipRepository membershipRepository;
     private final MemberRepository memberRepository;
     private final MembershipPlanRepository membershipPlanRepository;
+    private MembershipDtoMapper membershipDtoMapper;
+
 
     @Override
-    public Membership createMembership(Long memberId, Long planId, Membership membership) {
+    public MembershipResponseDto createMembership(
+            Long memberId,
+            Long planId,
+            MembershipRequestDto membershipRequestDto) {
 
-        // Validate member exists
+        // --------------------------------------------------------
+        // 1️⃣ Validate Member Exists
+        // --------------------------------------------------------
         Members member = memberRepository.findById(memberId)
                 .orElseThrow(() ->
                         new MemberNotFoundException("Member not found with ID: " + memberId));
 
-        // Validate membership plan exists
+        // --------------------------------------------------------
+        // 2️⃣ Validate Plan Exists
+        // --------------------------------------------------------
         MembershipPlan membershipPlan = membershipPlanRepository.findById(planId)
                 .orElseThrow(() -> new PlanDoNotExistException("Plan not found"));
 
-        // Prevent duplicate membership
-        Membership existingMembership =
-                membershipRepository.findByMemberMemberId(memberId);
-
+        // --------------------------------------------------------
+        // 3️⃣ Prevent Duplicate Membership For Same Member
+        // --------------------------------------------------------
+        Membership existingMembership = membershipRepository.findByMemberMemberId(memberId);
         if (existingMembership != null) {
             throw new MembershipAlreadyPresentException(
                     "Membership for member ID " + memberId + " is already present."
             );
         }
 
-        // Attach member
-        membership.setMember(member);
+        // --------------------------------------------------------
+        // 4️⃣ Handle Start Date
+        // If startDate not sent → use today's date
+        // --------------------------------------------------------
+        LocalDate startDate = (membershipRequestDto.getStartDate() != null)
+                ? membershipRequestDto.getStartDate()
+                : LocalDate.now();
 
-        // Default start date if null
-        if (membership.getStartDate() == null) {
-            membership.setStartDate(LocalDate.now());
-        }
+        // --------------------------------------------------------
+        // 5️⃣ Auto Calculate End Date Based On Plan Duration
+        // --------------------------------------------------------
+        LocalDate endDate = startDate.plusDays(membershipPlan.getDurationDays());
 
-        // Attach plan
-        membership.setPlan(membershipPlan);
-
-        // Auto derive end date from plan
-        membership.setEndDate(
-                membership.getStartDate().plusDays(membershipPlan.getDurationDays())
-        );
-
-        // Now safely calculate status
+        // --------------------------------------------------------
+        // 6️⃣ Create Membership Entity
+        // (Do NOT modify DTO to store entity objects)
+        // --------------------------------------------------------
+        Membership membership = new Membership();
+        membership.setMember(member);                 // set member entity
+        membership.setPlan(membershipPlan);           // set plan entity
+        membership.setStartDate(startDate);           // final start date
+        membership.setEndDate(endDate);               // calculated end date
         membership.setStatus(
-                calculateStatus(membership.getStartDate(), membership.getEndDate())
+                calculateStatus(startDate, endDate)    // calculate status safely
         );
 
-        return membershipRepository.save(membership);
+        // --------------------------------------------------------
+        // 7️⃣ Save To Database
+        // --------------------------------------------------------
+        Membership savedMembership = membershipRepository.save(membership);
+
+        // --------------------------------------------------------
+        // 8️⃣ Convert Entity → Response DTO
+        // (Best practice: never return entity directly)
+        // --------------------------------------------------------
+        return membershipDtoMapper.toResponse(savedMembership);
+
     }
 
 
@@ -93,7 +120,7 @@ public class MembershipServiceImpl implements MembershipService {
 
 
     @Override
-    public Membership updateMembership(Long membershipId, Membership updatedMembership) {
+    public MembershipResponseDto updateMembership(Long membershipId, Membership updatedMembership) {
         Membership existingMembership = membershipRepository.findById(membershipId)
                 .orElseThrow(() -> new MembershipNotFoundException("Membership not found with ID: " + membershipId));
 

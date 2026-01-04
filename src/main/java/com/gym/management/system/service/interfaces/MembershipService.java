@@ -1,5 +1,7 @@
 package com.gym.management.system.service.interfaces;
 
+import com.gym.management.system.dto.request.MembershipRequestDto;
+import com.gym.management.system.dto.response.MembershipResponseDto;
 import com.gym.management.system.entity.Membership;
 import com.gym.management.system.enums.MembershipStatus;
 
@@ -7,15 +9,15 @@ import java.util.List;
 
 public interface MembershipService {
 
-    Membership createMembership(Long memberId, Long planId, Membership membership);
+    MembershipResponseDto createMembership(Long memberId, Long planId, MembershipRequestDto membershipRequestDto);
 
-    Membership updateMembership(Long membershipId, Membership membership);
+    MembershipResponseDto updateMembership(Long membershipId, MembershipRequestDto membershipRequestDto);
 
-    Membership getMembershipByMemberId(Long memberId);
+    MembershipResponseDto getMembershipByMemberId(Long memberId);
 
-    List<Membership> getAllMemberships();
+    List<MembershipResponseDto> getAllMemberships();
 
-    List<Membership> getMembershipsByStatus(MembershipStatus status);
+    List<MembershipResponseDto> getMembershipsByStatus(MembershipStatus status);
 
     String deleteMembership(Long membershipId);
 }

@@ -1,6 +1,7 @@
 package com.gym.management.system.controller;
 
-import com.gym.management.system.entity.Membership;
+import com.gym.management.system.dto.request.MembershipRequestDto;
+import com.gym.management.system.dto.response.MembershipResponseDto;
 import com.gym.management.system.enums.MembershipStatus;
 import com.gym.management.system.service.interfaces.MembershipService;
 import lombok.RequiredArgsConstructor;
@@ -15,28 +16,28 @@ public class MembershipController {
     private final MembershipService membershipService;
 
     @PostMapping("/create/{memberId}/{planId}")
-    public Membership createMembership(@PathVariable Long memberId, @PathVariable Long planId, @RequestBody Membership membership) {
-        return membershipService.createMembership(memberId, planId, membership);
+    public MembershipResponseDto createMembership(@PathVariable Long memberId, @PathVariable Long planId, @RequestBody MembershipRequestDto membershipRequestDto) {
+        return membershipService.createMembership(memberId, planId, membershipRequestDto);
     }
 
     @PutMapping("/update/{membershipId}")
-    public Membership updateMembership(@PathVariable Long membershipId,
-                                       @RequestBody Membership membership) {
-        return membershipService.updateMembership(membershipId, membership);
+    public MembershipResponseDto updateMembership(@PathVariable Long membershipId,
+                                       @RequestBody MembershipRequestDto membershipRequestDto) {
+        return membershipService.updateMembership(membershipId, membershipRequestDto);
     }
 
     @GetMapping("/member/{memberId}")
-    public Membership getMembershipByMember(@PathVariable Long memberId) {
+    public MembershipResponseDto getMembershipByMember(@PathVariable Long memberId) {
         return membershipService.getMembershipByMemberId(memberId);
     }
 
     @GetMapping("/all")
-    public List<Membership> getAllMemberships() {
+    public List<MembershipResponseDto> getAllMemberships() {
         return membershipService.getAllMemberships();
     }
 
     @GetMapping("/status/{status}")
-    public List<Membership> getByStatus(@PathVariable MembershipStatus status) {
+    public List<MembershipResponseDto> getByStatus(@PathVariable MembershipStatus status) {
         return membershipService.getMembershipsByStatus(status);
     }
 

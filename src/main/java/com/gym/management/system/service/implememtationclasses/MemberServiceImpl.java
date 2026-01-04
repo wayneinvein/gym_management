@@ -1,8 +1,8 @@
 package com.gym.management.system.service.implememtationclasses;
 
-import com.gym.management.system.dto.mapper.MemberMapper;
-import com.gym.management.system.dto.request.MemberRequest;
-import com.gym.management.system.dto.response.MemberResponse;
+import com.gym.management.system.dto.mapper.MemberDtoMapper;
+import com.gym.management.system.dto.request.MemberRequestDto;
+import com.gym.management.system.dto.response.MemberResponseDto;
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
 import com.gym.management.system.exception.MemberNotFoundException;
@@ -21,10 +21,10 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final TrainerRepository trainerRepository;
-    private final MemberMapper memberMapper;
+    private final MemberDtoMapper memberDtoMapper;
 
     @Override
-    public List<MemberResponse> getAllMembers() {
+    public List<MemberResponseDto> getAllMembers() {
         List<Members> members = memberRepository.findAll();
         if (members.isEmpty()) {
             throw new MemberNotFoundException("Members not created yet!!");
@@ -32,41 +32,41 @@ public class MemberServiceImpl implements MemberService {
 
         //converting member(entity) object to memberResponse(dto) object
         return members.stream()
-                .map(memberMapper::toResponse)
+                .map(memberDtoMapper::toResponse)
                 .toList();
     }
 
     @Override
-    public MemberResponse getMemberById(Long id) {
+    public MemberResponseDto getMemberById(Long id) {
         Members member = memberRepository.findById(id)
                 .orElseThrow(() -> new MemberNotFoundException("Member not found with id: " + id));
 
-        return memberMapper.toResponse(member);
+        return memberDtoMapper.toResponse(member);
     }
 
     @Override
-    public MemberResponse addMember(MemberRequest memberRequest) {
-        Members member = memberMapper.toEntity(memberRequest);
+    public MemberResponseDto addMember(MemberRequestDto memberRequestDto) {
+        Members member = memberDtoMapper.toEntity(memberRequestDto);
 
         Members saved = memberRepository.save(member);
 
-        return memberMapper.toResponse(saved);
+        return memberDtoMapper.toResponse(saved);
     }
 
     @Override
-    public MemberResponse updateMember(Long id, MemberRequest memberRequest){
+    public MemberResponseDto updateMember(Long id, MemberRequestDto memberRequestDto){
 
         Optional<Members> existing = memberRepository.findById(id);
 
         if(existing.isPresent()){
             Members m = existing.get();
-            m.setMemberName(memberRequest.getMemberName());
-            m.setMemberGender(memberRequest.getMemberGender());
-            m.setPhoneNumber(memberRequest.getMemberPhoneNumber());
+            m.setMemberName(memberRequestDto.getMemberName());
+            m.setMemberGender(memberRequestDto.getMemberGender());
+            m.setPhoneNumber(memberRequestDto.getMemberPhoneNumber());
 
             Members updated = memberRepository.save(m);
 
-            return memberMapper.toResponse(updated);
+            return memberDtoMapper.toResponse(updated);
         }
         throw new MemberNotFoundException("Member not found with id:" + id);
     }
@@ -82,7 +82,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberResponse assignTrainer(Long memberId, Long trainerId) {
+    public MemberResponseDto assignTrainer(Long memberId, Long trainerId) {
         Members member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("Member not found with id: " + memberId));
 
@@ -94,6 +94,6 @@ public class MemberServiceImpl implements MemberService {
 
         Members updated = memberRepository.save(member);
 
-        return memberMapper.toResponse(updated);
+        return memberDtoMapper.toResponse(updated);
     }
 }
