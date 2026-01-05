@@ -1,6 +1,6 @@
 package com.gym.management.system.dto.mapper;
 
-import com.gym.management.system.dto.request.MemberRequestDto;
+import com.gym.management.system.dto.request.MembershipRequestDto;
 import com.gym.management.system.dto.response.MembershipResponseDto;
 import com.gym.management.system.entity.Membership;
 import org.mapstruct.Mapper;
@@ -10,7 +10,7 @@ import org.mapstruct.Mapper;
 public interface MembershipDtoMapper {
 
     //converting requestDTO into entity
-    Membership toEntity(MemberRequestDto memberRequestDto);
+    Membership toEntity(MembershipRequestDto membershipRequestDto);
 
     //converting entity to responseDTO so that it can be sent
     MembershipResponseDto toResponse(Membership membership);
