@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 public class MemberResponseDto {
     private Long memberId;
     private String memberName;
-    private String memberEmail;
-    private String memberPhone;
-    private boolean active;
+    private String memberGender;
+    private String phoneNumber;
 }

@@ -4,14 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.gym.management.system.enums.MembershipStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonPropertyOrder({"membershipId", "startDate", "endDate", "price", "status", "plan"})
@@ -36,5 +35,6 @@ public class Membership {
 
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "plan_id", nullable = false)
+    @JsonIgnore
     private MembershipPlan plan;
 }

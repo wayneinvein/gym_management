@@ -3,16 +3,16 @@ package com.gym.management.system.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"members"})
 @JsonPropertyOrder({"trainerId", "trainerName", "trainerGender", "phoneNumber"}) //to set the order of response
 public class Trainers {
 

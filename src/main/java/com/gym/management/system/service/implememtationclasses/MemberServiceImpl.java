@@ -11,6 +11,7 @@ import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.TrainerRepository;
 import com.gym.management.system.service.interfaces.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public List<MemberResponseDto> getAllMembers() {
         List<Members> members = memberRepository.findAll();
+        System.out.println(members);
         if (members.isEmpty()) {
             throw new MemberNotFoundException("Members not created yet!!");
         }
@@ -46,6 +48,8 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberResponseDto addMember(MemberRequestDto memberRequestDto) {
+
+        //object of memberRequestDto converted into Member entity
         Members member = memberDtoMapper.toEntity(memberRequestDto);
 
         Members saved = memberRepository.save(member);
@@ -62,7 +66,7 @@ public class MemberServiceImpl implements MemberService {
             Members m = existing.get();
             m.setMemberName(memberRequestDto.getMemberName());
             m.setMemberGender(memberRequestDto.getMemberGender());
-            m.setPhoneNumber(memberRequestDto.getMemberPhoneNumber());
+            m.setPhoneNumber(memberRequestDto.getPhoneNumber());
 
             Members updated = memberRepository.save(m);
 

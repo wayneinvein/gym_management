@@ -13,5 +13,5 @@ import lombok.Setter;
 public class MemberRequestDto {
     private String memberName;
     private String memberGender;
-    private String memberPhoneNumber;
+    private String phoneNumber;
 }
