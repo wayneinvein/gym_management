@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"member", "plan"})
 @JsonPropertyOrder({"membershipId", "startDate", "endDate", "price", "status", "plan"})
 public class Membership {
 

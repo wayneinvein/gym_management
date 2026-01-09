@@ -100,37 +100,48 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
 
-
     @Override
-    public MembershipResponseDto updateMembership(Long membershipId, MembershipRequestDto updatedMembership) {
+    public MembershipResponseDto updateMembership(Long membershipId,
+                                                  MembershipRequestDto updatedMembership) {
 
         Membership existingMembership = membershipRepository.findById(membershipId)
                 .orElseThrow(() ->
-                        new MembershipNotFoundException("Membership not found with ID: " + membershipId));
+                        new MembershipNotFoundException(
+                                "Membership not found with ID: " + membershipId));
+
+        boolean recalculate = false;
 
         // --- Update Start Date ---
         if (updatedMembership.getStartDate() != null) {
             existingMembership.setStartDate(updatedMembership.getStartDate());
+            recalculate = true;
         }
 
-        // --- Update End Date ---
-        if (updatedMembership.getEndDate() != null) {
-            existingMembership.setEndDate(updatedMembership.getEndDate());
-        }
+        // --- Recalculate End Date + Status if needed ---
+        if (recalculate) {
+            MembershipPlan plan = existingMembership.getPlan();
 
-        // --- Recalculate / Or Accept Status ---
-        if (updatedMembership.getStatus() != null) {
-            existingMembership.setStatus(updatedMembership.getStatus());
-        } else {
+            existingMembership.setEndDate(
+                    calculateEndDate(
+                            existingMembership.getStartDate(),
+                            plan.getDurationDays()
+                    )
+            );
+
             existingMembership.setStatus(
-                    calculateStatus(existingMembership.getStartDate(), existingMembership.getEndDate())
+                    calculateStatus(
+                            existingMembership.getStartDate(),
+                            existingMembership.getEndDate()
+                    )
             );
         }
 
         Membership savedMembership = membershipRepository.save(existingMembership);
-
-        // convert entity to response dto
         return membershipDtoMapper.toResponse(savedMembership);
+    }
+
+    private LocalDate calculateEndDate(LocalDate startDate, int durationDays) {
+        return startDate.plusDays(durationDays);
     }
 
 
