@@ -3,6 +3,7 @@ package com.gym.management.system.controller;
 import com.gym.management.system.dto.request.MemberRequestDto;
 import com.gym.management.system.dto.response.MemberResponseDto;
 import com.gym.management.system.service.interfaces.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,14 +35,14 @@ public class MemberController {
 
     // Create a new member
     @PostMapping
-    public ResponseEntity<MemberResponseDto> addMember(@RequestBody MemberRequestDto memberRequestDto) {
+    public ResponseEntity<MemberResponseDto> addMember(@Valid @RequestBody MemberRequestDto memberRequestDto) {
         MemberResponseDto memberResponseDto = memberService.addMember(memberRequestDto);
         return new ResponseEntity<>(memberResponseDto, HttpStatus.CREATED); // 201 Created
     }
 
     // Update existing member
     @PutMapping("/{id}")
-    public ResponseEntity<MemberResponseDto> updateMember(@PathVariable Long id, @RequestBody MemberRequestDto memberRequestDto) {
+    public ResponseEntity<MemberResponseDto> updateMember(@PathVariable Long id, @Valid @RequestBody MemberRequestDto memberRequestDto) {
         MemberResponseDto memberResponseDto = memberService.updateMember(id, memberRequestDto); // throws MemberNotFoundException if not found
         return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
     }

@@ -4,6 +4,7 @@ import com.gym.management.system.dto.request.MembershipRequestDto;
 import com.gym.management.system.dto.response.MembershipResponseDto;
 import com.gym.management.system.enums.MembershipStatus;
 import com.gym.management.system.service.interfaces.MembershipService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,13 +17,13 @@ public class MembershipController {
     private final MembershipService membershipService;
 
     @PostMapping("/create/{memberId}/{planId}")
-    public MembershipResponseDto createMembership(@PathVariable Long memberId, @PathVariable Long planId, @RequestBody MembershipRequestDto membershipRequestDto) {
+    public MembershipResponseDto createMembership(@PathVariable Long memberId, @PathVariable Long planId, @Valid @RequestBody MembershipRequestDto membershipRequestDto) {
         return membershipService.createMembership(memberId, planId, membershipRequestDto);
     }
 
     @PutMapping("/update/{membershipId}")
     public MembershipResponseDto updateMembership(@PathVariable Long membershipId,
-                                       @RequestBody MembershipRequestDto membershipRequestDto) {
+                                                  @Valid @RequestBody MembershipRequestDto membershipRequestDto) {
         return membershipService.updateMembership(membershipId, membershipRequestDto);
     }
 
