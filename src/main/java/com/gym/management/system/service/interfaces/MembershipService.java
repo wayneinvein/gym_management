@@ -2,8 +2,8 @@ package com.gym.management.system.service.interfaces;
 
 import com.gym.management.system.dto.request.MembershipRequestDto;
 import com.gym.management.system.dto.response.MembershipResponseDto;
-import com.gym.management.system.entity.Membership;
 import com.gym.management.system.enums.MembershipStatus;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public interface MembershipService {
 
     MembershipResponseDto getMembershipByMemberId(Long memberId);
 
-    List<MembershipResponseDto> getAllMemberships();
+    Page<MembershipResponseDto> getAllMemberships(int page, int size, String sortBy, String sortDir);
 
     List<MembershipResponseDto> getMembershipsByStatus(MembershipStatus status);
 

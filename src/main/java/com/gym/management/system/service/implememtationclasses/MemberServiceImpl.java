@@ -36,7 +36,8 @@ public class MemberServiceImpl implements MemberService {
                 ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
 
         //pagination
-        Pageable pageable = PageRequest.of(page, size, sort); Page<Members> membersPage = memberRepository.findAll(pageable);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Members> membersPage = memberRepository.findAll(pageable);
         if (membersPage.isEmpty()) {throw new MemberNotFoundException("Members not found"); }
         return membersPage.map(memberDtoMapper::toResponse);
     }

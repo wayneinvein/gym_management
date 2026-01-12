@@ -6,6 +6,7 @@ import com.gym.management.system.enums.MembershipStatus;
 import com.gym.management.system.service.interfaces.MembershipService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,8 +34,11 @@ public class MembershipController {
     }
 
     @GetMapping("/all")
-    public List<MembershipResponseDto> getAllMemberships() {
-        return membershipService.getAllMemberships();
+    public Page<MembershipResponseDto> getAllMemberships(@RequestParam(defaultValue = "0") int page,
+                                                         @RequestParam(defaultValue = "5") int size,
+                                                         @RequestParam(defaultValue = "membershipId") String sortBy,
+                                                         @RequestParam(defaultValue = "asc") String sortDir) {
+        return membershipService.getAllMemberships(page, size, sortBy, sortDir);
     }
 
     @GetMapping("/status/{status}")

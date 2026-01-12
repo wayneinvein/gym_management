@@ -13,6 +13,10 @@ import com.gym.management.system.repository.MembershipPlanRepository;
 import com.gym.management.system.repository.MembershipRepository;
 import com.gym.management.system.service.interfaces.MembershipService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -34,47 +38,47 @@ public class MembershipServiceImpl implements MembershipService {
             Long planId,
             MembershipRequestDto membershipRequestDto) {
 
-        // 1️⃣ Validate Member Exists
+        // Validate Member Exists
         Members member = memberRepository.findById(memberId)
                 .orElseThrow(() ->
                         new MemberNotFoundException("Member not found with ID: " + memberId));
 
-        // 2️⃣ Validate Plan Exists
+        // Validate Plan Exists
         MembershipPlan membershipPlan = membershipPlanRepository.findById(planId)
                 .orElseThrow(() -> new PlanDoNotExistException("Plan not found"));
 
-        // 3️⃣ Prevent Duplicate Membership For Same Member
+        // Prevent Duplicate Membership For Same Member
         Membership existingMembership = membershipRepository.findByMemberMemberId(memberId);
         if (existingMembership != null) {
             throw new MembershipAlreadyPresentException(
                     "Membership for member ID " + memberId + " is already present.");
         }
 
-        // 4️⃣ Handle Start Date (Use today's date if null)
+        // Handle Start Date (Use today's date if null)
         LocalDate startDate = (membershipRequestDto.getStartDate() != null)
                 ? membershipRequestDto.getStartDate()
                 : LocalDate.now();
 
-        // 5️⃣ Auto Calculate End Date
+        // Auto Calculate End Date
         LocalDate endDate = startDate.plusDays(membershipPlan.getDurationDays());
 
-        // 6️⃣ Determine Status
+        // Determine Status
         MembershipStatus status = calculateStatus(startDate, endDate);
 
-        // 7️⃣ Convert DTO -> Entity
+        // Convert DTO -> Entity
         Membership convertedMembership = membershipDtoMapper.toEntity(membershipRequestDto);
 
-        // 8️⃣ Override Important Fields (Never trust request)
+        // Override Important Fields (Never trust request)
         convertedMembership.setMember(member);
         convertedMembership.setPlan(membershipPlan);
         convertedMembership.setStartDate(startDate);
         convertedMembership.setEndDate(endDate);
         convertedMembership.setStatus(status);
 
-        // 9️⃣ Save
+        // Save
         Membership savedMembership = membershipRepository.save(convertedMembership);
 
-        // 🔟 Convert Entity -> Response DTO
+        // Convert Entity -> Response DTO
         return membershipDtoMapper.toResponse(savedMembership);
     }
 
@@ -160,11 +164,21 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public List<MembershipResponseDto> getAllMemberships() {
-        return membershipRepository.findAll()
-                .stream()
-                .map(membershipDtoMapper::toResponse)
-                .toList();
+    public Page<MembershipResponseDto> getAllMemberships(int page, int size, String sortBy, String sortDir) {
+
+        //sorting
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+
+        //pagination
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Membership> membershipPage = membershipRepository.findAll(pageable);
+
+        if (membershipPage.isEmpty()) {
+            throw new MembershipNotFoundException("Membership not found"); }
+
+        return membershipPage.map(membershipDtoMapper::toResponse);
     }
 
     @Override
