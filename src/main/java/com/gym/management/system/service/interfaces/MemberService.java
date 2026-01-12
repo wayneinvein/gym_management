@@ -2,12 +2,12 @@ package com.gym.management.system.service.interfaces;
 
 import com.gym.management.system.dto.request.MemberRequestDto;
 import com.gym.management.system.dto.response.MemberResponseDto;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface MemberService {
 
-    List<MemberResponseDto> getAllMembers();
+    //for pagination
+    Page<MemberResponseDto> getAllMembers(int page, int size, String sortBy, String sortDir);
 
     MemberResponseDto getMemberById(Long id);
 

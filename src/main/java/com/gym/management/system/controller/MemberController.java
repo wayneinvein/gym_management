@@ -5,6 +5,7 @@ import com.gym.management.system.dto.response.MemberResponseDto;
 import com.gym.management.system.service.interfaces.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +22,15 @@ public class MemberController {
 
     // Get all members
     @GetMapping
-    public ResponseEntity<List<MemberResponseDto>> getAllMembers() {
-        List<MemberResponseDto> memberResponseDto = memberService.getAllMembers();
-        return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
+    public ResponseEntity<Page<MemberResponseDto>> getAllMembers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "memberId") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        return ResponseEntity.ok(
+                memberService.getAllMembers(page, size, sortBy, sortDir)
+        );
     }
 
     // Get member by ID

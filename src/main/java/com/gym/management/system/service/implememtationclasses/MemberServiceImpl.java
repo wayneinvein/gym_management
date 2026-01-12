@@ -12,6 +12,10 @@ import com.gym.management.system.repository.TrainerRepository;
 import com.gym.management.system.service.interfaces.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,17 +29,16 @@ public class MemberServiceImpl implements MemberService {
     private final MemberDtoMapper memberDtoMapper;
 
     @Override
-    public List<MemberResponseDto> getAllMembers() {
-        List<Members> members = memberRepository.findAll();
-        System.out.println(members);
-        if (members.isEmpty()) {
-            throw new MemberNotFoundException("Members not created yet!!");
-        }
+    public Page<MemberResponseDto> getAllMembers(int page, int size, String sortBy, String sortDir) {
 
-        //converting member(entity) object to memberResponse(dto) object
-        return members.stream()
-                .map(memberDtoMapper::toResponse)
-                .toList();
+        //sorting
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+
+        //pagination
+        Pageable pageable = PageRequest.of(page, size, sort); Page<Members> membersPage = memberRepository.findAll(pageable);
+        if (membersPage.isEmpty()) {throw new MemberNotFoundException("Members not found"); }
+        return membersPage.map(memberDtoMapper::toResponse);
     }
 
     @Override
