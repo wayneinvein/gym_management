@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 @RestController
 @RequestMapping("/api/memberships")
 @RequiredArgsConstructor
@@ -42,8 +41,12 @@ public class MembershipController {
     }
 
     @GetMapping("/status/{status}")
-    public List<MembershipResponseDto> getByStatus(@PathVariable MembershipStatus status) {
-        return membershipService.getMembershipsByStatus(status);
+    public Page<MembershipResponseDto> getByStatus(@PathVariable MembershipStatus status,
+                                                   @RequestParam(defaultValue = "0") int page,
+                                                   @RequestParam(defaultValue = "5") int size,
+                                                   @RequestParam(defaultValue = "membershipId") String sortBy,
+                                                   @RequestParam(defaultValue = "asc") String sortDir) {
+        return membershipService.getMembershipsByStatus(status, page, size, sortBy, sortDir);
     }
 
     @DeleteMapping("/delete/{membershipId}")

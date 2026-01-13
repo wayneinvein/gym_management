@@ -17,7 +17,7 @@ public interface MembershipService {
 
     Page<MembershipResponseDto> getAllMemberships(int page, int size, String sortBy, String sortDir);
 
-    List<MembershipResponseDto> getMembershipsByStatus(MembershipStatus status);
+    Page<MembershipResponseDto> getMembershipsByStatus(MembershipStatus status, int page, int size, String sortBy, String sortDir);
 
     String deleteMembership(Long membershipId);
 }

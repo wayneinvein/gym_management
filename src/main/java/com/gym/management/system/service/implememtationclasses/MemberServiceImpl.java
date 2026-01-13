@@ -37,8 +37,11 @@ public class MemberServiceImpl implements MemberService {
 
         //pagination
         Pageable pageable = PageRequest.of(page, size, sort);
+
         Page<Members> membersPage = memberRepository.findAll(pageable);
+
         if (membersPage.isEmpty()) {throw new MemberNotFoundException("Members not found"); }
+
         return membersPage.map(memberDtoMapper::toResponse);
     }
 

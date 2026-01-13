@@ -20,7 +20,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -182,19 +181,23 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public List<MembershipResponseDto> getMembershipsByStatus(MembershipStatus status) {
+    public Page<MembershipResponseDto> getMembershipsByStatus(MembershipStatus status, int page, int size, String sortBy, String sortDir) {
 
-        List<Membership> memberships = membershipRepository.findByStatus(status);
+        //sorting
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        //pagination
+        Pageable pageable = PageRequest.of(page, size, sort);
 
-        if (memberships.isEmpty()) {
+        Page<Membership> membershipsPage = membershipRepository.findByStatus(status, pageable);
+
+        if (membershipsPage.isEmpty()) {
             throw new MembershipNotFoundException(
                     "Membership with status '" + status + "' not found"
             );
         }
 
-        return memberships.stream()
-                .map(membershipDtoMapper::toResponse)
-                .toList();
+        return membershipsPage.map(membershipDtoMapper::toResponse);
     }
 
     @Override
