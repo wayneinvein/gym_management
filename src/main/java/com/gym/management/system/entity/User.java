@@ -1,9 +1,7 @@
 package com.gym.management.system.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.gym.management.system.enums.UserRoles;
+import jakarta.persistence.*;
 
 @Entity
 public class User {
@@ -17,5 +15,6 @@ public class User {
 
     private String password;
 
-    private String role; // ROLE_ADMIN, ROLE_USER
+    @Enumerated(EnumType.STRING)
+    private UserRoles userRole;
 }
