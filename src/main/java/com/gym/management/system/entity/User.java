@@ -2,7 +2,9 @@ package com.gym.management.system.entity;
 
 import com.gym.management.system.enums.UserRoles;
 import jakarta.persistence.*;
+import lombok.Data;
 
+@Data
 @Entity
 public class User {
 
