@@ -5,6 +5,7 @@ import com.gym.management.system.exception.UserNotFoundException;
 import com.gym.management.system.repository.UserRepository;
 import com.gym.management.system.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,9 +16,11 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public User addUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
