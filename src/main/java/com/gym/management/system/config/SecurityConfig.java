@@ -1,9 +1,10 @@
 package com.gym.management.system.config;
 
 import com.gym.management.system.service.implememtationclasses.CustomUserDetailsService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableMethodSecurity
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
@@ -30,15 +31,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
-
-                        .requestMatchers("/users").permitAll()
-
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                        .requestMatchers("/trainer/**").hasRole("TRAINER")
-
+                        .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
                         .anyRequest().authenticated()
                 )
+
+                .userDetailsService(customUserDetailsService)
 
                 .httpBasic(Customizer.withDefaults());
 

@@ -7,16 +7,14 @@ import com.gym.management.system.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public User addUser(User user) {
@@ -26,28 +24,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User updateUser(User user, Long id) {
-        Optional<User> existingUser = userRepository.findById(id);
 
-        if(existingUser.isPresent()) {
-            User updatedUser = existingUser.get();
-            updatedUser.setUsername(user.getUsername());
-            updatedUser.setPassword(user.getPassword());
-            updatedUser.setUserRole(user.getUserRole());
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new UserNotFoundException("user with id: " + id + " not found"));
 
-            return userRepository.save(updatedUser);
-        }
+        existingUser.setUsername(user.getUsername());
+        existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        existingUser.setUserRole(user.getUserRole());
 
-        throw new UserNotFoundException("user with id: " + id + " not found");
+        return userRepository.save(existingUser);
     }
 
     @Override
     public User deleteUser(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        if(user.isPresent()) {
-            userRepository.deleteById(id);
-            return user.get();
-        }
-        throw new UserNotFoundException("user with id: " + id + " not found");
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new UserNotFoundException("user with id: " + id + " not found"));
+
+        userRepository.delete(user);
+
+        return user;
     }
 
     @Override
