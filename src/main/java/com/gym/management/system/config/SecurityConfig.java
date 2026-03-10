@@ -32,6 +32,10 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
+
+                        .requestMatchers(HttpMethod.PUT,"/users/**")
+                        .hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
 
