@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
-import static com.gym.management.system.enums.UserRoles.USER;
+import static com.gym.management.system.enums.UserRoles.MEMBER;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +21,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User addUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setUserRole(USER);
+        user.setUserRole(MEMBER);
         return userRepository.save(user);
     }
 
