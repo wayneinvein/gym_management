@@ -1,6 +1,7 @@
 package com.gym.management.system.service.implememtationclasses;
 
 import com.gym.management.system.entity.User;
+import com.gym.management.system.enums.UserRoles;
 import com.gym.management.system.exception.UserNotFoundException;
 import com.gym.management.system.repository.UserRepository;
 import com.gym.management.system.service.interfaces.UserService;
@@ -20,6 +21,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User addUser(User user) {
+
+        if(userRepository.existsByUserRole(UserRoles.ADMIN)){
+            throw new RuntimeException("Admin already exists");
+        }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
