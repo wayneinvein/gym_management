@@ -31,15 +31,64 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
+
+                        // First admin registration
                         .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
 
-                        .requestMatchers(HttpMethod.GET,"/users/**")
+                        // USER MANAGEMENT
+                        .requestMatchers("/users/**")
                         .hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.PUT,"/users/**")
+                        // TRAINER ENDPOINTS
+                        .requestMatchers(HttpMethod.GET, "/trainers/**")
+                        .hasAnyRole("TRAINER","ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/trainers/**")
                         .hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.DELETE,"/users/**")
+                        .requestMatchers(HttpMethod.PUT, "/trainers/**")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.DELETE, "/trainers/**")
+                        .hasRole("ADMIN")
+
+                        // MEMBER ENDPOINTS
+                        .requestMatchers(HttpMethod.GET, "/members/**")
+                        .hasAnyRole("MEMBER","ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/members/**")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.PUT, "/members/**")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.DELETE, "/members/**")
+                        .hasRole("ADMIN")
+
+                        // MEMBERSHIP PLAN ENDPOINTS
+                        .requestMatchers(HttpMethod.GET, "/membership-plan/**")
+                        .hasAnyRole("ADMIN","TRAINER","MEMBER")
+
+                        .requestMatchers(HttpMethod.POST, "/membership-plan/**")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.PUT, "/membership-plan/**")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.DELETE, "/membership-plan/**")
+                        .hasRole("ADMIN")
+
+                        // MEMBERSHIP ENDPOINTS
+                        .requestMatchers(HttpMethod.GET, "/membership/**")
+                        .hasAnyRole("ADMIN","MEMBER")
+
+                        .requestMatchers(HttpMethod.POST, "/membership/**")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.PUT, "/membership/**")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.DELETE, "/membership/**")
                         .hasRole("ADMIN")
 
                         .anyRequest().authenticated()
