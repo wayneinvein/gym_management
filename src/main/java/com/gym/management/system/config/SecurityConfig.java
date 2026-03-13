@@ -40,55 +40,55 @@ public class SecurityConfig {
                         .hasRole("ADMIN")
 
                         // TRAINER ENDPOINTS
-                        .requestMatchers(HttpMethod.GET, "/trainers/**")
+                        .requestMatchers(HttpMethod.GET, "/api/trainers/**")
                         .hasAnyRole("TRAINER","ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/trainers/**")
+                        .requestMatchers(HttpMethod.POST, "/api/trainers/**")
                         .hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.PUT, "/trainers/**")
+                        .requestMatchers(HttpMethod.PUT, "/api/trainers/**")
                         .hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.DELETE, "/trainers/**")
+                        .requestMatchers(HttpMethod.DELETE, "/api/trainers/**")
                         .hasRole("ADMIN")
 
                         // MEMBER ENDPOINTS
-                        .requestMatchers(HttpMethod.GET, "/members/**")
+                        .requestMatchers(HttpMethod.GET, "/api/members/**")
                         .hasAnyRole("MEMBER","ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/members/**")
+                        .requestMatchers(HttpMethod.POST, "/api/members/**")
                         .hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.PUT, "/members/**")
+                        .requestMatchers(HttpMethod.PUT, "/api/members/**")
                         .hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.DELETE, "/members/**")
+                        .requestMatchers(HttpMethod.DELETE, "/api/members/**")
                         .hasRole("ADMIN")
 
                         // MEMBERSHIP PLAN ENDPOINTS
-                        .requestMatchers(HttpMethod.GET, "/membership-plan/**")
+                        .requestMatchers(HttpMethod.GET, "/plans/**")
                         .hasAnyRole("ADMIN","TRAINER","MEMBER")
 
-                        .requestMatchers(HttpMethod.POST, "/membership-plan/**")
+                        .requestMatchers(HttpMethod.POST, "/plans/**")
                         .hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.PUT, "/membership-plan/**")
+                        .requestMatchers(HttpMethod.PUT, "/plans/**")
                         .hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.DELETE, "/membership-plan/**")
+                        .requestMatchers(HttpMethod.DELETE, "/plans/**")
                         .hasRole("ADMIN")
 
                         // MEMBERSHIP ENDPOINTS
-                        .requestMatchers(HttpMethod.GET, "/membership/**")
+                        .requestMatchers(HttpMethod.GET, "/api/memberships/**")
                         .hasAnyRole("ADMIN","MEMBER")
 
-                        .requestMatchers(HttpMethod.POST, "/membership/**")
+                        .requestMatchers(HttpMethod.POST, "/api/memberships/**")
                         .hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.PUT, "/membership/**")
+                        .requestMatchers(HttpMethod.PUT, "/api/memberships/**")
                         .hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.DELETE, "/membership/**")
+                        .requestMatchers(HttpMethod.DELETE, "/api/memberships/**")
                         .hasRole("ADMIN")
 
                         .anyRequest().authenticated()
