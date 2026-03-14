@@ -22,6 +22,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User addUser(User user) {
 
+        //if ADMIN already present throw an exception
         if(userRepository.existsByUserRole(UserRoles.ADMIN)){
             throw new RuntimeException("Admin already exists");
         }
