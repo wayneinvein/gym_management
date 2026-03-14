@@ -31,9 +31,6 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
-
-                        // First admin registration
-                        .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
                         .anyRequest().authenticated()
                 )
 

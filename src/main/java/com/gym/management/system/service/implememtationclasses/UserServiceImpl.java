@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
+import static com.gym.management.system.enums.UserRoles.ADMIN;
 import static com.gym.management.system.enums.UserRoles.MEMBER;
 
 @Service
@@ -23,7 +24,7 @@ public class UserServiceImpl implements UserService {
     public User addUser(User user) {
 
         //if ADMIN already present throw an exception
-        if(userRepository.existsByUserRole(UserRoles.ADMIN)){
+        if(userRepository.existsByUserRole(ADMIN)){
             throw new RuntimeException("Admin already exists");
         }
 
@@ -37,6 +38,10 @@ public class UserServiceImpl implements UserService {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() ->
                         new UserNotFoundException("user with id: " + id + " not found"));
+
+        if(existingUser.getUserRole().equals(ADMIN)) {
+            throw new RuntimeException("Admin cannot be modified");
+        }
 
         existingUser.setUsername(user.getUsername());
         existingUser.setPassword(passwordEncoder.encode(user.getPassword()));

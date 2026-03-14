@@ -21,7 +21,9 @@ public class AdminSeeder {
     @PostConstruct
     public void createAdmin() {
 
-        if(userRepository.count() == 0) {
+        System.out.println("Seeder running...");
+
+        if(!userRepository.existsByUserRole(ADMIN)) {
 
             User admin = new User();
             admin.setUsername("admin");
@@ -30,5 +32,5 @@ public class AdminSeeder {
 
             userRepository.save(admin);
         }
-    }
+}
 }
