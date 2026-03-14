@@ -27,6 +27,9 @@ public class UserServiceImpl implements UserService {
         if(userRepository.existsByUserRole(ADMIN)){
             throw new RuntimeException("Admin already exists");
         }
+        if(user.getUserRole().equals(ADMIN) && userRepository.existsByUserRole(ADMIN)) {
+            throw new RuntimeException("Admin already exists. Only one admin allowed.");
+        }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
@@ -41,6 +44,9 @@ public class UserServiceImpl implements UserService {
 
         if(existingUser.getUserRole().equals(ADMIN)) {
             throw new RuntimeException("Admin cannot be modified");
+        }
+        if(user.getUserRole().equals(ADMIN) && userRepository.existsByUserRole(ADMIN)) {
+            throw new RuntimeException("Admin already exists. Only one admin allowed.");
         }
 
         existingUser.setUsername(user.getUsername());
