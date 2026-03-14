@@ -21,8 +21,6 @@ public class AdminSeeder {
     @PostConstruct
     public void createAdmin() {
 
-        System.out.println("Seeder running...");
-
         if(!userRepository.existsByUserRole(ADMIN)) {
 
             User admin = new User();

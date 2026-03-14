@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class MemberController {
 
     // Get all members
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<MemberResponseDto>> getAllMembers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
@@ -35,6 +37,7 @@ public class MemberController {
 
     // Get member by ID
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MemberResponseDto> getMemberById(@PathVariable Long id) {
         MemberResponseDto memberResponseDto = memberService.getMemberById(id); // throws MemberNotFoundException if not found
         return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
@@ -42,6 +45,7 @@ public class MemberController {
 
     // Create a new member
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MemberResponseDto> addMember(@Valid @RequestBody MemberRequestDto memberRequestDto) {
         MemberResponseDto memberResponseDto = memberService.addMember(memberRequestDto);
         return new ResponseEntity<>(memberResponseDto, HttpStatus.CREATED); // 201 Created
@@ -49,6 +53,7 @@ public class MemberController {
 
     // Update existing member
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MemberResponseDto> updateMember(@PathVariable Long id, @Valid @RequestBody MemberRequestDto memberRequestDto) {
         MemberResponseDto memberResponseDto = memberService.updateMember(id, memberRequestDto); // throws MemberNotFoundException if not found
         return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
@@ -56,6 +61,7 @@ public class MemberController {
 
     // delete member
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteMember(@PathVariable Long id) {
         memberService.deleteMember(id);
         return ResponseEntity.ok("Member deleted successfully with id: " + id);
@@ -63,6 +69,7 @@ public class MemberController {
 
     //assigning a member to a trainer
     @PutMapping("/member/{memberId}/trainer/{trainerId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MemberResponseDto> assignTrainer(@PathVariable Long memberId, @PathVariable Long trainerId) {
         MemberResponseDto memberResponseDto = memberService.assignTrainer(memberId, trainerId);
         return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
