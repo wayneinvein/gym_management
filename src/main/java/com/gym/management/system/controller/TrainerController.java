@@ -6,6 +6,7 @@ import com.gym.management.system.service.interfaces.TrainerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,30 +20,35 @@ public class TrainerController {
     private final TrainerService trainerService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Trainers> addTrainer(@RequestBody Trainers trainer) {
         Trainers savedTrainer = trainerService.addTrainer(trainer);
         return new ResponseEntity<>(savedTrainer, HttpStatus.CREATED);
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Trainers>> getAllTrainers() {
         List<Trainers> trainer = trainerService.getAllTrainers();
         return new ResponseEntity<>(trainer, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Trainers> getTrainerById(@PathVariable Long id) {
         Trainers trainer = trainerService.getTrainerById(id);
         return new ResponseEntity<>(trainer, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Trainers> updateTrainer(@PathVariable Long id, @RequestBody Trainers trainer) {
         Trainers updatedTrainer = trainerService.updateTrainer(id, trainer);
         return new ResponseEntity<>(updatedTrainer, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteTrainer(@PathVariable Long id) {
         trainerService.deleteTrainer(id);
         return new ResponseEntity<>("trainer with id: " + id + " has been successfully deleted", HttpStatus.CREATED);
@@ -50,6 +56,7 @@ public class TrainerController {
 
     //find members assigned to a particular trainer
     @GetMapping("/{trainerId}/members")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Members> getMembersByTrainer(@PathVariable Long trainerId) {
         return trainerService.getMembersByTrainer(trainerId);
     }
