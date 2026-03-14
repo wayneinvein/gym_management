@@ -57,6 +57,11 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() ->
                         new UserNotFoundException("user with id: " + id + " not found"));
 
+
+        if(user.getUserRole().equals(ADMIN)) {
+            throw new RuntimeException("Admin cannot be deleted");
+        }
+
         userRepository.delete(user);
 
         return user;
