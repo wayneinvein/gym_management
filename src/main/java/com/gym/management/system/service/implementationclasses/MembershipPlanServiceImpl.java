@@ -1,4 +1,4 @@
-package com.gym.management.system.service.implememtationclasses;
+package com.gym.management.system.service.implementationclasses;
 
 import com.gym.management.system.entity.MembershipPlan;
 import com.gym.management.system.repository.MembershipPlanRepository;

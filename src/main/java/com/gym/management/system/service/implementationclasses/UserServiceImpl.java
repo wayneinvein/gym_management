@@ -1,7 +1,6 @@
-package com.gym.management.system.service.implememtationclasses;
+package com.gym.management.system.service.implementationclasses;
 
 import com.gym.management.system.entity.User;
-import com.gym.management.system.enums.UserRoles;
 import com.gym.management.system.exception.UserNotFoundException;
 import com.gym.management.system.repository.UserRepository;
 import com.gym.management.system.service.interfaces.UserService;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static com.gym.management.system.enums.UserRoles.ADMIN;
-import static com.gym.management.system.enums.UserRoles.MEMBER;
 
 @Service
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-package com.gym.management.system.service.implememtationclasses;
+package com.gym.management.system.service.implementationclasses;
 
 import com.gym.management.system.dto.mapper.MembershipDtoMapper;
 import com.gym.management.system.dto.request.MembershipRequestDto;

@@ -1,4 +1,4 @@
-package com.gym.management.system.service.implememtationclasses;
+package com.gym.management.system.service.implementationclasses;
 
 import com.gym.management.system.dto.mapper.MemberDtoMapper;
 import com.gym.management.system.dto.request.MemberRequestDto;
@@ -11,14 +11,12 @@ import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.TrainerRepository;
 import com.gym.management.system.service.interfaces.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 @Service
 @RequiredArgsConstructor

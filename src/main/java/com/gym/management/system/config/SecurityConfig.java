@@ -1,6 +1,6 @@
 package com.gym.management.system.config;
 
-import com.gym.management.system.service.implememtationclasses.CustomUserDetailsService;
+import com.gym.management.system.service.implementationclasses.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
