@@ -1,6 +1,9 @@
 package com.gym.management.system.controller;
 
 import com.gym.management.system.dto.request.AuthRequest;
+import com.gym.management.system.dto.response.AuthResponse;
+import com.gym.management.system.entity.User;
+import com.gym.management.system.repository.UserRepository;
 import com.gym.management.system.security.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -12,11 +15,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
+
     private final AuthenticationManager authManager;
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
     @PostMapping("/login")
-    public String login(@RequestBody AuthRequest request) {
+    public AuthResponse login(@RequestBody AuthRequest request) {
 
         authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -25,6 +30,18 @@ public class AuthController {
                 )
         );
 
-        return jwtUtil.generateToken(request.getUsername());
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String token = jwtUtil.generateToken(
+                user.getUsername(),
+                user.getUserRole().name()
+        );
+
+        return new AuthResponse(
+                token,
+                user.getUsername(),
+                user.getUserRole().name()
+        );
     }
 }
