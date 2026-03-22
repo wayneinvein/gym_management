@@ -5,8 +5,8 @@ import com.gym.management.system.dto.request.MemberRequestDto;
 import com.gym.management.system.dto.response.MemberResponseDto;
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
-import com.gym.management.system.exception.MemberNotFoundException;
-import com.gym.management.system.exception.TrainerNotFoundException;
+import com.gym.management.system.exception.NotFoundException;
+import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.TrainerRepository;
 import com.gym.management.system.service.interfaces.MemberService;
@@ -38,7 +38,7 @@ public class MemberServiceImpl implements MemberService {
 
         Page<Members> membersPage = memberRepository.findAll(pageable);
 
-        if (membersPage.isEmpty()) {throw new MemberNotFoundException("Members not found"); }
+        if (membersPage.isEmpty()) {throw new NotFoundException("Members not found"); }
 
         return membersPage.map(memberDtoMapper::toResponse);
     }
@@ -46,7 +46,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public MemberResponseDto getMemberById(Long id) {
         Members member = memberRepository.findById(id)
-                .orElseThrow(() -> new MemberNotFoundException("Member not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException("Member not found with id: " + id));
 
         return memberDtoMapper.toResponse(member);
     }
@@ -77,7 +77,7 @@ public class MemberServiceImpl implements MemberService {
 
             return memberDtoMapper.toResponse(updated);
         }
-        throw new MemberNotFoundException("Member not found with id:" + id);
+        throw new NotFoundException("Member not found with id:" + id);
     }
 
     @Override
@@ -86,17 +86,17 @@ public class MemberServiceImpl implements MemberService {
         if(existing.isPresent()) {
             memberRepository.deleteById(id);
         }else{
-            throw new MemberNotFoundException("Member not found with id:" + id);
+            throw new NotFoundException("Member not found with id:" + id);
         }
     }
 
     @Override
     public MemberResponseDto assignTrainer(Long memberId, Long trainerId) {
         Members member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException("Member not found with id: " + memberId));
+                .orElseThrow(() -> new NotFoundException("Member not found with id: " + memberId));
 
         Trainers trainer = trainerRepository.findById(trainerId)
-                .orElseThrow(() -> new TrainerNotFoundException("Trainer not found with id: " + trainerId));
+                .orElseThrow(() -> new NotFoundException("Trainer not found with id: " + trainerId));
 
         member.setTrainer(trainer);
         memberRepository.save(member);
