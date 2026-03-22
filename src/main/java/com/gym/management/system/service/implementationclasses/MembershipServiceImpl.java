@@ -40,16 +40,16 @@ public class MembershipServiceImpl implements MembershipService {
         // Validate Member Exists
         Members member = memberRepository.findById(memberId)
                 .orElseThrow(() ->
-                        new MemberNotFoundException("Member not found with ID: " + memberId));
+                        new NotFoundException("Member not found with ID: " + memberId));
 
         // Validate Plan Exists
         MembershipPlan membershipPlan = membershipPlanRepository.findById(planId)
-                .orElseThrow(() -> new PlanDoNotExistException("Plan not found"));
+                .orElseThrow(() -> new NotFoundoNotExistException("Plan not found"));
 
         // Prevent Duplicate Membership For Same Member
         Membership existingMembership = membershipRepository.findByMemberMemberId(memberId);
         if (existingMembership != null) {
-            throw new MembershipAlreadyPresentException(
+            throw new AlreadyPresentException(
                     "Membership for member ID " + memberId + " is already present.");
         }
 
@@ -109,7 +109,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         Membership existingMembership = membershipRepository.findById(membershipId)
                 .orElseThrow(() ->
-                        new MembershipNotFoundException(
+                        new NotFoundException(
                                 "Membership not found with ID: " + membershipId));
 
         boolean recalculate = false;
@@ -154,7 +154,7 @@ public class MembershipServiceImpl implements MembershipService {
         Membership membership = membershipRepository.findByMember_MemberId(memberId);
 
         if (membership == null) {
-            throw new MembershipNotFoundException(
+            throw new NotFoundException(
                     "No membership found for member ID: " + memberId
             );
         }
@@ -175,7 +175,7 @@ public class MembershipServiceImpl implements MembershipService {
         Page<Membership> membershipPage = membershipRepository.findAll(pageable);
 
         if (membershipPage.isEmpty()) {
-            throw new MembershipNotFoundException("Membership not found"); }
+            throw new NotFoundException("Membership not found"); }
 
         return membershipPage.map(membershipDtoMapper::toResponse);
     }
@@ -192,7 +192,7 @@ public class MembershipServiceImpl implements MembershipService {
         Page<Membership> membershipsPage = membershipRepository.findByStatus(status, pageable);
 
         if (membershipsPage.isEmpty()) {
-            throw new MembershipNotFoundException(
+            throw new NotFoundException(
                     "Membership with status '" + status + "' not found"
             );
         }

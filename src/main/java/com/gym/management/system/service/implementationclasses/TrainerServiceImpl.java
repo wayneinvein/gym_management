@@ -3,7 +3,7 @@ package com.gym.management.system.service.implementationclasses;
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
 import com.gym.management.system.exception.MemberNotFoundException;
-import com.gym.management.system.exception.TrainerNotFoundException;
+import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.TrainerRepository;
 import com.gym.management.system.service.interfaces.TrainerService;
@@ -29,7 +29,7 @@ public class TrainerServiceImpl implements TrainerService {
     //get trainer by id
     @Override
     public Trainers getTrainerById(Long id) {
-        return trainerRepository.findById(id).orElseThrow(() -> new TrainerNotFoundException("trainer with id "+ id + " not found!!"));
+        return trainerRepository.findById(id).orElseThrow(() -> new NotFoundException("trainer with id "+ id + " not found!!"));
     }
 
     //add trainer
@@ -50,7 +50,7 @@ public class TrainerServiceImpl implements TrainerService {
             obj.setPhoneNumber(trainer.getPhoneNumber());
             return trainerRepository.save(obj);
         }
-        throw new TrainerNotFoundException("trainer not found with id: " + id);
+        throw new NotFoundException("trainer not found with id: " + id);
     }
 
     //delete trainer
@@ -60,7 +60,7 @@ public class TrainerServiceImpl implements TrainerService {
         if(existing.isPresent()){
             trainerRepository.deleteById(id);
         }else {
-            throw new TrainerNotFoundException("trainer with id " + id + " dosen't exist!!");
+            throw new NotFoundException("trainer with id " + id + " dosen't exist!!");
         }
     }
 
