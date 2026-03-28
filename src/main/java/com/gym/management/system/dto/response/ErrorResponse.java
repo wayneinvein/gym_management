@@ -1,4 +1,4 @@
-package com.gym.management.system.exception;
+package com.gym.management.system.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

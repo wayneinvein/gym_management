@@ -1,7 +1,7 @@
 package com.gym.management.system.service.implementationclasses;
 
 import com.gym.management.system.entity.User;
-import com.gym.management.system.exception.UserNotFoundException;
+import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.UserRepository;
 import com.gym.management.system.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
 
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() ->
-                        new UserNotFoundException("user with id: " + id + " not found"));
+                        new NotFoundException("user with id: " + id + " not found"));
 
         if(existingUser.getUserRole().equals(ADMIN)) {
             throw new RuntimeException("Admin cannot be modified");
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() ->
-                        new UserNotFoundException("user with id: " + id + " not found"));
+                        new NotFoundException("user with id: " + id + " not found"));
 
 
         if(user.getUserRole().equals(ADMIN)) {
@@ -76,6 +76,6 @@ public class UserServiceImpl implements UserService {
     public User getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() ->
-                        new UserNotFoundException("User with id: " + id + " not found"));
+                        new NotFoundException("User with id: " + id + " not found"));
     }
 }

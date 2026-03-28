@@ -2,7 +2,6 @@ package com.gym.management.system.service.implementationclasses;
 
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
-import com.gym.management.system.exception.MemberNotFoundException;
 import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.TrainerRepository;
@@ -71,7 +70,7 @@ public class TrainerServiceImpl implements TrainerService {
         List<Members> members = memberRepository.findByTrainerTrainerId(trainerId);
         System.out.println("Members found: " + members.size());
         if (members.isEmpty()) {
-            throw new MemberNotFoundException("No members found for trainer id: " + trainerId);
+            throw new NotFoundException("No members found for trainer id: " + trainerId);
         }
         return members;
     }

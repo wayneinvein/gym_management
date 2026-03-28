@@ -1,5 +1,6 @@
 package com.gym.management.system.exception;
 
+import com.gym.management.system.dto.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

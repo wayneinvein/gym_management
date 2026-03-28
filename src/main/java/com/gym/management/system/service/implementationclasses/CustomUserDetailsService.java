@@ -1,13 +1,12 @@
 package com.gym.management.system.service.implementationclasses;
 
 import com.gym.management.system.entity.User;
+import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
 @Service
 @AllArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
@@ -16,11 +15,11 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username)
-            throws UsernameNotFoundException {
+            throws NotFoundException {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("User not found"));
+                        new NotFoundException("User not found"));
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())

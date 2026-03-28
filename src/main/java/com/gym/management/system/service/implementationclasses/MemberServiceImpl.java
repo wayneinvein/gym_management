@@ -6,7 +6,6 @@ import com.gym.management.system.dto.response.MemberResponseDto;
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
 import com.gym.management.system.exception.NotFoundException;
-import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.TrainerRepository;
 import com.gym.management.system.service.interfaces.MemberService;

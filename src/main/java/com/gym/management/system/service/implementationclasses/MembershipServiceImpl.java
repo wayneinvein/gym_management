@@ -44,7 +44,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         // Validate Plan Exists
         MembershipPlan membershipPlan = membershipPlanRepository.findById(planId)
-                .orElseThrow(() -> new NotFoundoNotExistException("Plan not found"));
+                .orElseThrow(() -> new NotFoundException("Plan not found"));
 
         // Prevent Duplicate Membership For Same Member
         Membership existingMembership = membershipRepository.findByMemberMemberId(memberId);
