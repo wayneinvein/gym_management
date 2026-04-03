@@ -75,4 +75,10 @@ public class MemberController {
         return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
     }
 
+    @GetMapping("/profile")
+    @PreAuthorize("hasRole('MEMBER')")
+    public ResponseEntity<MemberResponseDTO> getMyProfile() {
+        return ResponseEntity.ok(memberService.getMyProfile());
+    }
+
 }
