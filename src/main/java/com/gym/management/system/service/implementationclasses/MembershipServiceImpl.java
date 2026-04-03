@@ -1,8 +1,8 @@
 package com.gym.management.system.service.implementationclasses;
 
 import com.gym.management.system.dto.mapper.MembershipDtoMapper;
-import com.gym.management.system.dto.request.MembershipRequestDto;
-import com.gym.management.system.dto.response.MembershipResponseDto;
+import com.gym.management.system.dto.request.MembershipRequestDTO;
+import com.gym.management.system.dto.response.MembershipResponseDTO;
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Membership;
 import com.gym.management.system.entity.MembershipPlan;
@@ -32,10 +32,10 @@ public class MembershipServiceImpl implements MembershipService {
     private final MembershipDtoMapper membershipDtoMapper;
 
     @Override
-    public MembershipResponseDto createMembership(
+    public MembershipResponseDTO createMembership(
             Long memberId,
             Long planId,
-            MembershipRequestDto membershipRequestDto) {
+            MembershipRequestDTO membershipRequestDto) {
 
         // Validate Member Exists
         Members member = memberRepository.findById(memberId)
@@ -104,8 +104,8 @@ public class MembershipServiceImpl implements MembershipService {
 
 
     @Override
-    public MembershipResponseDto updateMembership(Long membershipId,
-                                                  MembershipRequestDto updatedMembership) {
+    public MembershipResponseDTO updateMembership(Long membershipId,
+                                                  MembershipRequestDTO updatedMembership) {
 
         Membership existingMembership = membershipRepository.findById(membershipId)
                 .orElseThrow(() ->
@@ -149,7 +149,7 @@ public class MembershipServiceImpl implements MembershipService {
 
 
     @Override
-    public MembershipResponseDto getMembershipByMemberId(Long memberId) {
+    public MembershipResponseDTO getMembershipByMemberId(Long memberId) {
 
         Membership membership = membershipRepository.findByMember_MemberId(memberId);
 
@@ -163,7 +163,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public Page<MembershipResponseDto> getAllMemberships(int page, int size, String sortBy, String sortDir) {
+    public Page<MembershipResponseDTO> getAllMemberships(int page, int size, String sortBy, String sortDir) {
 
         //sorting
         Sort sort = sortDir.equalsIgnoreCase("desc")
@@ -181,7 +181,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public Page<MembershipResponseDto> getMembershipsByStatus(MembershipStatus status, int page, int size, String sortBy, String sortDir) {
+    public Page<MembershipResponseDTO> getMembershipsByStatus(MembershipStatus status, int page, int size, String sortBy, String sortDir) {
 
         //sorting
         Sort sort = sortDir.equalsIgnoreCase("desc")

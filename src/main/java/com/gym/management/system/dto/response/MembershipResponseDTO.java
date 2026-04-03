@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MembershipResponseDto {
+public class MembershipResponseDTO {
     private Long membershipId;
     private LocalDate startDate;
     private LocalDate endDate;

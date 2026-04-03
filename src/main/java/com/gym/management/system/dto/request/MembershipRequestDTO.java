@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MembershipRequestDto {
+public class MembershipRequestDTO {
 
     @NotNull(message = "Start date is required")
     private LocalDate startDate;

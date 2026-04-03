@@ -1,8 +1,8 @@
 package com.gym.management.system.service.implementationclasses;
 
 import com.gym.management.system.dto.mapper.MemberDtoMapper;
-import com.gym.management.system.dto.request.MemberRequestDto;
-import com.gym.management.system.dto.response.MemberResponseDto;
+import com.gym.management.system.dto.request.MemberRequestDTO;
+import com.gym.management.system.dto.response.MemberResponseDTO;
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
 import com.gym.management.system.exception.NotFoundException;
@@ -26,7 +26,7 @@ public class MemberServiceImpl implements MemberService {
     private final MemberDtoMapper memberDtoMapper;
 
     @Override
-    public Page<MemberResponseDto> getAllMembers(int page, int size, String sortBy, String sortDir) {
+    public Page<MemberResponseDTO> getAllMembers(int page, int size, String sortBy, String sortDir) {
 
         //sorting
         Sort sort = sortDir.equalsIgnoreCase("desc")
@@ -43,7 +43,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberResponseDto getMemberById(Long id) {
+    public MemberResponseDTO getMemberById(Long id) {
         Members member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Member not found with id: " + id));
 
@@ -51,7 +51,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberResponseDto addMember(MemberRequestDto memberRequestDto) {
+    public MemberResponseDTO addMember(MemberRequestDTO memberRequestDto) {
 
         //object of memberRequestDto converted into Member entity
         Members member = memberDtoMapper.toEntity(memberRequestDto);
@@ -62,7 +62,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberResponseDto updateMember(Long id, MemberRequestDto memberRequestDto){
+    public MemberResponseDTO updateMember(Long id, MemberRequestDTO memberRequestDto){
 
         Optional<Members> existing = memberRepository.findById(id);
 
@@ -90,7 +90,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberResponseDto assignTrainer(Long memberId, Long trainerId) {
+    public MemberResponseDTO assignTrainer(Long memberId, Long trainerId) {
         Members member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("Member not found with id: " + memberId));
 

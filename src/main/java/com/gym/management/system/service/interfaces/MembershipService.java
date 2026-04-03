@@ -1,23 +1,21 @@
 package com.gym.management.system.service.interfaces;
 
-import com.gym.management.system.dto.request.MembershipRequestDto;
-import com.gym.management.system.dto.response.MembershipResponseDto;
+import com.gym.management.system.dto.request.MembershipRequestDTO;
+import com.gym.management.system.dto.response.MembershipResponseDTO;
 import com.gym.management.system.enums.MembershipStatus;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
-
 public interface MembershipService {
 
-    MembershipResponseDto createMembership(Long memberId, Long planId, MembershipRequestDto membershipRequestDto);
+    MembershipResponseDTO createMembership(Long memberId, Long planId, MembershipRequestDTO membershipRequestDto);
 
-    MembershipResponseDto updateMembership(Long membershipId, MembershipRequestDto membershipRequestDto);
+    MembershipResponseDTO updateMembership(Long membershipId, MembershipRequestDTO membershipRequestDto);
 
-    MembershipResponseDto getMembershipByMemberId(Long memberId);
+    MembershipResponseDTO getMembershipByMemberId(Long memberId);
 
-    Page<MembershipResponseDto> getAllMemberships(int page, int size, String sortBy, String sortDir);
+    Page<MembershipResponseDTO> getAllMemberships(int page, int size, String sortBy, String sortDir);
 
-    Page<MembershipResponseDto> getMembershipsByStatus(MembershipStatus status, int page, int size, String sortBy, String sortDir);
+    Page<MembershipResponseDTO> getMembershipsByStatus(MembershipStatus status, int page, int size, String sortBy, String sortDir);
 
     String deleteMembership(Long membershipId);
 }
