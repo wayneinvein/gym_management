@@ -8,6 +8,7 @@ import com.gym.management.system.entity.Trainers;
 import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.TrainerRepository;
+import com.gym.management.system.security.SecurityUtils;
 import com.gym.management.system.service.interfaces.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,7 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final TrainerRepository trainerRepository;
     private final MemberDtoMapper memberDtoMapper;
+    private final SecurityUtils securityUtils;
 
     @Override
     public Page<MemberResponseDTO> getAllMembers(int page, int size, String sortBy, String sortDir) {
@@ -103,5 +105,22 @@ public class MemberServiceImpl implements MemberService {
         Members updated = memberRepository.save(member);
 
         return memberDtoMapper.toResponse(updated);
+    }
+
+    @Override
+    public MemberResponseDTO getMyProfile() {
+
+        String username = securityUtils.getCurrentUsername();
+
+        if (username == null){
+            throw new RuntimeException("user not authenticated");
+
+        }
+
+        Members member = memberRepository.findByUserUsername(username)
+                .orElseThrow(() -> new RuntimeException("member not found"));
+
+        return memberDtoMapper.toResponse(member);
+
     }
 }

@@ -36,4 +36,7 @@ public class Members {
     @JsonIgnore
     @OneToOne(mappedBy = "member")
     private Membership membership;
+
+    @ManyToOne
+    private User user;
 }
