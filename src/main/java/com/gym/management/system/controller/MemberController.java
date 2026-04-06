@@ -1,7 +1,7 @@
 package com.gym.management.system.controller;
 
-import com.gym.management.system.dto.request.MemberRequestDto;
-import com.gym.management.system.dto.response.MemberResponseDto;
+import com.gym.management.system.dto.request.MemberRequestDTO;
+import com.gym.management.system.dto.response.MemberResponseDTO;
 import com.gym.management.system.service.interfaces.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/members")
@@ -24,7 +22,7 @@ public class MemberController {
     // Get all members
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<MemberResponseDto>> getAllMembers(
+    public ResponseEntity<Page<MemberResponseDTO>> getAllMembers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "memberId") String sortBy,
@@ -38,24 +36,24 @@ public class MemberController {
     // Get member by ID
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MemberResponseDto> getMemberById(@PathVariable Long id) {
-        MemberResponseDto memberResponseDto = memberService.getMemberById(id); // throws MemberNotFoundException if not found
+    public ResponseEntity<MemberResponseDTO> getMemberById(@PathVariable Long id) {
+        MemberResponseDTO memberResponseDto = memberService.getMemberById(id); // throws MemberNotFoundException if not found
         return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
     }
 
     // Create a new member
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MemberResponseDto> addMember(@Valid @RequestBody MemberRequestDto memberRequestDto) {
-        MemberResponseDto memberResponseDto = memberService.addMember(memberRequestDto);
+    public ResponseEntity<MemberResponseDTO> addMember(@Valid @RequestBody MemberRequestDTO memberRequestDto) {
+        MemberResponseDTO memberResponseDto = memberService.addMember(memberRequestDto);
         return new ResponseEntity<>(memberResponseDto, HttpStatus.CREATED); // 201 Created
     }
 
     // Update existing member
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MemberResponseDto> updateMember(@PathVariable Long id, @Valid @RequestBody MemberRequestDto memberRequestDto) {
-        MemberResponseDto memberResponseDto = memberService.updateMember(id, memberRequestDto); // throws MemberNotFoundException if not found
+    public ResponseEntity<MemberResponseDTO> updateMember(@PathVariable Long id, @Valid @RequestBody MemberRequestDTO memberRequestDto) {
+        MemberResponseDTO memberResponseDto = memberService.updateMember(id, memberRequestDto); // throws MemberNotFoundException if not found
         return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
     }
 
@@ -70,9 +68,15 @@ public class MemberController {
     //assigning a member to a trainer
     @PutMapping("/member/{memberId}/trainer/{trainerId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MemberResponseDto> assignTrainer(@PathVariable Long memberId, @PathVariable Long trainerId) {
-        MemberResponseDto memberResponseDto = memberService.assignTrainer(memberId, trainerId);
+    public ResponseEntity<MemberResponseDTO> assignTrainer(@PathVariable Long memberId, @PathVariable Long trainerId) {
+        MemberResponseDTO memberResponseDto = memberService.assignTrainer(memberId, trainerId);
         return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/profile")
+    @PreAuthorize("hasRole('MEMBER')")
+    public ResponseEntity<MemberResponseDTO> getMyProfile() {
+        return ResponseEntity.ok(memberService.getMyProfile());
     }
 
 }

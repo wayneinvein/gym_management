@@ -1,21 +1,23 @@
 package com.gym.management.system.service.interfaces;
 
-import com.gym.management.system.dto.request.MemberRequestDto;
-import com.gym.management.system.dto.response.MemberResponseDto;
+import com.gym.management.system.dto.request.MemberRequestDTO;
+import com.gym.management.system.dto.response.MemberResponseDTO;
 import org.springframework.data.domain.Page;
 
 public interface MemberService {
 
     //for pagination
-    Page<MemberResponseDto> getAllMembers(int page, int size, String sortBy, String sortDir);
+    Page<MemberResponseDTO> getAllMembers(int page, int size, String sortBy, String sortDir);
 
-    MemberResponseDto getMemberById(Long id);
+    MemberResponseDTO getMemberById(Long id);
 
-    MemberResponseDto addMember(MemberRequestDto memberRequestDto);
+    MemberResponseDTO addMember(MemberRequestDTO memberRequestDto);
 
-    MemberResponseDto updateMember(Long id, MemberRequestDto memberRequestDto);
+    MemberResponseDTO updateMember(Long id, MemberRequestDTO memberRequestDto);
 
     void deleteMember(Long id);
 
-    MemberResponseDto assignTrainer(Long memberId, Long trainerId);
+    MemberResponseDTO assignTrainer(Long memberId, Long trainerId);
+
+    MemberResponseDTO getMyProfile();
 }

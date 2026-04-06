@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberRequestDto {
+public class MemberRequestDTO {
 
     @NotBlank(message = "Name cannot be blank")
     private String memberName;

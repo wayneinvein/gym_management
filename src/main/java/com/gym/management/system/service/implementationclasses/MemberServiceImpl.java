@@ -1,13 +1,14 @@
 package com.gym.management.system.service.implementationclasses;
 
 import com.gym.management.system.dto.mapper.MemberDtoMapper;
-import com.gym.management.system.dto.request.MemberRequestDto;
-import com.gym.management.system.dto.response.MemberResponseDto;
+import com.gym.management.system.dto.request.MemberRequestDTO;
+import com.gym.management.system.dto.response.MemberResponseDTO;
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
 import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.TrainerRepository;
+import com.gym.management.system.security.SecurityUtils;
 import com.gym.management.system.service.interfaces.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,9 +25,10 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final TrainerRepository trainerRepository;
     private final MemberDtoMapper memberDtoMapper;
+    private final SecurityUtils securityUtils;
 
     @Override
-    public Page<MemberResponseDto> getAllMembers(int page, int size, String sortBy, String sortDir) {
+    public Page<MemberResponseDTO> getAllMembers(int page, int size, String sortBy, String sortDir) {
 
         //sorting
         Sort sort = sortDir.equalsIgnoreCase("desc")
@@ -43,7 +45,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberResponseDto getMemberById(Long id) {
+    public MemberResponseDTO getMemberById(Long id) {
         Members member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Member not found with id: " + id));
 
@@ -51,7 +53,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberResponseDto addMember(MemberRequestDto memberRequestDto) {
+    public MemberResponseDTO addMember(MemberRequestDTO memberRequestDto) {
 
         //object of memberRequestDto converted into Member entity
         Members member = memberDtoMapper.toEntity(memberRequestDto);
@@ -62,7 +64,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberResponseDto updateMember(Long id, MemberRequestDto memberRequestDto){
+    public MemberResponseDTO updateMember(Long id, MemberRequestDTO memberRequestDto){
 
         Optional<Members> existing = memberRepository.findById(id);
 
@@ -90,7 +92,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberResponseDto assignTrainer(Long memberId, Long trainerId) {
+    public MemberResponseDTO assignTrainer(Long memberId, Long trainerId) {
         Members member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("Member not found with id: " + memberId));
 
@@ -103,5 +105,22 @@ public class MemberServiceImpl implements MemberService {
         Members updated = memberRepository.save(member);
 
         return memberDtoMapper.toResponse(updated);
+    }
+
+    @Override
+    public MemberResponseDTO getMyProfile() {
+
+        String username = securityUtils.getCurrentUsername();
+
+        if (username == null){
+            throw new RuntimeException("user not authenticated");
+
+        }
+
+        Members member = memberRepository.findByUserUsername(username)
+                .orElseThrow(() -> new RuntimeException("member not found"));
+
+        return memberDtoMapper.toResponse(member);
+
     }
 }
