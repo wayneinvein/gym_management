@@ -3,6 +3,8 @@ package com.gym.management.system.controller;
 import com.gym.management.system.dto.request.MemberRequestDTO;
 import com.gym.management.system.dto.response.MemberResponseDTO;
 import com.gym.management.system.service.interfaces.MemberService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -11,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Member APIs", description = "Operations related to members") // swagger annotation
 @RestController
 @RequestMapping("/api/members")
 @RequiredArgsConstructor // used instead of @Autowired and manual constructor for injecting dependency
@@ -73,6 +76,10 @@ public class MemberController {
         return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "Get logged-in member profile",
+            description = "Fetches profile details of the currently authenticated member"
+    )//swagger annotation
     @GetMapping("/profile")
     @PreAuthorize("hasRole('MEMBER')")
     public ResponseEntity<MemberResponseDTO> getMyProfile() {
