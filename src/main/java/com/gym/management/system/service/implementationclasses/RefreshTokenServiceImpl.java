@@ -3,6 +3,7 @@ package com.gym.management.system.service.implementationclasses;
 import com.gym.management.system.entity.RefreshToken;
 import com.gym.management.system.repository.RefreshTokenRepository;
 import com.gym.management.system.service.interfaces.RefreshTokenService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -54,6 +55,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     // Delete on Logout
+    @Transactional
     @Override
     public void deleteByUsername(String username) {
         refreshTokenRepository.deleteByUsername(username);
