@@ -1,7 +1,7 @@
 package com.gym.management.system.controller;
 
-import com.gym.management.system.dto.request.AuthRequest;
-import com.gym.management.system.dto.response.AuthResponse;
+import com.gym.management.system.dto.request.AuthRequestDTO;
+import com.gym.management.system.dto.response.AuthResponseDTO;
 import com.gym.management.system.entity.RefreshToken;
 import com.gym.management.system.entity.User;
 import com.gym.management.system.repository.UserRepository;
@@ -24,9 +24,7 @@ public class AuthController {
 
     //Login (Access + Refresh Token)
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest request) {
-
-        System.out.println("step 0 done");
+    public AuthResponseDTO login(@RequestBody AuthRequestDTO request) {
 
         authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -35,12 +33,8 @@ public class AuthController {
                 )
         );
 
-        System.out.println("step 1 done");
-
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-        System.out.println("step 2 done");
 
         // Access token
         String accessToken = jwtUtil.generateToken(
@@ -48,14 +42,10 @@ public class AuthController {
                 user.getUserRole().name()
         );
 
-        System.out.println("step 3 done");
-
         // Refresh Token
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
 
-        System.out.println("step 4 done");
-
-        return new AuthResponse(
+        return new AuthResponseDTO(
                 accessToken,
                 refreshToken.getToken(),
                 user.getUsername(),
@@ -66,7 +56,7 @@ public class AuthController {
 
     //REFRESH TOKEN (Get new access token)
     @PostMapping("/refresh")
-    public AuthResponse refreshToken(@RequestBody String refreshToken) {
+    public AuthResponseDTO refreshToken(@RequestBody String refreshToken) {
 
         RefreshToken token = refreshTokenService.findByToken(refreshToken)
                 .map(refreshTokenService::verifyExpiration)
@@ -80,7 +70,7 @@ public class AuthController {
                 user.getUserRole().name()
         );
 
-        return new AuthResponse(
+        return new AuthResponseDTO(
                 newAccessToken,
                 refreshToken,
                 user.getUsername(),

@@ -1,6 +1,6 @@
 package com.gym.management.system.exception;
 
-import com.gym.management.system.dto.response.ErrorResponse;
+import com.gym.management.system.dto.response.ErrorResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,9 +15,9 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
+    public ResponseEntity<ErrorResponseDTO> handleGlobalException(Exception ex) {
 
-        ErrorResponse response = new ErrorResponse(
+        ErrorResponseDTO response = new ErrorResponseDTO(
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Something went wrong"
@@ -42,9 +42,9 @@ public class GlobalExceptionHandler {
 
     //handling NOT FOUND exception
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleNotFoundException(NotFoundException ex) {
 
-        ErrorResponse response = new ErrorResponse(
+        ErrorResponseDTO response = new ErrorResponseDTO(
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage()
@@ -55,9 +55,9 @@ public class GlobalExceptionHandler {
 
     //handling INVALID INPUT exception
     @ExceptionHandler(InvalidInputException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidInputException(InvalidInputException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleInvalidInputException(InvalidInputException ex) {
 
-        ErrorResponse response = new ErrorResponse(
+        ErrorResponseDTO response = new ErrorResponseDTO(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage()
@@ -68,9 +68,9 @@ public class GlobalExceptionHandler {
 
     //handling ALREADY PRESENT exception
     @ExceptionHandler(AlreadyPresentException.class)
-    public ResponseEntity<ErrorResponse> handleAlreadyPresentException(AlreadyPresentException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleAlreadyPresentException(AlreadyPresentException ex) {
 
-        ErrorResponse response = new ErrorResponse(
+        ErrorResponseDTO response = new ErrorResponseDTO(
                 LocalDateTime.now(),
                 HttpStatus.CONFLICT.value(),
                 ex.getMessage()

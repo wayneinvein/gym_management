@@ -5,7 +5,7 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class AuthResponse {
+public class AuthResponseDTO {
 
     private String accessToken;   // short-lived
     private String refreshToken;  // long-lived
