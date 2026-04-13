@@ -1,21 +1,33 @@
 package com.gym.management.system.service.interfaces;
 
-import com.gym.management.system.entity.Members;
-import com.gym.management.system.entity.Trainers;
+import com.gym.management.system.dto.request.TrainerRequestDTO;
+import com.gym.management.system.dto.response.TrainerResponseDTO;
+import com.gym.management.system.dto.response.MemberResponseDTO;
 
 import java.util.List;
 
+/**
+ * Service interface for managing trainers.
+ *
+ * Provides operations for CRUD on trainers and fetching assigned members.
+ */
 public interface TrainerService {
 
-    public List<Trainers> getAllTrainers();
+    // Get list of all trainers
+    List<TrainerResponseDTO> getAllTrainers();
 
-    public Trainers getTrainerById(Long id);
+    // Get trainer details by ID
+    TrainerResponseDTO getTrainerById(Long id);
 
-    public Trainers addTrainer(Trainers trainer);
+    // Create a new trainer
+    TrainerResponseDTO addTrainer(TrainerRequestDTO trainer);
 
-    public Trainers updateTrainer(Long id, Trainers trainer);
+    // Update existing trainer details
+    TrainerResponseDTO updateTrainer(Long id, TrainerRequestDTO trainer);
 
-    public void deleteTrainer(Long id);
+    // Delete trainer by ID
+    void deleteTrainer(Long id);
 
-    public List<Members> getMembersByTrainer(Long trainerId);
+    // Get all members assigned to a specific trainer
+    List<MemberResponseDTO> getMembersByTrainer(Long trainerId);
 }

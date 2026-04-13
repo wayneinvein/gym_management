@@ -1,47 +1,78 @@
 package com.gym.management.system.controller;
 
-import com.gym.management.system.entity.User;
+import com.gym.management.system.dto.request.UserRequestDTO;
+import com.gym.management.system.dto.response.UserResponseDTO;
 import com.gym.management.system.service.interfaces.UserService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Handles user management operations.
+ * Access: ADMIN only
+ */
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
 
+    /**
+     * Register a new user.
+     */
     @PostMapping("/register")
     @PreAuthorize("hasRole('ADMIN')")
-    public User addUser(@RequestBody User user) {
-        return userService.addUser(user);
+    public ResponseEntity<UserResponseDTO> addUser(@RequestBody UserRequestDTO user) {
+        return new ResponseEntity<>(
+                userService.addUser(user),
+                HttpStatus.CREATED
+        );
     }
 
+    /**
+     * Update existing user.
+     */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public User updateUser(@RequestBody User user, @PathVariable Long id) {
-        return userService.updateUser(user, id);
+    public ResponseEntity<UserResponseDTO> updateUser(
+            @RequestBody UserRequestDTO user,
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                userService.updateUser(user, id)
+        );
     }
 
+    /**
+     * Delete user by ID.
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public User deleteUser(@PathVariable Long id) {
-        return userService.deleteUser(id);
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.ok("User deleted successfully with id: " + id);
     }
 
+    /**
+     * Fetch all users.
+     */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    /**
+     * Fetch user by ID.
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public User getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 }

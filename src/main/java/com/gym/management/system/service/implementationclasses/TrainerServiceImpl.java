@@ -1,5 +1,9 @@
 package com.gym.management.system.service.implementationclasses;
 
+import com.gym.management.system.dto.mapper.TrainerDTOMapper;
+import com.gym.management.system.dto.request.TrainerRequestDTO;
+import com.gym.management.system.dto.response.MemberResponseDTO;
+import com.gym.management.system.dto.response.TrainerResponseDTO;
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
 import com.gym.management.system.exception.NotFoundException;
@@ -10,68 +14,98 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
+/**
+ * Service implementation for managing trainers.
+ *
+ * Handles CRUD operations for trainers and fetching assigned members.
+ */
 @Service
 @RequiredArgsConstructor
 public class TrainerServiceImpl implements TrainerService {
 
     private final TrainerRepository trainerRepository;
     private final MemberRepository memberRepository;
+    private final TrainerDTOMapper trainerDTOMapper;
 
-    //get all trainers
     @Override
-    public List<Trainers> getAllTrainers(){
-        return trainerRepository.findAll();
+    public List<TrainerResponseDTO> getAllTrainers() {
+
+        // Fetch all trainers from DB
+        List<Trainers> trainers = trainerRepository.findAll();
+
+        return trainerDTOMapper.toResponse(trainers);
     }
 
-    //get trainer by id
     @Override
-    public Trainers getTrainerById(Long id) {
-        return trainerRepository.findById(id).orElseThrow(() -> new NotFoundException("trainer with id "+ id + " not found!!"));
+    public TrainerResponseDTO getTrainerById(Long id) {
+
+        // Fetch trainer or throw exception if not found
+        Trainers trainer = trainerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Trainer with id " + id + " not found"));
+
+        return trainerDTOMapper.toResponse(trainer);
     }
 
-    //add trainer
     @Override
-    public Trainers addTrainer(Trainers trainer) {
-        return trainerRepository.save(trainer);
+    public TrainerResponseDTO addTrainer(TrainerRequestDTO trainer) {
+
+        // Convert DTO to entity
+        Trainers newTrainer = trainerDTOMapper.toEntity(trainer);
+
+        // Save trainer in database
+        Trainers saved = trainerRepository.save(newTrainer);
+
+        return trainerDTOMapper.toResponse(saved);
     }
 
-    //update trainer
     @Override
-    public Trainers updateTrainer(Long id, Trainers trainer) {
-        Optional<Trainers> existing = trainerRepository.findById(id);
+    public TrainerResponseDTO updateTrainer(Long id, TrainerRequestDTO trainer) {
 
-        if(existing.isPresent()){
-            Trainers obj = existing.get();
-            obj.setTrainerName(trainer.getTrainerName());
-            obj.setTrainerGender(trainer.getTrainerGender());
-            obj.setPhoneNumber(trainer.getPhoneNumber());
-            return trainerRepository.save(obj);
-        }
-        throw new NotFoundException("trainer not found with id: " + id);
+        // Fetch existing trainer
+        Trainers existing = trainerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Trainer not found with id: " + id));
+
+        // Update fields
+        existing.setTrainerName(trainer.getTrainerName());
+        existing.setTrainerGender(trainer.getTrainerGender());
+        existing.setPhoneNumber(trainer.getPhoneNumber());
+
+        // Save updated trainer
+        Trainers updated = trainerRepository.save(existing);
+
+        return trainerDTOMapper.toResponse(updated);
     }
 
-    //delete trainer
     @Override
     public void deleteTrainer(Long id) {
-        Optional<Trainers> existing = trainerRepository.findById(id);
-        if(existing.isPresent()){
-            trainerRepository.deleteById(id);
-        }else {
-            throw new NotFoundException("trainer with id " + id + " dosen't exist!!");
-        }
+
+        // Validate trainer exists before deletion
+        Trainers existing = trainerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Trainer with id " + id + " doesn't exist"));
+
+        trainerRepository.delete(existing);
     }
 
-    //get member assigned to a particular trainer
     @Override
-    public List<Members>  getMembersByTrainer(Long trainerId) {
-        System.out.println("Fetching members for trainerId: " + trainerId);
+    public List<MemberResponseDTO> getMembersByTrainer(Long trainerId) {
+
+        // Fetch members assigned to trainer
         List<Members> members = memberRepository.findByTrainerTrainerId(trainerId);
-        System.out.println("Members found: " + members.size());
+
+        // Handle empty result
         if (members.isEmpty()) {
             throw new NotFoundException("No members found for trainer id: " + trainerId);
         }
-        return members;
+
+        // Convert entity list to DTO list manually (no mapper used here)
+        return members.stream()
+                .map(member -> new MemberResponseDTO(
+                        member.getMemberId(),
+                        member.getMemberName(),
+                        member.getMemberGender(),
+                        member.getPhoneNumber()
+                ))
+                .toList();
     }
 }
