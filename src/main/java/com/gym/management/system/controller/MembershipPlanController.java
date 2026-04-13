@@ -4,7 +4,6 @@ import com.gym.management.system.dto.response.MembershipPlanResponseDTO;
 import com.gym.management.system.entity.MembershipPlan;
 import com.gym.management.system.service.interfaces.MembershipPlanService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +14,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MembershipPlanController {
 
-    @Autowired
     private final MembershipPlanService membershipPlanService;
 
     @PostMapping

@@ -10,6 +10,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Handles membership management operations:
+ * - Create and update memberships
+ * - Fetch memberships (by member, status, or all)
+ * - Delete membership
+ *
+ * Access: Restricted to ADMIN
+ */
 @RestController
 @RequestMapping("/api/memberships")
 @RequiredArgsConstructor
@@ -17,44 +25,72 @@ public class MembershipController {
 
     private final MembershipService membershipService;
 
+    /**
+     * Creates a membership for a given member and plan.
+     */
     @PostMapping("/create/{memberId}/{planId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public MembershipResponseDTO createMembership(@PathVariable Long memberId, @PathVariable Long planId, @Valid @RequestBody MembershipRequestDTO membershipRequestDto) {
+    public MembershipResponseDTO createMembership(
+            @PathVariable Long memberId,
+            @PathVariable Long planId,
+            @Valid @RequestBody MembershipRequestDTO membershipRequestDto) {
+
         return membershipService.createMembership(memberId, planId, membershipRequestDto);
     }
 
+    /**
+     * Updates an existing membership.
+     */
     @PutMapping("/update/{membershipId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public MembershipResponseDTO updateMembership(@PathVariable Long membershipId,
-                                                  @Valid @RequestBody MembershipRequestDTO membershipRequestDto) {
+    public MembershipResponseDTO updateMembership(
+            @PathVariable Long membershipId,
+            @Valid @RequestBody MembershipRequestDTO membershipRequestDto) {
+
         return membershipService.updateMembership(membershipId, membershipRequestDto);
     }
 
+    /**
+     * Fetch membership details for a specific member.
+     */
     @GetMapping("/member/{memberId}")
     @PreAuthorize("hasRole('ADMIN')")
     public MembershipResponseDTO getMembershipByMember(@PathVariable Long memberId) {
         return membershipService.getMembershipByMemberId(memberId);
     }
 
+    /**
+     * Fetch paginated list of all memberships.
+     */
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<MembershipResponseDTO> getAllMemberships(@RequestParam(defaultValue = "0") int page,
-                                                         @RequestParam(defaultValue = "5") int size,
-                                                         @RequestParam(defaultValue = "membershipId") String sortBy,
-                                                         @RequestParam(defaultValue = "asc") String sortDir) {
+    public Page<MembershipResponseDTO> getAllMemberships(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "membershipId") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
         return membershipService.getAllMemberships(page, size, sortBy, sortDir);
     }
 
+    /**
+     * Fetch memberships filtered by status (e.g., ACTIVE, EXPIRED).
+     */
     @GetMapping("/status/{status}")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<MembershipResponseDTO> getByStatus(@PathVariable MembershipStatus status,
-                                                   @RequestParam(defaultValue = "0") int page,
-                                                   @RequestParam(defaultValue = "5") int size,
-                                                   @RequestParam(defaultValue = "membershipId") String sortBy,
-                                                   @RequestParam(defaultValue = "asc") String sortDir) {
+    public Page<MembershipResponseDTO> getByStatus(
+            @PathVariable MembershipStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "membershipId") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
         return membershipService.getMembershipsByStatus(status, page, size, sortBy, sortDir);
     }
 
+    /**
+     * Deletes a membership by ID.
+     */
     @DeleteMapping("/delete/{membershipId}")
     @PreAuthorize("hasRole('ADMIN')")
     public String deleteMembership(@PathVariable Long membershipId) {

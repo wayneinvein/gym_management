@@ -16,12 +16,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
-
     private final RefreshTokenRepository refreshTokenRepository;
 
     private final long REFRESH_TOKEN_DURATION = 7; // days
 
-    // Create Refresh Token
     @Override
     public RefreshToken createRefreshToken(String username) {
 
@@ -36,28 +34,22 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return refreshTokenRepository.save(refreshToken);
     }
 
-    // Verify Expiry
     @Override
-    public RefreshToken verifyExpiration(RefreshToken token) {
+    public RefreshToken verifyRefreshToken(String token) {
 
-        if (token.getExpiryDate().isBefore(Instant.now())) {
-            refreshTokenRepository.delete(token);
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+
+        if (refreshToken.getExpiryDate().isBefore(Instant.now())) {
+            refreshTokenRepository.delete(refreshToken);
             throw new RuntimeException("Refresh token expired. Please login again.");
         }
 
-        return token;
+        return refreshToken;
     }
 
-    // Find by Token
     @Override
-    public Optional<RefreshToken> findByToken(String token) {
-        return refreshTokenRepository.findByToken(token);
-    }
-
-    // Delete on Logout
-    @Transactional
-    @Override
-    public void deleteByUsername(String username) {
-        refreshTokenRepository.deleteByUsername(username);
+    public void deleteByToken(String token) {
+        refreshTokenRepository.deleteByToken(token);
     }
 }

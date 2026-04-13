@@ -1,11 +1,8 @@
 package com.gym.management.system.controller;
 
-import com.gym.management.system.dto.mapper.TrainerDTOMapper;
 import com.gym.management.system.dto.request.TrainerRequestDTO;
 import com.gym.management.system.dto.response.MemberResponseDTO;
 import com.gym.management.system.dto.response.TrainerResponseDTO;
-import com.gym.management.system.entity.Members;
-import com.gym.management.system.entity.Trainers;
 import com.gym.management.system.service.interfaces.TrainerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,56 +12,80 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Handles trainer management:
+ * - CRUD operations
+ * - Fetch members assigned to a trainer
+ *
+ * Access: ADMIN only
+ */
 @RestController
 @RequestMapping("/api/trainers")
 @RequiredArgsConstructor
 public class TrainerController {
 
-    //dependency
     private final TrainerService trainerService;
-    private final TrainerDTOMapper trainerRequestDTO;
 
+    /**
+     * Create a new trainer.
+     */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TrainerResponseDTO> addTrainer(@RequestBody TrainerRequestDTO trainer) {
-        TrainerResponseDTO savedTrainer = trainerService.addTrainer(trainer);
-        return new ResponseEntity<>(savedTrainer, HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                trainerService.addTrainer(trainer),
+                HttpStatus.CREATED
+        );
     }
 
+    /**
+     * Fetch all trainers.
+     */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<TrainerResponseDTO>> getAllTrainers() {
-        List<TrainerResponseDTO> trainer = trainerService.getAllTrainers();
-        return new ResponseEntity<>(trainer, HttpStatus.OK);
+        return ResponseEntity.ok(trainerService.getAllTrainers());
     }
 
+    /**
+     * Fetch trainer by ID.
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TrainerResponseDTO> getTrainerById(@PathVariable Long id) {
-        TrainerResponseDTO trainer = trainerService.getTrainerById(id);
-        return new ResponseEntity<>(trainer, HttpStatus.OK);
+        return ResponseEntity.ok(trainerService.getTrainerById(id));
     }
 
+    /**
+     * Update trainer details.
+     */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TrainerResponseDTO> updateTrainer(@PathVariable Long id, @RequestBody TrainerRequestDTO trainer) {
-        TrainerResponseDTO updatedTrainer = trainerService.updateTrainer(id, trainer);
-        return new ResponseEntity<>(updatedTrainer, HttpStatus.CREATED);
+    public ResponseEntity<TrainerResponseDTO> updateTrainer(
+            @PathVariable Long id,
+            @RequestBody TrainerRequestDTO trainer) {
+
+        return ResponseEntity.ok(
+                trainerService.updateTrainer(id, trainer)
+        );
     }
 
+    /**
+     * Delete trainer by ID.
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteTrainer(@PathVariable Long id) {
         trainerService.deleteTrainer(id);
-        return new ResponseEntity<>("trainer with id: " + id + " has been successfully deleted", HttpStatus.CREATED);
+        return ResponseEntity.ok("Trainer deleted successfully with id: " + id);
     }
 
-    //find members assigned to a particular trainer
+    /**
+     * Fetch members assigned to a specific trainer.
+     */
     @GetMapping("/{trainerId}/members")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<MemberResponseDTO> getMembersByTrainer(@PathVariable Long trainerId) {
-        return trainerService.getMembersByTrainer(trainerId);
+    public ResponseEntity<List<MemberResponseDTO>> getMembersByTrainer(@PathVariable Long trainerId) {
+        return ResponseEntity.ok(trainerService.getMembersByTrainer(trainerId));
     }
-
-
 }

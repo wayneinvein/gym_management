@@ -13,16 +13,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Member APIs", description = "Operations related to members") // swagger annotation
+@Tag(name = "Member APIs", description = "Operations related to members")
 @RestController
 @RequestMapping("/api/members")
-@RequiredArgsConstructor // used instead of @Autowired and manual constructor for injecting dependency
+@RequiredArgsConstructor
 public class MemberController {
 
-    //dependency of member service
     private final MemberService memberService;
 
-    // Get all members
+    // Get paginated & sorted list of members (ADMIN only)
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<MemberResponseDTO>> getAllMembers(
@@ -36,31 +35,38 @@ public class MemberController {
         );
     }
 
-    // Get member by ID
+    // Get member by ID (ADMIN only)
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MemberResponseDTO> getMemberById(@PathVariable Long id) {
-        MemberResponseDTO memberResponseDto = memberService.getMemberById(id); // throws MemberNotFoundException if not found
-        return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
+        return ResponseEntity.ok(memberService.getMemberById(id));
     }
 
-    // Create a new member
+    // Create new member (ADMIN only)
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MemberResponseDTO> addMember(@Valid @RequestBody MemberRequestDTO memberRequestDto) {
-        MemberResponseDTO memberResponseDto = memberService.addMember(memberRequestDto);
-        return new ResponseEntity<>(memberResponseDto, HttpStatus.CREATED); // 201 Created
+    public ResponseEntity<MemberResponseDTO> addMember(
+            @Valid @RequestBody MemberRequestDTO memberRequestDto) {
+
+        return new ResponseEntity<>(
+                memberService.addMember(memberRequestDto),
+                HttpStatus.CREATED
+        );
     }
 
-    // Update existing member
+    // Update existing member (ADMIN only)
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MemberResponseDTO> updateMember(@PathVariable Long id, @Valid @RequestBody MemberRequestDTO memberRequestDto) {
-        MemberResponseDTO memberResponseDto = memberService.updateMember(id, memberRequestDto); // throws MemberNotFoundException if not found
-        return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
+    public ResponseEntity<MemberResponseDTO> updateMember(
+            @PathVariable Long id,
+            @Valid @RequestBody MemberRequestDTO memberRequestDto) {
+
+        return ResponseEntity.ok(
+                memberService.updateMember(id, memberRequestDto)
+        );
     }
 
-    // delete member
+    // Delete member by ID (ADMIN only)
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteMember(@PathVariable Long id) {
@@ -68,22 +74,26 @@ public class MemberController {
         return ResponseEntity.ok("Member deleted successfully with id: " + id);
     }
 
-    //assigning a member to a trainer
+    // Assign trainer to a member (ADMIN only)
     @PutMapping("/member/{memberId}/trainer/{trainerId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MemberResponseDTO> assignTrainer(@PathVariable Long memberId, @PathVariable Long trainerId) {
-        MemberResponseDTO memberResponseDto = memberService.assignTrainer(memberId, trainerId);
-        return new ResponseEntity<>(memberResponseDto, HttpStatus.OK);
+    public ResponseEntity<MemberResponseDTO> assignTrainer(
+            @PathVariable Long memberId,
+            @PathVariable Long trainerId) {
+
+        return ResponseEntity.ok(
+                memberService.assignTrainer(memberId, trainerId)
+        );
     }
 
+    // Get profile of logged-in member
     @Operation(
             summary = "Get logged-in member profile",
             description = "Fetches profile details of the currently authenticated member"
-    )//swagger annotation
+    )
     @GetMapping("/profile")
     @PreAuthorize("hasRole('MEMBER')")
     public ResponseEntity<MemberResponseDTO> getMyProfile() {
         return ResponseEntity.ok(memberService.getMyProfile());
     }
-
 }

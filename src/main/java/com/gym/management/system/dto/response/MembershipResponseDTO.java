@@ -7,18 +7,35 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import java.time.LocalDate;
 
+/**
+ * DTO for returning membership details.
+ * Includes membership info along with associated member and plan.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class MembershipResponseDTO {
+
+    // Unique identifier of the membership
     private Long membershipId;
+
+    // Start date of the membership
     private LocalDate startDate;
+
+    // End date calculated based on plan duration
     private LocalDate endDate;
+
+    // Current status of membership (e.g., ACTIVE, EXPIRED)
     private MembershipStatus status;
+
+    // Associated member details
     private Members member;
+
+    // Associated membership plan details
     private MembershipPlan plan;
 
 }

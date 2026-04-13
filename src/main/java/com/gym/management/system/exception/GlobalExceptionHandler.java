@@ -11,9 +11,14 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Global exception handler for the application.
+ * Centralizes all exception handling and returns consistent API error responses.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // Handles all unhandled exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleGlobalException(Exception ex) {
 
@@ -26,8 +31,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    // Handles validation errors from @Valid annotations
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex){
+    public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
 
         Map<String, String> errors = new HashMap<>();
 
@@ -40,7 +46,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-    //handling NOT FOUND exception
+    // Handles resource not found exceptions
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorResponseDTO> handleNotFoundException(NotFoundException ex) {
 
@@ -53,7 +59,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    //handling INVALID INPUT exception
+    // Handles invalid input exceptions
     @ExceptionHandler(InvalidInputException.class)
     public ResponseEntity<ErrorResponseDTO> handleInvalidInputException(InvalidInputException ex) {
 
@@ -66,7 +72,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    //handling ALREADY PRESENT exception
+    // Handles duplicate or already existing resource exceptions
     @ExceptionHandler(AlreadyPresentException.class)
     public ResponseEntity<ErrorResponseDTO> handleAlreadyPresentException(AlreadyPresentException ex) {
 
@@ -78,5 +84,4 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
-
 }

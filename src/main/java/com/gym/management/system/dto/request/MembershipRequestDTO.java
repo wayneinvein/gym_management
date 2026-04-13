@@ -8,12 +8,17 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+/**
+ * DTO for creating a membership record.
+ * Captures the start date of the membership.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class MembershipRequestDTO {
 
+    // Start date of the membership (must not be null)
     @NotNull(message = "Start date is required")
     private LocalDate startDate;
 
