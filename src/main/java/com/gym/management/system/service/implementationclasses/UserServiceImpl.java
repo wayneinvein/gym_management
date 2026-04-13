@@ -1,5 +1,8 @@
 package com.gym.management.system.service.implementationclasses;
 
+import com.gym.management.system.dto.mapper.UserDTOMapper;
+import com.gym.management.system.dto.request.UserRequestDTO;
+import com.gym.management.system.dto.response.UserResponseDTO;
 import com.gym.management.system.entity.User;
 import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.UserRepository;
@@ -17,20 +20,24 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserDTOMapper userDTOMapper;
 
     @Override
-    public User addUser(User user) {
+    public UserResponseDTO addUser(UserRequestDTO user) {
 
         if(user.getUserRole().equals(ADMIN) && userRepository.existsByUserRole(ADMIN)) {
             throw new RuntimeException("Admin already exists. Only one admin allowed.");
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+
+        User newUser = userDTOMapper.toEntity(user);
+        return userDTOMapper.toResponse(userRepository.save(newUser));
+
     }
 
     @Override
-    public User updateUser(User user, Long id) {
+    public UserResponseDTO updateUser(UserRequestDTO  user, Long id) {
 
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() ->
@@ -47,11 +54,11 @@ public class UserServiceImpl implements UserService {
         existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         existingUser.setUserRole(user.getUserRole());
 
-        return userRepository.save(existingUser);
+        return userDTOMapper.toResponse(userRepository.save(existingUser));
     }
 
     @Override
-    public User deleteUser(Long id) {
+    public UserResponseDTO deleteUser(Long id) {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() ->
@@ -64,18 +71,20 @@ public class UserServiceImpl implements UserService {
 
         userRepository.delete(user);
 
-        return user;
+        return userDTOMapper.toResponse(user);
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponseDTO> getAllUsers() {
+        return userDTOMapper.toResponse(userRepository.findAll());
+
     }
 
     @Override
-    public User getUserById(Long id) {
+    public UserResponseDTO getUserById(Long id) {
+
         return userRepository.findById(id)
-                .orElseThrow(() ->
-                        new NotFoundException("User with id: " + id + " not found"));
+                .map(userDTOMapper::toResponse)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
     }
 }

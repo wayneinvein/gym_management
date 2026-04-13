@@ -8,7 +8,7 @@ import org.mapstruct.Mapper;
 //MapStruct will auto-generate conversions
 //You just call mapper methods — no manual mapping
 @Mapper(componentModel = "spring")
-public interface MemberDtoMapper {
+public interface MemberDTOMapper {
 
     // Convert Request -> Entity
     Members toEntity(MemberRequestDTO request);

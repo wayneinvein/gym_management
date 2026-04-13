@@ -1,6 +1,6 @@
 package com.gym.management.system.service.implementationclasses;
 
-import com.gym.management.system.dto.mapper.MemberDtoMapper;
+import com.gym.management.system.dto.mapper.MemberDTOMapper;
 import com.gym.management.system.dto.request.MemberRequestDTO;
 import com.gym.management.system.dto.response.MemberResponseDTO;
 import com.gym.management.system.entity.Members;
@@ -24,7 +24,7 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final TrainerRepository trainerRepository;
-    private final MemberDtoMapper memberDtoMapper;
+    private final MemberDTOMapper memberDtoMapper;
     private final SecurityUtils securityUtils;
 
     @Override

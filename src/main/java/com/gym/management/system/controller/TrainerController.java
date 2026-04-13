@@ -1,5 +1,9 @@
 package com.gym.management.system.controller;
 
+import com.gym.management.system.dto.mapper.TrainerDTOMapper;
+import com.gym.management.system.dto.request.TrainerRequestDTO;
+import com.gym.management.system.dto.response.MemberResponseDTO;
+import com.gym.management.system.dto.response.TrainerResponseDTO;
 import com.gym.management.system.entity.Members;
 import com.gym.management.system.entity.Trainers;
 import com.gym.management.system.service.interfaces.TrainerService;
@@ -18,32 +22,33 @@ public class TrainerController {
 
     //dependency
     private final TrainerService trainerService;
+    private final TrainerDTOMapper trainerRequestDTO;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Trainers> addTrainer(@RequestBody Trainers trainer) {
-        Trainers savedTrainer = trainerService.addTrainer(trainer);
+    public ResponseEntity<TrainerResponseDTO> addTrainer(@RequestBody TrainerRequestDTO trainer) {
+        TrainerResponseDTO savedTrainer = trainerService.addTrainer(trainer);
         return new ResponseEntity<>(savedTrainer, HttpStatus.CREATED);
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<Trainers>> getAllTrainers() {
-        List<Trainers> trainer = trainerService.getAllTrainers();
+    public ResponseEntity<List<TrainerResponseDTO>> getAllTrainers() {
+        List<TrainerResponseDTO> trainer = trainerService.getAllTrainers();
         return new ResponseEntity<>(trainer, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Trainers> getTrainerById(@PathVariable Long id) {
-        Trainers trainer = trainerService.getTrainerById(id);
+    public ResponseEntity<TrainerResponseDTO> getTrainerById(@PathVariable Long id) {
+        TrainerResponseDTO trainer = trainerService.getTrainerById(id);
         return new ResponseEntity<>(trainer, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Trainers> updateTrainer(@PathVariable Long id, @RequestBody Trainers trainer) {
-        Trainers updatedTrainer = trainerService.updateTrainer(id, trainer);
+    public ResponseEntity<TrainerResponseDTO> updateTrainer(@PathVariable Long id, @RequestBody TrainerRequestDTO trainer) {
+        TrainerResponseDTO updatedTrainer = trainerService.updateTrainer(id, trainer);
         return new ResponseEntity<>(updatedTrainer, HttpStatus.CREATED);
     }
 
@@ -57,7 +62,7 @@ public class TrainerController {
     //find members assigned to a particular trainer
     @GetMapping("/{trainerId}/members")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<Members> getMembersByTrainer(@PathVariable Long trainerId) {
+    public List<MemberResponseDTO> getMembersByTrainer(@PathVariable Long trainerId) {
         return trainerService.getMembersByTrainer(trainerId);
     }
 

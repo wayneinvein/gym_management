@@ -1,5 +1,6 @@
 package com.gym.management.system.controller;
 
+import com.gym.management.system.dto.response.MembershipPlanResponseDTO;
 import com.gym.management.system.entity.MembershipPlan;
 import com.gym.management.system.service.interfaces.MembershipPlanService;
 import lombok.RequiredArgsConstructor;
@@ -19,19 +20,19 @@ public class MembershipPlanController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public MembershipPlan createPlan(@RequestBody MembershipPlan plan) {
+    public MembershipPlanResponseDTO createPlan(@RequestBody MembershipPlan plan) {
         return membershipPlanService.createPlan(plan);
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public List<MembershipPlan> getPlans() {
+    public List<MembershipPlanResponseDTO> getPlans() {
         return membershipPlanService.getAllPlans();
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public MembershipPlan getPlan(@PathVariable Long id) {
+    public MembershipPlanResponseDTO getPlan(@PathVariable Long id) {
         return membershipPlanService.getPlan(id);
     }
 

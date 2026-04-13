@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 
 // MapStruct will auto-generate implementation
 @Mapper(componentModel = "spring")
-public interface MembershipDtoMapper {
+public interface MembershipDTOMapper {
 
     //converting requestDTO into entity
     Membership toEntity(MembershipRequestDTO membershipRequestDto);

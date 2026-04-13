@@ -1,21 +1,22 @@
 package com.gym.management.system.service.interfaces;
 
-import com.gym.management.system.entity.Members;
-import com.gym.management.system.entity.Trainers;
+import com.gym.management.system.dto.request.TrainerRequestDTO;
+import com.gym.management.system.dto.response.TrainerResponseDTO;
+import com.gym.management.system.dto.response.MemberResponseDTO;
 
 import java.util.List;
 
 public interface TrainerService {
 
-    public List<Trainers> getAllTrainers();
+    List<TrainerResponseDTO> getAllTrainers();
 
-    public Trainers getTrainerById(Long id);
+    TrainerResponseDTO getTrainerById(Long id);
 
-    public Trainers addTrainer(Trainers trainer);
+    TrainerResponseDTO addTrainer(TrainerRequestDTO trainer);
 
-    public Trainers updateTrainer(Long id, Trainers trainer);
+    TrainerResponseDTO updateTrainer(Long id, TrainerRequestDTO trainer);
 
-    public void deleteTrainer(Long id);
+    void deleteTrainer(Long id);
 
-    public List<Members> getMembersByTrainer(Long trainerId);
+    List<MemberResponseDTO> getMembersByTrainer(Long trainerId);
 }

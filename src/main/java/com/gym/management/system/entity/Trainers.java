@@ -21,6 +21,7 @@ public class Trainers {
     private Long trainerId;
     private String trainerName;
     private String trainerGender;
+
     @Column(length = 15)
     private String phoneNumber;
 
