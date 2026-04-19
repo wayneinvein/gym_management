@@ -38,8 +38,8 @@ public class AuthController {
      * Logout user (invalidate refresh token)
      */
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestBody String refreshToken) {
-        authService.logout(refreshToken);
+    public ResponseEntity<String> logout(@RequestBody String token) {
+        authService.logout(token);
         return ResponseEntity.ok("Logged out successfully");
     }
 }
