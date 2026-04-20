@@ -24,13 +24,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public RefreshToken createRefreshToken(String username) {
 
         RefreshToken refreshToken = new RefreshToken();
-
         refreshToken.setUsername(username);
         refreshToken.setToken(UUID.randomUUID().toString());
         refreshToken.setExpiryDate(
                 Instant.now().plus(REFRESH_TOKEN_DURATION, ChronoUnit.DAYS)
         );
-
         return refreshTokenRepository.save(refreshToken);
     }
 

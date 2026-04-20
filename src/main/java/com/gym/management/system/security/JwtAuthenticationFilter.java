@@ -1,11 +1,11 @@
 package com.gym.management.system.security;
 
 import com.gym.management.system.service.implementationclasses.CustomUserDetailsService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,43 +40,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Read Authorization header from incoming request
         String authHeader = request.getHeader("Authorization");
 
         String token = null;
         String username = null;
 
-        // Extract JWT token if header is in "Bearer <token>" format
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
-
-            // Extract username (subject) from JWT token
-            username = jwtUtil.extractUsername(token);
+            try {
+                username = jwtUtil.extractUsername(token);
+            } catch (JwtException e) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
+                return;
+            }
         }
 
-        // Proceed only if username exists and user is not already authenticated
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-            // Load full user details (roles, authorities) from database
             var userDetails = userDetailsService.loadUserByUsername(username);
 
-            //  Validate token integrity and expiry
             if (jwtUtil.validateToken(token, userDetails.getUsername())) {
-
-                // Create authentication object for Spring Security context
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
-                                userDetails,      // authenticated principal
-                                null,             // credentials not required for JWT
-                                userDetails.getAuthorities() // roles/permissions
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
                         );
-
-                // Set authentication in SecurityContext (marks user as logged in)
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
-        // Continue request processing (controller or next filter)
         filterChain.doFilter(request, response);
     }
 }
