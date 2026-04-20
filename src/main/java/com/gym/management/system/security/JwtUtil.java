@@ -30,7 +30,7 @@ public class JwtUtil {
     /**
      * Token validity duration (10 hours)
      */
-    private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10;
+    private final long EXPIRATION_TIME = 1000 * 60 * 15;
 
     /**
      * Generates a JWT token for authenticated user.
@@ -56,7 +56,6 @@ public class JwtUtil {
      * @return username stored in token
      */
     public String extractUsername(String token) {
-        System.out.println("extraction of username started");
         return getClaims(token).getSubject();
     }
 
