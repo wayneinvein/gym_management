@@ -49,7 +49,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
-    public void deleteByToken(String token) {
-        refreshTokenRepository.deleteByToken(token);
+    public void deleteByUsername(String userName) {
+        refreshTokenRepository.deleteByUsername(userName);
     }
 }

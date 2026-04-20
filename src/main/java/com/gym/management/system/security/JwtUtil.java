@@ -56,6 +56,7 @@ public class JwtUtil {
      * @return username stored in token
      */
     public String extractUsername(String token) {
+        System.out.println("extraction of username started");
         return getClaims(token).getSubject();
     }
 

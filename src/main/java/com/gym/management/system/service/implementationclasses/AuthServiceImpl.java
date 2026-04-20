@@ -4,6 +4,7 @@ import com.gym.management.system.dto.request.AuthRequestDTO;
 import com.gym.management.system.dto.response.AuthResponseDTO;
 import com.gym.management.system.entity.RefreshToken;
 import com.gym.management.system.entity.User;
+import com.gym.management.system.repository.RefreshTokenRepository;
 import com.gym.management.system.repository.UserRepository;
 import com.gym.management.system.security.JwtUtil;
 import com.gym.management.system.service.interfaces.AuthService;
@@ -26,6 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     /**
      * Authenticates user credentials and generates access + refresh tokens.
@@ -93,7 +95,9 @@ public class AuthServiceImpl implements AuthService {
      * Logs out user by deleting refresh token from database.
      */
     @Override
-    public void logout(String refreshToken) {
-        refreshTokenService.deleteByToken(refreshToken);
+    public void logout(String token) {
+        token = token.replaceAll("^\"|\"$", "");
+            refreshTokenRepository.deleteByToken(token);
+
+        }
     }
-}
