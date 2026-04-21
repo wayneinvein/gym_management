@@ -1,6 +1,7 @@
 package com.gym.management.system.repository;
 
 import com.gym.management.system.entity.RefreshToken;
+import com.gym.management.system.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,7 +11,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     Optional<RefreshToken> findByToken(String token);
 
     @Transactional
-    void deleteByUsername(String username);
+    void deleteByUser(User user);
 
     @Transactional
     void deleteByToken(String token);

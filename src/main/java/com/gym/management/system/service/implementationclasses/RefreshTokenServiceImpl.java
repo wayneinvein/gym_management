@@ -1,15 +1,13 @@
 package com.gym.management.system.service.implementationclasses;
 
 import com.gym.management.system.entity.RefreshToken;
+import com.gym.management.system.entity.User;
 import com.gym.management.system.repository.RefreshTokenRepository;
 import com.gym.management.system.service.interfaces.RefreshTokenService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -17,24 +15,19 @@ import java.util.UUID;
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
-
-    private final long REFRESH_TOKEN_DURATION = 7; // days
+    private final long REFRESH_TOKEN_DURATION = 7;
 
     @Override
-    public RefreshToken createRefreshToken(String username) {
-
+    public RefreshToken createRefreshToken(User user) {
         RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setUsername(username);
+        refreshToken.setUser(user);
         refreshToken.setToken(UUID.randomUUID().toString());
-        refreshToken.setExpiryDate(
-                Instant.now().plus(REFRESH_TOKEN_DURATION, ChronoUnit.DAYS)
-        );
+        refreshToken.setExpiryDate(Instant.now().plus(REFRESH_TOKEN_DURATION, ChronoUnit.DAYS));
         return refreshTokenRepository.save(refreshToken);
     }
 
     @Override
     public RefreshToken verifyRefreshToken(String token) {
-
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
 
@@ -44,5 +37,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         }
 
         return refreshToken;
+    }
+
+    @Override
+    public void deleteByUser(User user) {
+        refreshTokenRepository.deleteByUser(user);
     }
 }

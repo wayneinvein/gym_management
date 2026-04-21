@@ -34,8 +34,6 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public AuthResponseDTO login(AuthRequestDTO request) {
-
-        // Authenticate username and password using Spring Security
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -43,56 +41,36 @@ public class AuthServiceImpl implements AuthService {
                 )
         );
 
-        // Fetch user details after successful authentication
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Generate JWT access token
         String accessToken = jwtUtil.generateToken(
                 user.getUsername(),
                 user.getUserRole().name()
         );
 
-        // deletes old refresh token
-        refreshTokenRepository.deleteByUsername(user.getUsername());
+        // Now passing User object instead of username string
+        refreshTokenRepository.deleteByUser(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
-        // Generate refresh token and store it in DB
-        RefreshToken refreshToken =
-                refreshTokenService.createRefreshToken(user.getUsername());
-
-        // Return both tokens to client
-        return new AuthResponseDTO(
-                accessToken,
-                refreshToken.getToken()
-        );
+        return new AuthResponseDTO(accessToken, refreshToken.getToken());
     }
 
-    /**
-     * Generates a new access token using a valid refresh token.
-     */
     @Override
     public AuthResponseDTO refreshToken(String requestToken) {
-
-        // Validate and fetch existing refresh token
         RefreshToken oldToken = refreshTokenService.verifyRefreshToken(requestToken);
 
-        // Fetch user
-        User user = userRepository.findByUsername(oldToken.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        // Get user from refresh token directly
+        User user = oldToken.getUser();
 
-        // Delete old refresh token
         refreshTokenRepository.delete(oldToken);
+        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user);
 
-        // Issue new refresh token
-        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getUsername());
-
-        // Generate new access token
         String accessToken = jwtUtil.generateToken(
                 user.getUsername(),
                 user.getUserRole().name()
         );
 
-        // Return new access token + new refresh token
         return new AuthResponseDTO(accessToken, newRefreshToken.getToken());
     }
 
