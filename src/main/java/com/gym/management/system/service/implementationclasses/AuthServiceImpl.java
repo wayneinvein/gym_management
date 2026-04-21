@@ -53,6 +53,9 @@ public class AuthServiceImpl implements AuthService {
                 user.getUserRole().name()
         );
 
+        // deletes old refresh token
+        refreshTokenRepository.deleteByUsername(user.getUsername());
+
         // Generate refresh token and store it in DB
         RefreshToken refreshToken =
                 refreshTokenService.createRefreshToken(user.getUsername());
