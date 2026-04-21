@@ -4,6 +4,7 @@ import com.gym.management.system.dto.request.AuthRequestDTO;
 import com.gym.management.system.dto.response.AuthResponseDTO;
 import com.gym.management.system.entity.RefreshToken;
 import com.gym.management.system.entity.User;
+import com.gym.management.system.exception.TokenException;
 import com.gym.management.system.repository.RefreshTokenRepository;
 import com.gym.management.system.repository.UserRepository;
 import com.gym.management.system.security.JwtUtil;
@@ -42,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
         );
 
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new TokenException("User not found"));
 
         String accessToken = jwtUtil.generateToken(
                 user.getUsername(),

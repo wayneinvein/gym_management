@@ -2,6 +2,7 @@ package com.gym.management.system.service.implementationclasses;
 
 import com.gym.management.system.entity.RefreshToken;
 import com.gym.management.system.entity.User;
+import com.gym.management.system.exception.TokenException;
 import com.gym.management.system.repository.RefreshTokenRepository;
 import com.gym.management.system.service.interfaces.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +30,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public RefreshToken verifyRefreshToken(String token) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+                .orElseThrow(() -> new TokenException("Invalid refresh token"));
 
         if (refreshToken.getExpiryDate().isBefore(Instant.now())) {
             refreshTokenRepository.delete(refreshToken);
-            throw new RuntimeException("Refresh token expired. Please login again.");
+            throw new TokenException("Refresh token expired. Please login again.");
         }
 
         return refreshToken;
