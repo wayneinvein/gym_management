@@ -4,6 +4,7 @@ import com.gym.management.system.entity.User;
 import com.gym.management.system.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -24,31 +25,19 @@ public class AdminSeeder {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /**
-     * Executes automatically after the bean is initialized.
-     *
-     * Logic:
-     * - Checks if any ADMIN user already exists
-     * - If not, creates a default admin account
-     *
-     * This prevents duplicate admin creation on every restart.
-     */
+    @Value("${admin.username}")
+    private String adminUsername;
+
+    @Value("${admin.password}")
+    private String adminPassword;
+
     @PostConstruct
     public void createAdmin() {
-
-        // Avoid creating multiple admin users if one already exists
         if (!userRepository.existsByUserRole(ADMIN)) {
-
-            // Create default admin credentials (should be changed in production)
             User admin = new User();
-            admin.setUsername("admin");
-
-            // Always store passwords in encoded (hashed) form
-            admin.setPassword(passwordEncoder.encode("admin123"));
-
+            admin.setUsername(adminUsername);
+            admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setUserRole(ADMIN);
-
-            // Persist the admin user to the database
             userRepository.save(admin);
         }
     }
