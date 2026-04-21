@@ -32,7 +32,7 @@ public class AuthController {
      * Generate new access token using refresh token
      */
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponseDTO> refresh(@RequestBody RefreshRequestDTO refreshToken) {
+    public ResponseEntity<AuthResponseDTO> refresh(@Valid @RequestBody RefreshRequestDTO refreshToken) {
         return ResponseEntity.ok(authService.refreshToken(refreshToken.getRefreshToken()));
     }
 
@@ -40,7 +40,7 @@ public class AuthController {
      * Logout user (invalidate refresh token)
      */
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestBody LogoutRequestDTO token) {
+    public ResponseEntity<String> logout(@Valid @RequestBody LogoutRequestDTO token) {
         authService.logout(token.getRefreshToken());
         return ResponseEntity.ok("Logged out successfully");
     }

@@ -4,6 +4,7 @@ import com.gym.management.system.dto.request.TrainerRequestDTO;
 import com.gym.management.system.dto.response.MemberResponseDTO;
 import com.gym.management.system.dto.response.TrainerResponseDTO;
 import com.gym.management.system.service.interfaces.TrainerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ public class TrainerController {
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TrainerResponseDTO> addTrainer(@RequestBody TrainerRequestDTO trainer) {
+    public ResponseEntity<TrainerResponseDTO> addTrainer(@Valid @RequestBody TrainerRequestDTO trainer) {
         return new ResponseEntity<>(
                 trainerService.addTrainer(trainer),
                 HttpStatus.CREATED
