@@ -26,8 +26,9 @@ public class RefreshToken {
     @Column(unique = true, nullable = false)
     private String token;
 
-    // Username associated with this token
-    private String username;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     // Expiry timestamp of the refresh token
     private Instant expiryDate;

@@ -4,6 +4,7 @@ import com.gym.management.system.dto.request.AuthRequestDTO;
 import com.gym.management.system.dto.response.AuthResponseDTO;
 import com.gym.management.system.entity.RefreshToken;
 import com.gym.management.system.entity.User;
+import com.gym.management.system.exception.TokenException;
 import com.gym.management.system.repository.RefreshTokenRepository;
 import com.gym.management.system.repository.UserRepository;
 import com.gym.management.system.security.JwtUtil;
@@ -34,8 +35,6 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public AuthResponseDTO login(AuthRequestDTO request) {
-
-        // Authenticate username and password using Spring Security
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -43,52 +42,37 @@ public class AuthServiceImpl implements AuthService {
                 )
         );
 
-        // Fetch user details after successful authentication
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new TokenException("User not found"));
 
-        // Generate JWT access token
         String accessToken = jwtUtil.generateToken(
                 user.getUsername(),
                 user.getUserRole().name()
         );
 
-        // Generate refresh token and store it in DB
-        RefreshToken refreshToken =
-                refreshTokenService.createRefreshToken(user.getUsername());
+        // Now passing User object instead of username string
+        refreshTokenRepository.deleteByUser(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
-        // Return both tokens to client
-        return new AuthResponseDTO(
-                accessToken,
-                refreshToken.getToken()
-        );
+        return new AuthResponseDTO(accessToken, refreshToken.getToken());
     }
 
-    /**
-     * Generates a new access token using a valid refresh token.
-     */
     @Override
     public AuthResponseDTO refreshToken(String requestToken) {
+        RefreshToken oldToken = refreshTokenService.verifyRefreshToken(requestToken);
 
-        // Validate refresh token and fetch stored entity
-        RefreshToken refreshToken =
-                refreshTokenService.verifyRefreshToken(requestToken);
+        // Get user from refresh token directly
+        User user = oldToken.getUser();
 
-        // Load user associated with refresh token
-        User user = userRepository.findByUsername(refreshToken.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        refreshTokenRepository.delete(oldToken);
+        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user);
 
-        // Generate new access token
         String accessToken = jwtUtil.generateToken(
                 user.getUsername(),
                 user.getUserRole().name()
         );
 
-        // Return new access token with same refresh token
-        return new AuthResponseDTO(
-                accessToken,
-                refreshToken.getToken()
-        );
+        return new AuthResponseDTO(accessToken, newRefreshToken.getToken());
     }
 
     /**
@@ -96,7 +80,6 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public void logout(String token) {
-        token = token.replaceAll("^\"|\"$", "");
             refreshTokenRepository.deleteByToken(token);
 
         }

@@ -3,7 +3,9 @@ package com.gym.management.system.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -22,15 +24,19 @@ public class JwtUtil {
 
     /**
      * Secret key used for signing JWT tokens.
-     * MUST be kept secure in production (use env variables or vault).
      */
-    private final Key SECRET_KEY =
-            Keys.hmacShaKeyFor("sandeep_secret_key_sandeep_secret_key".getBytes());
+    @Value("${jwt.secret}")
+    private String secret;
 
     /**
-     * Token validity duration (10 hours)
+     * Token validity duration
      */
-    private final long EXPIRATION_TIME = 1000 * 60 * 15;
+    @Value("${jwt.expiration}")
+    private long expirationTime;
+
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+    }
 
     /**
      * Generates a JWT token for authenticated user.
@@ -41,11 +47,11 @@ public class JwtUtil {
      */
     public String generateToken(String username, String role) {
         return Jwts.builder()
-                .setSubject(username) // stores username as principal identity
-                .claim("role", role)  // custom claim for authorization
-                .setIssuedAt(new Date()) // token creation time
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // expiry
-                .signWith(SECRET_KEY, SignatureAlgorithm.HS256) // sign using HMAC SHA-256
+                .setSubject(username)
+                .claim("role", role)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -74,14 +80,13 @@ public class JwtUtil {
     private boolean isTokenExpired(String token) {
         return getClaims(token).getExpiration().before(new Date());
     }
-
     /**
      * Parses JWT token and extracts all claims.
      * This is the core method used internally by other methods.
      */
     private Claims getClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

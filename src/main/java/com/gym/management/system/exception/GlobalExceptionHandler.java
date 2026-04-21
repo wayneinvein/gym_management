@@ -3,6 +3,8 @@ package com.gym.management.system.exception;
 import com.gym.management.system.dto.response.ErrorResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -18,17 +20,26 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Handles all unhandled exceptions
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDTO> handleGlobalException(Exception ex) {
-
+    // Handles wrong role (403)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponseDTO> handleAccessDeniedException(AccessDeniedException ex) {
         ErrorResponseDTO response = new ErrorResponseDTO(
                 LocalDateTime.now(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Something went wrong"
+                HttpStatus.FORBIDDEN.value(),
+                "Access denied"
         );
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
 
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    // Handles unauthenticated requests (401)
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleAuthenticationException(AuthenticationException ex) {
+        ErrorResponseDTO response = new ErrorResponseDTO(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "Unauthorized"
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     // Handles validation errors from @Valid annotations
@@ -83,5 +94,29 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    // Handles all exceptions related to tokens
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<ErrorResponseDTO> handleTokenException(TokenException ex) {
+        ErrorResponseDTO response = new ErrorResponseDTO(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    // Handles all unhandled exceptions
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponseDTO> handleGlobalException(Exception ex) {
+
+        ErrorResponseDTO response = new ErrorResponseDTO(
+                LocalDateTime.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Something went wrong"
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

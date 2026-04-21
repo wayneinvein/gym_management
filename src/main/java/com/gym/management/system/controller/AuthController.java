@@ -1,6 +1,8 @@
 package com.gym.management.system.controller;
 
 import com.gym.management.system.dto.request.AuthRequestDTO;
+import com.gym.management.system.dto.request.LogoutRequestDTO;
+import com.gym.management.system.dto.request.RefreshRequestDTO;
 import com.gym.management.system.dto.response.AuthResponseDTO;
 import com.gym.management.system.service.interfaces.AuthService;
 import jakarta.validation.Valid;
@@ -30,16 +32,16 @@ public class AuthController {
      * Generate new access token using refresh token
      */
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponseDTO> refresh(@RequestBody String refreshToken) {
-        return ResponseEntity.ok(authService.refreshToken(refreshToken));
+    public ResponseEntity<AuthResponseDTO> refresh(@Valid @RequestBody RefreshRequestDTO refreshToken) {
+        return ResponseEntity.ok(authService.refreshToken(refreshToken.getRefreshToken()));
     }
 
     /**
      * Logout user (invalidate refresh token)
      */
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestBody String token) {
-        authService.logout(token);
+    public ResponseEntity<String> logout(@Valid @RequestBody LogoutRequestDTO token) {
+        authService.logout(token.getRefreshToken());
         return ResponseEntity.ok("Logged out successfully");
     }
 }

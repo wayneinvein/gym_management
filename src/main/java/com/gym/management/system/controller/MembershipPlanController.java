@@ -3,6 +3,7 @@ package com.gym.management.system.controller;
 import com.gym.management.system.dto.response.MembershipPlanResponseDTO;
 import com.gym.management.system.entity.MembershipPlan;
 import com.gym.management.system.service.interfaces.MembershipPlanService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class MembershipPlanController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public MembershipPlanResponseDTO createPlan(@RequestBody MembershipPlan plan) {
+    public MembershipPlanResponseDTO createPlan(@Valid @RequestBody MembershipPlan plan) {
         return membershipPlanService.createPlan(plan);
     }
 
