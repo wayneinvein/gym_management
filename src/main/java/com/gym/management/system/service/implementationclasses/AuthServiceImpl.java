@@ -96,7 +96,6 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public void logout(String token) {
-        token = token.replaceAll("^\"|\"$", "");
             refreshTokenRepository.deleteByToken(token);
 
         }
