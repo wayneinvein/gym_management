@@ -73,13 +73,18 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponseDTO refreshToken(String requestToken) {
 
-        // Validate refresh token and fetch stored entity
-        RefreshToken refreshToken =
-                refreshTokenService.verifyRefreshToken(requestToken);
+        // Validate and fetch existing refresh token
+        RefreshToken oldToken = refreshTokenService.verifyRefreshToken(requestToken);
 
-        // Load user associated with refresh token
-        User user = userRepository.findByUsername(refreshToken.getUsername())
+        // Fetch user
+        User user = userRepository.findByUsername(oldToken.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Delete old refresh token
+        refreshTokenRepository.delete(oldToken);
+
+        // Issue new refresh token
+        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getUsername());
 
         // Generate new access token
         String accessToken = jwtUtil.generateToken(
@@ -87,11 +92,8 @@ public class AuthServiceImpl implements AuthService {
                 user.getUserRole().name()
         );
 
-        // Return new access token with same refresh token
-        return new AuthResponseDTO(
-                accessToken,
-                refreshToken.getToken()
-        );
+        // Return new access token + new refresh token
+        return new AuthResponseDTO(accessToken, newRefreshToken.getToken());
     }
 
     /**
