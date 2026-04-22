@@ -4,20 +4,26 @@ import com.gym.management.system.dto.request.MembershipRequestDTO;
 import com.gym.management.system.dto.response.MembershipResponseDTO;
 import com.gym.management.system.enums.MembershipStatus;
 import com.gym.management.system.service.interfaces.MembershipService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
- * Handles membership management operations:
- * - Create and update memberships
- * - Fetch memberships (by member, status, or all)
- * - Delete membership
+ * REST controller for managing memberships.
  *
- * Access: Restricted to ADMIN
+ * Access control:
+ * - ADMIN  → full access
+ * - MEMBER → can view their own membership history
  */
+@Tag(name = "Membership APIs", description = "Operations related to member subscriptions")
 @RestController
 @RequestMapping("/api/memberships")
 @RequiredArgsConstructor
@@ -26,74 +32,97 @@ public class MembershipController {
     private final MembershipService membershipService;
 
     /**
-     * Creates a membership for a given member and plan.
+     * Creates a new membership for a member with a selected plan.
+     * Cancels existing active membership if one exists.
      */
-    @PostMapping("/create/{memberId}/{planId}")
+    @Operation(summary = "Create membership", description = "Assigns a plan to a member and creates subscription")
+    @PostMapping("/member/{memberId}/plan/{planId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public MembershipResponseDTO createMembership(
+    public ResponseEntity<MembershipResponseDTO> createMembership(
             @PathVariable Long memberId,
             @PathVariable Long planId,
-            @Valid @RequestBody MembershipRequestDTO membershipRequestDto) {
-
-        return membershipService.createMembership(memberId, planId, membershipRequestDto);
+            @Valid @RequestBody MembershipRequestDTO dto) {
+        return new ResponseEntity<>(
+                membershipService.createMembership(memberId, planId, dto),
+                HttpStatus.CREATED
+        );
     }
 
     /**
-     * Updates an existing membership.
+     * Returns full membership history for a member.
      */
-    @PutMapping("/update/{membershipId}")
+    @Operation(summary = "Get membership history", description = "Returns all past and current memberships for a member")
+    @GetMapping("/member/{memberId}/history")
     @PreAuthorize("hasRole('ADMIN')")
-    public MembershipResponseDTO updateMembership(
-            @PathVariable Long membershipId,
-            @Valid @RequestBody MembershipRequestDTO membershipRequestDto) {
-
-        return membershipService.updateMembership(membershipId, membershipRequestDto);
+    public ResponseEntity<List<MembershipResponseDTO>> getMembershipHistory(
+            @PathVariable Long memberId) {
+        return ResponseEntity.ok(membershipService.getMembershipsByMemberId(memberId));
     }
 
     /**
-     * Fetch membership details for a specific member.
+     * Returns current active membership for a member.
      */
-    @GetMapping("/member/{memberId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public MembershipResponseDTO getMembershipByMember(@PathVariable Long memberId) {
-        return membershipService.getMembershipByMemberId(memberId);
+    @Operation(summary = "Get active membership")
+    @GetMapping("/member/{memberId}/active")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MEMBER')")
+    public ResponseEntity<MembershipResponseDTO> getActiveMembership(
+            @PathVariable Long memberId) {
+        return ResponseEntity.ok(membershipService.getActiveMembership(memberId));
     }
 
     /**
-     * Fetch paginated list of all memberships.
+     * Returns all memberships with pagination.
      */
-    @GetMapping("/all")
+    @Operation(summary = "Get all memberships")
+    @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<MembershipResponseDTO> getAllMemberships(
+    public ResponseEntity<Page<MembershipResponseDTO>> getAllMemberships(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "membershipId") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
-
-        return membershipService.getAllMemberships(page, size, sortBy, sortDir);
+        return ResponseEntity.ok(
+                membershipService.getAllMemberships(page, size, sortBy, sortDir)
+        );
     }
 
     /**
-     * Fetch memberships filtered by status (e.g., ACTIVE, EXPIRED).
+     * Returns memberships filtered by status.
      */
+    @Operation(summary = "Get memberships by status")
     @GetMapping("/status/{status}")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<MembershipResponseDTO> getByStatus(
+    public ResponseEntity<Page<MembershipResponseDTO>> getMembershipsByStatus(
             @PathVariable MembershipStatus status,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "membershipId") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
-
-        return membershipService.getMembershipsByStatus(status, page, size, sortBy, sortDir);
+        return ResponseEntity.ok(
+                membershipService.getMembershipsByStatus(status, page, size, sortBy, sortDir)
+        );
     }
 
     /**
-     * Deletes a membership by ID.
+     * Cancels an active membership.
      */
-    @DeleteMapping("/delete/{membershipId}")
+    @Operation(summary = "Cancel membership")
+    @PatchMapping("/{membershipId}/cancel")
     @PreAuthorize("hasRole('ADMIN')")
-    public String deleteMembership(@PathVariable Long membershipId) {
-        return membershipService.deleteMembership(membershipId);
+    public ResponseEntity<MembershipResponseDTO> cancelMembership(
+            @PathVariable Long membershipId) {
+        return ResponseEntity.ok(membershipService.cancelMembership(membershipId));
+    }
+
+    /**
+     * Returns memberships expiring within the next N days.
+     * Default is 7 days — used for dashboard expiry alerts.
+     */
+    @Operation(summary = "Get expiring memberships", description = "Returns active memberships expiring within N days")
+    @GetMapping("/expiring")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<MembershipResponseDTO>> getExpiringMemberships(
+            @RequestParam(defaultValue = "7") int days) {
+        return ResponseEntity.ok(membershipService.getExpiringMemberships(days));
     }
 }
