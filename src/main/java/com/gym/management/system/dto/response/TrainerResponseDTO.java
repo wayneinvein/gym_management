@@ -2,12 +2,16 @@ package com.gym.management.system.dto.response;
 
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 /**
  * DTO for returning trainer details in API responses.
- * Exposes basic trainer information to clients.
+ *
+ * Only exposes safe and relevant fields.
+ * Sensitive fields like password and user_id are never included.
  */
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrainerResponseDTO {
@@ -15,7 +19,7 @@ public class TrainerResponseDTO {
     // Unique identifier of the trainer
     private Long trainerId;
 
-    // Name of the trainer
+    // Full name of the trainer
     private String trainerName;
 
     // Gender of the trainer
@@ -23,4 +27,25 @@ public class TrainerResponseDTO {
 
     // Contact number of the trainer
     private String phoneNumber;
+
+    // Email address of the trainer
+    private String email;
+
+    // Area of expertise
+    private String specialization;
+
+    // Date when trainer joined the gym
+    private LocalDate joiningDate;
+
+    // Monthly salary
+    private double salary;
+
+    // Whether trainer is currently active
+    private boolean active;
+
+    // Record creation timestamp
+    private LocalDateTime createdAt;
+
+    // Record last updated timestamp
+    private LocalDateTime updatedAt;
 }
