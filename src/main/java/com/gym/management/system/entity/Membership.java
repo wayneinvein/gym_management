@@ -1,51 +1,67 @@
 package com.gym.management.system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.gym.management.system.enums.MembershipStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
- * Entity representing a membership assigned to a member.
- * Stores duration, status, and associated plan details.
+ * Entity representing a membership subscription.
+ *
+ * A membership is created when a member subscribes to a plan.
+ * A member can have multiple memberships over time (history).
+ * ManyToOne with Member allows full membership history per member.
+ * The amount paid is stored at subscription time — not read from plan
+ * because plan price may change in future.
  */
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"member", "plan"}) // avoids recursive calls in logs
-@JsonPropertyOrder({"membershipId", "startDate", "endDate", "price", "status", "plan"})
+@ToString(exclude = {"member", "plan"})
 public class Membership {
 
-    // Primary key (auto-generated)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long membershipId;
 
-    // Start date of the membership
+    // Start date of this membership — set when subscription is created
+    @Column(nullable = false)
     private LocalDate startDate;
 
-    // End date calculated based on plan duration
+    // End date — calculated as startDate + plan.durationDays
+    @Column(nullable = false)
     private LocalDate endDate;
 
-    // Membership status (ACTIVE, EXPIRED, UPCOMING)
+    // Amount paid at the time of subscription
+    // Stored separately so plan price changes don't affect historical records
+    @Column(nullable = false)
+    private double amountPaid;
+
+    // Current status of this membership
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MembershipStatus status;
 
-    // One-to-one relationship with member (each member has one membership)
-    @OneToOne
-    @JoinColumn(name = "member_id", unique = true, nullable = false)
-    @JsonIgnore // prevents circular reference during JSON serialization
+    // ManyToOne so a member can have multiple memberships over time
+    // This enables full membership history per member
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    @JsonIgnore // prevent circular reference
     private Member member;
 
-    // Many memberships can use the same plan
-    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    // The plan this membership is based on
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plan_id", nullable = false)
-    @JsonIgnore // prevents nested object recursion in response
     private MembershipPlan plan;
+
+    // Automatically set when membership record is created
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 }
