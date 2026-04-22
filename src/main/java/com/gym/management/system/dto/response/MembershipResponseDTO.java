@@ -1,23 +1,18 @@
 package com.gym.management.system.dto.response;
 
-import com.gym.management.system.entity.Member;
-import com.gym.management.system.entity.MembershipPlan;
 import com.gym.management.system.enums.MembershipStatus;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
- * DTO for returning membership details.
- * Includes membership info along with associated member and plan.
+ * DTO for returning membership details in API responses.
+ *
+ * Uses flat fields instead of full entity objects to keep
+ * the response clean and avoid circular reference issues.
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class MembershipResponseDTO {
 
     // Unique identifier of the membership
@@ -26,16 +21,23 @@ public class MembershipResponseDTO {
     // Start date of the membership
     private LocalDate startDate;
 
-    // End date calculated based on plan duration
+    // End date of the membership
     private LocalDate endDate;
 
-    // Current status of membership (e.g., ACTIVE, EXPIRED)
+    // Amount paid at time of subscription
+    private double amountPaid;
+
+    // Current status of the membership
     private MembershipStatus status;
 
-    // Associated member details
-    private Member member;
+    // Member details — flat fields instead of full Member object
+    private Long memberId;
+    private String memberName;
 
-    // Associated membership plan details
-    private MembershipPlan plan;
+    // Plan details — flat fields instead of full MembershipPlan object
+    private Long planId;
+    private String planName;
 
+    // When this membership record was created
+    private LocalDateTime createdAt;
 }

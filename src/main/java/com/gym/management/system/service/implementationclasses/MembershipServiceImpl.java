@@ -7,7 +7,8 @@ import com.gym.management.system.entity.Member;
 import com.gym.management.system.entity.Membership;
 import com.gym.management.system.entity.MembershipPlan;
 import com.gym.management.system.enums.MembershipStatus;
-import com.gym.management.system.exception.*;
+import com.gym.management.system.exception.InvalidInputException;
+import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.MembershipPlanRepository;
 import com.gym.management.system.repository.MembershipRepository;
@@ -17,12 +18,13 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Service implementation for managing memberships.
  *
- * Handles creation, update, retrieval, filtering, and deletion of memberships.
- * Also manages business rules like status calculation and date validation.
+ * Handles subscription creation, history retrieval,
+ * cancellation, and expiry tracking.
  */
 @Service
 @RequiredArgsConstructor
@@ -31,195 +33,154 @@ public class MembershipServiceImpl implements MembershipService {
     private final MembershipRepository membershipRepository;
     private final MemberRepository memberRepository;
     private final MembershipPlanRepository membershipPlanRepository;
-    private final MembershipDTOMapper membershipDtoMapper;
+    private final MembershipDTOMapper membershipDTOMapper;
 
+    /**
+     * Creates a new membership for a member.
+     *
+     * - Validates member and plan exist
+     * - Checks plan is active
+     * - Cancels any existing active membership before creating new one
+     * - End date is auto-calculated from plan duration
+     * - Amount paid is taken from plan price at time of subscription
+     */
     @Override
-    public MembershipResponseDTO createMembership(
-            Long memberId,
-            Long planId,
-            MembershipRequestDTO membershipRequestDto) {
+    public MembershipResponseDTO createMembership(Long memberId, Long planId, MembershipRequestDTO dto) {
 
-        // Validate member existence
+        // Fetch member
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() ->
-                        new NotFoundException("Member not found with ID: " + memberId));
+                .orElseThrow(() -> new NotFoundException("Member not found with id: " + memberId));
 
-        // Validate plan existence
-        MembershipPlan membershipPlan = membershipPlanRepository.findById(planId)
-                .orElseThrow(() -> new NotFoundException("Plan not found"));
+        // Fetch plan
+        MembershipPlan plan = membershipPlanRepository.findById(planId)
+                .orElseThrow(() -> new NotFoundException("Plan not found with id: " + planId));
 
-        // Prevent duplicate membership for same member
-        Membership existingMembership = membershipRepository.findByMemberMemberId(memberId);
-        if (existingMembership != null) {
-            throw new AlreadyPresentException(
-                    "Membership for member ID " + memberId + " is already present."
-            );
+        // Plan must be active to assign to a member
+        if (!plan.isActive()) {
+            throw new InvalidInputException("Plan '" + plan.getName() + "' is not active");
         }
 
-        // Set start date (default to today if not provided)
-        LocalDate startDate = (membershipRequestDto.getStartDate() != null)
-                ? membershipRequestDto.getStartDate()
-                : LocalDate.now();
+        // If member has an existing active membership, cancel it before creating new one
+        membershipRepository.findByMemberMemberIdAndStatus(memberId, MembershipStatus.ACTIVE)
+                .ifPresent(existing -> {
+                    existing.setStatus(MembershipStatus.CANCELLED);
+                    membershipRepository.save(existing);
+                });
 
-        // Calculate end date based on plan duration
-        LocalDate endDate = startDate.plusDays(membershipPlan.getDurationDays());
-
-        // Determine membership status based on dates
-        MembershipStatus status = calculateStatus(startDate, endDate);
-
-        // Convert DTO to entity
-        Membership membership = membershipDtoMapper.toEntity(membershipRequestDto);
-
-        // Override critical fields (never trust client input)
+        // Create new membership
+        Membership membership = new Membership();
         membership.setMember(member);
-        membership.setPlan(membershipPlan);
-        membership.setStartDate(startDate);
-        membership.setEndDate(endDate);
-        membership.setStatus(status);
+        membership.setPlan(plan);
+        membership.setStartDate(dto.getStartDate());
 
-        // Save membership
-        Membership savedMembership = membershipRepository.save(membership);
+        // End date = start date + plan duration in days
+        membership.setEndDate(dto.getStartDate().plusDays(plan.getDurationDays()));
 
-        return membershipDtoMapper.toResponse(savedMembership);
+        // Store plan price at time of subscription — not affected by future price changes
+        membership.setAmountPaid(plan.getPrice());
+        membership.setStatus(MembershipStatus.ACTIVE);
+
+        return membershipDTOMapper.toResponse(membershipRepository.save(membership));
     }
 
     /**
-     * Determines membership status based on start and end date.
+     * Returns full membership history for a member.
+     * Includes all past and current memberships.
      */
-    private MembershipStatus calculateStatus(LocalDate startDate, LocalDate endDate) {
-
-        // Validate date logic
-        if (startDate.isAfter(endDate)) {
-            throw new InvalidInputException("Start date cannot be after end date");
-        }
-
-        LocalDate today = LocalDate.now();
-
-        if (today.isBefore(startDate)) {
-            return MembershipStatus.UPCOMING;
-        } else if (!today.isAfter(endDate)) {
-            return MembershipStatus.ACTIVE;
-        } else {
-            return MembershipStatus.EXPIRED;
-        }
-    }
-
     @Override
-    public MembershipResponseDTO updateMembership(Long membershipId,
-                                                  MembershipRequestDTO updatedMembership) {
+    public List<MembershipResponseDTO> getMembershipsByMemberId(Long memberId) {
 
-        // Fetch membership
-        Membership existingMembership = membershipRepository.findById(membershipId)
-                .orElseThrow(() ->
-                        new NotFoundException("Membership not found with ID: " + membershipId));
-
-        boolean recalculate = false;
-
-        // Update start date if provided
-        if (updatedMembership.getStartDate() != null) {
-            existingMembership.setStartDate(updatedMembership.getStartDate());
-            recalculate = true;
+        if (!memberRepository.existsById(memberId)) {
+            throw new NotFoundException("Member not found with id: " + memberId);
         }
 
-        // Recalculate end date and status if start date changed
-        if (recalculate) {
-            MembershipPlan plan = existingMembership.getPlan();
-
-            existingMembership.setEndDate(
-                    calculateEndDate(
-                            existingMembership.getStartDate(),
-                            plan.getDurationDays()
-                    )
-            );
-
-            existingMembership.setStatus(
-                    calculateStatus(
-                            existingMembership.getStartDate(),
-                            existingMembership.getEndDate()
-                    )
-            );
-        }
-
-        Membership savedMembership = membershipRepository.save(existingMembership);
-        return membershipDtoMapper.toResponse(savedMembership);
+        return membershipRepository.findByMemberMemberId(memberId)
+                .stream()
+                .map(membershipDTOMapper::toResponse)
+                .toList();
     }
 
     /**
-     * Calculates end date using start date and duration.
+     * Returns the current active membership for a member.
+     * Throws NotFoundException if no active membership exists.
      */
-    private LocalDate calculateEndDate(LocalDate startDate, int durationDays) {
-        return startDate.plusDays(durationDays);
-    }
-
     @Override
-    public MembershipResponseDTO getMembershipByMemberId(Long memberId) {
+    public MembershipResponseDTO getActiveMembership(Long memberId) {
 
-        Membership membership = membershipRepository.findByMember_MemberId(memberId);
-
-        if (membership == null) {
-            throw new NotFoundException(
-                    "No membership found for member ID: " + memberId
-            );
+        if (!memberRepository.existsById(memberId)) {
+            throw new NotFoundException("Member not found with id: " + memberId);
         }
 
-        return membershipDtoMapper.toResponse(membership);
+        Membership membership = membershipRepository
+                .findByMemberMemberIdAndStatus(memberId, MembershipStatus.ACTIVE)
+                .orElseThrow(() -> new NotFoundException("No active membership found for member id: " + memberId));
+
+        return membershipDTOMapper.toResponse(membership);
     }
 
+    /**
+     * Returns all memberships with pagination and sorting.
+     */
     @Override
     public Page<MembershipResponseDTO> getAllMemberships(int page, int size, String sortBy, String sortDir) {
 
-        // Sorting configuration
         Sort sort = sortDir.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
 
-        // Pagination setup
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        Page<Membership> membershipPage = membershipRepository.findAll(pageable);
-
-        if (membershipPage.isEmpty()) {
-            throw new NotFoundException("Membership not found");
-        }
-
-        return membershipPage.map(membershipDtoMapper::toResponse);
+        return membershipRepository.findAll(PageRequest.of(page, size, sort))
+                .map(membershipDTOMapper::toResponse);
     }
 
+    /**
+     * Returns memberships filtered by status with pagination.
+     */
     @Override
-    public Page<MembershipResponseDTO> getMembershipsByStatus(MembershipStatus status,
-                                                              int page,
-                                                              int size,
-                                                              String sortBy,
-                                                              String sortDir) {
+    public Page<MembershipResponseDTO> getMembershipsByStatus(
+            MembershipStatus status, int page, int size, String sortBy, String sortDir) {
 
-        // Sorting configuration
         Sort sort = sortDir.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
 
-        // Pagination setup
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        Page<Membership> membershipsPage =
-                membershipRepository.findByStatus(status, pageable);
-
-        if (membershipsPage.isEmpty()) {
-            throw new NotFoundException(
-                    "Membership with status '" + status + "' not found"
-            );
-        }
-
-        return membershipsPage.map(membershipDtoMapper::toResponse);
+        return membershipRepository.findByStatus(status, PageRequest.of(page, size, sort))
+                .map(membershipDTOMapper::toResponse);
     }
 
+    /**
+     * Cancels an active membership.
+     * Throws NotFoundException if membership does not exist.
+     * Throws InvalidInputException if membership is already cancelled or expired.
+     */
     @Override
-    public String deleteMembership(Long membershipId) {
+    public MembershipResponseDTO cancelMembership(Long membershipId) {
 
-        if (!membershipRepository.existsById(membershipId)) {
-            return "Membership not found with ID: " + membershipId;
+        Membership membership = membershipRepository.findById(membershipId)
+                .orElseThrow(() -> new NotFoundException("Membership not found with id: " + membershipId));
+
+        // Can only cancel an active membership
+        if (membership.getStatus() != MembershipStatus.ACTIVE) {
+            throw new InvalidInputException("Only active memberships can be cancelled");
         }
 
-        membershipRepository.deleteById(membershipId);
-        return "Membership deleted successfully";
+        membership.setStatus(MembershipStatus.CANCELLED);
+        return membershipDTOMapper.toResponse(membershipRepository.save(membership));
+    }
+
+    /**
+     * Returns memberships expiring within the next N days.
+     * Used by dashboard to alert admin of upcoming expirations.
+     */
+    @Override
+    public List<MembershipResponseDTO> getExpiringMemberships(int days) {
+
+        // Get all active memberships expiring before today + N days
+        LocalDate expiryThreshold = LocalDate.now().plusDays(days);
+
+        return membershipRepository
+                .findByEndDateBeforeAndStatus(expiryThreshold, MembershipStatus.ACTIVE)
+                .stream()
+                .map(membershipDTOMapper::toResponse)
+                .toList();
     }
 }
