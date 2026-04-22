@@ -2,7 +2,10 @@ package com.gym.management.system.service.interfaces;
 
 import com.gym.management.system.dto.request.MemberRequestDTO;
 import com.gym.management.system.dto.response.MemberResponseDTO;
+import com.gym.management.system.enums.MemberStatus;
 import org.springframework.data.domain.Page;
+
+import java.util.List;
 
 /**
  * Service interface for managing gym members.
@@ -32,4 +35,10 @@ public interface MemberService {
 
     // Get currently logged-in user's member profile
     MemberResponseDTO getMyProfile();
+
+    // Update member status (ACTIVE, INACTIVE, SUSPENDED)
+    MemberResponseDTO updateMemberStatus(Long id, MemberStatus status);
+
+    // Get all members assigned to a specific trainer
+    List<MemberResponseDTO> getMembersByTrainer(Long trainerId);
 }
