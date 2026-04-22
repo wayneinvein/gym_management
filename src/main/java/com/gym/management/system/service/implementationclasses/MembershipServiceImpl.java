@@ -3,7 +3,7 @@ package com.gym.management.system.service.implementationclasses;
 import com.gym.management.system.dto.mapper.MembershipDTOMapper;
 import com.gym.management.system.dto.request.MembershipRequestDTO;
 import com.gym.management.system.dto.response.MembershipResponseDTO;
-import com.gym.management.system.entity.Members;
+import com.gym.management.system.entity.Member;
 import com.gym.management.system.entity.Membership;
 import com.gym.management.system.entity.MembershipPlan;
 import com.gym.management.system.enums.MembershipStatus;
@@ -40,7 +40,7 @@ public class MembershipServiceImpl implements MembershipService {
             MembershipRequestDTO membershipRequestDto) {
 
         // Validate member existence
-        Members member = memberRepository.findById(memberId)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() ->
                         new NotFoundException("Member not found with ID: " + memberId));
 

@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @ToString(exclude = {"members"}) // avoids recursive loops in logs
 @JsonPropertyOrder({"trainerId", "trainerName", "trainerGender", "phoneNumber"}) // controls JSON response order
-public class Trainers {
+public class Trainer {
 
     // Primary key (auto-generated)
     @Id
@@ -38,5 +38,5 @@ public class Trainers {
     // One trainer can have multiple members
     @OneToMany(mappedBy = "trainer")
     @JsonIgnore // prevents infinite recursion during serialization
-    private List<Members> members;
+    private List<Member> members;
 }

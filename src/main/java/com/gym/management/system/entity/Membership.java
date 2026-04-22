@@ -41,7 +41,7 @@ public class Membership {
     @OneToOne
     @JoinColumn(name = "member_id", unique = true, nullable = false)
     @JsonIgnore // prevents circular reference during JSON serialization
-    private Members member;
+    private Member member;
 
     // Many memberships can use the same plan
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
