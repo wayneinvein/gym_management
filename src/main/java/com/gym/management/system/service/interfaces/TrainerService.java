@@ -30,4 +30,10 @@ public interface TrainerService {
 
     // Get all members assigned to a specific trainer
     List<MemberResponseDTO> getMembersByTrainer(Long trainerId);
+
+    // Update trainer active status
+    TrainerResponseDTO updateTrainerStatus(Long id, boolean active);
+
+    // Get profile of currently logged-in trainer
+    TrainerResponseDTO getMyProfile(String username);
 }
