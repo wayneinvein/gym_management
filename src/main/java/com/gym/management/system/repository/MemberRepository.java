@@ -19,4 +19,7 @@ public interface MemberRepository extends JpaRepository<Members, Long> {
 
     // Fetch member based on username of associated user account
     Optional<Members> findByUserUsername(String username);
+
+    // Check if a member with given phone number already exists
+    boolean existsByPhoneNumber(String phoneNumber);
 }
