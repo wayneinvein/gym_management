@@ -5,21 +5,28 @@ import com.gym.management.system.dto.mapper.TrainerDTOMapper;
 import com.gym.management.system.dto.request.TrainerRequestDTO;
 import com.gym.management.system.dto.response.MemberResponseDTO;
 import com.gym.management.system.dto.response.TrainerResponseDTO;
-import com.gym.management.system.entity.Member;
 import com.gym.management.system.entity.Trainer;
+import com.gym.management.system.entity.User;
+import com.gym.management.system.enums.UserRoles;
+import com.gym.management.system.exception.AlreadyPresentException;
 import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.TrainerRepository;
+import com.gym.management.system.repository.UserRepository;
 import com.gym.management.system.service.interfaces.TrainerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Service implementation for managing trainers.
+ * Service implementation for managing gym trainers.
  *
- * Handles CRUD operations for trainers and fetching assigned members.
+ * Handles CRUD operations, auto user account creation,
+ * active/inactive status, and fetching assigned members.
  */
 @Service
 @RequiredArgsConstructor
@@ -27,82 +34,149 @@ public class TrainerServiceImpl implements TrainerService {
 
     private final TrainerRepository trainerRepository;
     private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
     private final TrainerDTOMapper trainerDTOMapper;
     private final MemberDTOMapper memberDTOMapper;
+    private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Returns list of all trainers.
+     * Returns empty list if no trainers exist — not an error.
+     */
     @Override
     public List<TrainerResponseDTO> getAllTrainers() {
-
-        // Fetch all trainers from DB
-        List<Trainer> trainers = trainerRepository.findAll();
-
-        return trainerDTOMapper.toResponse(trainers);
+        return trainerDTOMapper.toResponse(trainerRepository.findAll());
     }
 
+    /**
+     * Fetches a single trainer by ID.
+     * Throws NotFoundException if trainer does not exist.
+     */
     @Override
     public TrainerResponseDTO getTrainerById(Long id) {
-
-        // Fetch trainer or throw exception if not found
         Trainer trainer = trainerRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Trainer with id " + id + " not found"));
-
+                .orElseThrow(() -> new NotFoundException("Trainer not found with id: " + id));
         return trainerDTOMapper.toResponse(trainer);
     }
 
+    /**
+     * Creates a new trainer and automatically creates a login account.
+     *
+     * Auto-created login credentials:
+     * - Username = phone number
+     * - Password = "Trainer@123" (default, should be changed after first login)
+     * - Role = TRAINER
+     *
+     * Throws AlreadyPresentException if phone number already exists.
+     */
     @Override
-    public TrainerResponseDTO addTrainer(TrainerRequestDTO trainer) {
+    @Transactional // rolls back both user and trainer creation if anything fails
+    public TrainerResponseDTO addTrainer(TrainerRequestDTO dto) {
 
-        // Convert DTO to entity
-        Trainer newTrainer = trainerDTOMapper.toEntity(trainer);
+        // Check if phone number is already registered
+        if (trainerRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
+            throw new AlreadyPresentException("Trainer with phone number "
+                    + dto.getPhoneNumber() + " already exists");
+        }
 
-        // Save trainer in database
-        Trainer saved = trainerRepository.save(newTrainer);
+        // Auto create login account for the trainer
+        // Username = phone number, Password = default "Trainer@123"
+        User user = new User();
+        user.setUsername(dto.getPhoneNumber());
+        user.setPassword(passwordEncoder.encode("Trainer@123"));
+        user.setUserRole(UserRoles.TRAINER);
+        User savedUser = userRepository.save(user);
 
-        return trainerDTOMapper.toResponse(saved);
+        // Convert DTO to entity and set system-managed fields
+        Trainer trainer = trainerDTOMapper.toEntity(dto);
+        trainer.setUser(savedUser);
+        trainer.setJoiningDate(LocalDate.now()); // always today
+        trainer.setActive(true);                 // always active on creation
+
+        return trainerDTOMapper.toResponse(trainerRepository.save(trainer));
     }
 
+    /**
+     * Updates an existing trainer's details.
+     * Throws NotFoundException if trainer does not exist.
+     */
     @Override
-    public TrainerResponseDTO updateTrainer(Long id, TrainerRequestDTO trainer) {
+    public TrainerResponseDTO updateTrainer(Long id, TrainerRequestDTO dto) {
 
-        // Fetch existing trainer
-        Trainer existing = trainerRepository.findById(id)
+        Trainer trainer = trainerRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Trainer not found with id: " + id));
 
-        // Update fields
-        existing.setTrainerName(trainer.getTrainerName());
-        existing.setTrainerGender(trainer.getTrainerGender());
-        existing.setPhoneNumber(trainer.getPhoneNumber());
+        // Update all editable fields
+        trainer.setTrainerName(dto.getTrainerName());
+        trainer.setTrainerGender(dto.getTrainerGender());
+        trainer.setPhoneNumber(dto.getPhoneNumber());
+        trainer.setEmail(dto.getEmail());
+        trainer.setSpecialization(dto.getSpecialization());
+        trainer.setSalary(dto.getSalary());
 
-        // Save updated trainer
-        Trainer updated = trainerRepository.save(existing);
-
-        return trainerDTOMapper.toResponse(updated);
+        return trainerDTOMapper.toResponse(trainerRepository.save(trainer));
     }
 
+    /**
+     * Deletes a trainer and their associated login account.
+     * Throws NotFoundException if trainer does not exist.
+     */
     @Override
+    @Transactional // ensures both trainer and user are deleted together
     public void deleteTrainer(Long id) {
 
-        // Validate trainer exists before deletion
-        Trainer existing = trainerRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Trainer with id " + id + " doesn't exist"));
+        Trainer trainer = trainerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Trainer not found with id: " + id));
 
-        trainerRepository.delete(existing);
+        // Delete linked user account as well
+        if (trainer.getUser() != null) {
+            userRepository.delete(trainer.getUser());
+        }
+
+        trainerRepository.delete(trainer);
     }
 
+    /**
+     * Updates the active status of a trainer.
+     * Inactive trainers cannot be assigned new members.
+     */
+    @Override
+    public TrainerResponseDTO updateTrainerStatus(Long id, boolean active) {
+
+        Trainer trainer = trainerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Trainer not found with id: " + id));
+
+        trainer.setActive(active);
+        return trainerDTOMapper.toResponse(trainerRepository.save(trainer));
+    }
+
+    /**
+     * Returns all members assigned to a specific trainer.
+     * Returns empty list if trainer has no members assigned yet.
+     */
     @Override
     public List<MemberResponseDTO> getMembersByTrainer(Long trainerId) {
 
-        // Verify trainer exists before fetching their members
+        // Verify trainer exists before fetching members
         if (!trainerRepository.existsById(trainerId)) {
             throw new NotFoundException("Trainer not found with id: " + trainerId);
         }
 
-        // Fetch all members assigned to this trainer
-        List<Member> members = memberRepository.findByTrainerTrainerId(trainerId);
-
-        // Empty list is valid — trainer may not have members assigned yet
-        return members.stream()
+        // Empty list is valid — trainer may not have members yet
+        return memberRepository.findByTrainerTrainerId(trainerId)
+                .stream()
                 .map(memberDTOMapper::toResponse)
                 .toList();
+    }
+
+    /**
+     * Returns the profile of the currently logged-in trainer.
+     * Reads username from Spring Security context.
+     */
+    @Override
+    public TrainerResponseDTO getMyProfile(String username) {
+        Trainer trainer = trainerRepository.findByUserUsername(username)
+                .orElseThrow(() -> new NotFoundException("Trainer profile not found"));
+        return trainerDTOMapper.toResponse(trainer);
     }
 }
