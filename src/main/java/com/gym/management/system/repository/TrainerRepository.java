@@ -1,6 +1,6 @@
 package com.gym.management.system.repository;
 
-import com.gym.management.system.entity.Trainers;
+import com.gym.management.system.entity.Trainer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
  * Handles database operations for trainer data.
  */
 @Repository
-public interface TrainerRepository extends JpaRepository<Trainers, Long> {
+public interface TrainerRepository extends JpaRepository<Trainer, Long> {
     // Currently no custom queries required
 }

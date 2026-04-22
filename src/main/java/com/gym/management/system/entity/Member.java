@@ -24,7 +24,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = {"trainer", "memberships", "user"}) // exclude relationships to avoid recursive toString calls
-public class Members {
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -81,7 +81,7 @@ public class Members {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trainer_id")
     @JsonIgnore // prevent trainer → members → trainer infinite loop during JSON serialization
-    private Trainers trainer;
+    private Trainer trainer;
 
     // Full membership history of this member
     // OneToMany because a member can renew/change plans multiple times over time

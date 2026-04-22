@@ -2,7 +2,7 @@ package com.gym.management.system.dto.mapper;
 
 import com.gym.management.system.dto.request.MemberRequestDTO;
 import com.gym.management.system.dto.response.MemberResponseDTO;
-import com.gym.management.system.entity.Members;
+import com.gym.management.system.entity.Member;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -30,7 +30,7 @@ public interface MemberDTOMapper {
     @Mapping(target = "trainer", ignore = true)         // assigned separately via assignTrainer()
     @Mapping(target = "memberships", ignore = true)     // created separately via membership module
     @Mapping(target = "user", ignore = true)            // created automatically in service
-    Members toEntity(MemberRequestDTO request);
+    Member toEntity(MemberRequestDTO request);
 
     /**
      * Converts Members entity to MemberResponseDTO.
@@ -39,5 +39,5 @@ public interface MemberDTOMapper {
      * so we return just the name string instead of the full trainer object.
      */
     @Mapping(target = "trainerName", source = "trainer.trainerName") // extract just the name from trainer object
-    MemberResponseDTO toResponse(Members member);
+    MemberResponseDTO toResponse(Member member);
 }

@@ -1,11 +1,12 @@
 package com.gym.management.system.service.implementationclasses;
 
+import com.gym.management.system.dto.mapper.MemberDTOMapper;
 import com.gym.management.system.dto.mapper.TrainerDTOMapper;
 import com.gym.management.system.dto.request.TrainerRequestDTO;
 import com.gym.management.system.dto.response.MemberResponseDTO;
 import com.gym.management.system.dto.response.TrainerResponseDTO;
-import com.gym.management.system.entity.Members;
-import com.gym.management.system.entity.Trainers;
+import com.gym.management.system.entity.Member;
+import com.gym.management.system.entity.Trainer;
 import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.TrainerRepository;
@@ -27,12 +28,13 @@ public class TrainerServiceImpl implements TrainerService {
     private final TrainerRepository trainerRepository;
     private final MemberRepository memberRepository;
     private final TrainerDTOMapper trainerDTOMapper;
+    private final MemberDTOMapper memberDTOMapper;
 
     @Override
     public List<TrainerResponseDTO> getAllTrainers() {
 
         // Fetch all trainers from DB
-        List<Trainers> trainers = trainerRepository.findAll();
+        List<Trainer> trainers = trainerRepository.findAll();
 
         return trainerDTOMapper.toResponse(trainers);
     }
@@ -41,7 +43,7 @@ public class TrainerServiceImpl implements TrainerService {
     public TrainerResponseDTO getTrainerById(Long id) {
 
         // Fetch trainer or throw exception if not found
-        Trainers trainer = trainerRepository.findById(id)
+        Trainer trainer = trainerRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Trainer with id " + id + " not found"));
 
         return trainerDTOMapper.toResponse(trainer);
@@ -51,10 +53,10 @@ public class TrainerServiceImpl implements TrainerService {
     public TrainerResponseDTO addTrainer(TrainerRequestDTO trainer) {
 
         // Convert DTO to entity
-        Trainers newTrainer = trainerDTOMapper.toEntity(trainer);
+        Trainer newTrainer = trainerDTOMapper.toEntity(trainer);
 
         // Save trainer in database
-        Trainers saved = trainerRepository.save(newTrainer);
+        Trainer saved = trainerRepository.save(newTrainer);
 
         return trainerDTOMapper.toResponse(saved);
     }
@@ -63,7 +65,7 @@ public class TrainerServiceImpl implements TrainerService {
     public TrainerResponseDTO updateTrainer(Long id, TrainerRequestDTO trainer) {
 
         // Fetch existing trainer
-        Trainers existing = trainerRepository.findById(id)
+        Trainer existing = trainerRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Trainer not found with id: " + id));
 
         // Update fields
@@ -72,7 +74,7 @@ public class TrainerServiceImpl implements TrainerService {
         existing.setPhoneNumber(trainer.getPhoneNumber());
 
         // Save updated trainer
-        Trainers updated = trainerRepository.save(existing);
+        Trainer updated = trainerRepository.save(existing);
 
         return trainerDTOMapper.toResponse(updated);
     }
@@ -81,7 +83,7 @@ public class TrainerServiceImpl implements TrainerService {
     public void deleteTrainer(Long id) {
 
         // Validate trainer exists before deletion
-        Trainers existing = trainerRepository.findById(id)
+        Trainer existing = trainerRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Trainer with id " + id + " doesn't exist"));
 
         trainerRepository.delete(existing);
@@ -90,22 +92,17 @@ public class TrainerServiceImpl implements TrainerService {
     @Override
     public List<MemberResponseDTO> getMembersByTrainer(Long trainerId) {
 
-        // Fetch members assigned to trainer
-        List<Members> members = memberRepository.findByTrainerTrainerId(trainerId);
-
-        // Handle empty result
-        if (members.isEmpty()) {
-            throw new NotFoundException("No members found for trainer id: " + trainerId);
+        // Verify trainer exists before fetching their members
+        if (!trainerRepository.existsById(trainerId)) {
+            throw new NotFoundException("Trainer not found with id: " + trainerId);
         }
 
-        // Convert entity list to DTO list manually (no mapper used here)
+        // Fetch all members assigned to this trainer
+        List<Member> members = memberRepository.findByTrainerTrainerId(trainerId);
+
+        // Empty list is valid — trainer may not have members assigned yet
         return members.stream()
-                .map(member -> new MemberResponseDTO(
-                        member.getMemberId(),
-                        member.getMemberName(),
-                        member.getMemberGender(),
-                        member.getPhoneNumber()
-                ))
+                .map(memberDTOMapper::toResponse)
                 .toList();
     }
 }

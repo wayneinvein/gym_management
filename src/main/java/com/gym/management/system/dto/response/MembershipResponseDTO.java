@@ -1,6 +1,6 @@
 package com.gym.management.system.dto.response;
 
-import com.gym.management.system.entity.Members;
+import com.gym.management.system.entity.Member;
 import com.gym.management.system.entity.MembershipPlan;
 import com.gym.management.system.enums.MembershipStatus;
 import lombok.AllArgsConstructor;
@@ -33,7 +33,7 @@ public class MembershipResponseDTO {
     private MembershipStatus status;
 
     // Associated member details
-    private Members member;
+    private Member member;
 
     // Associated membership plan details
     private MembershipPlan plan;

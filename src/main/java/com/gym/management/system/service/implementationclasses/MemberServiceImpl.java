@@ -3,8 +3,8 @@ package com.gym.management.system.service.implementationclasses;
 import com.gym.management.system.dto.mapper.MemberDTOMapper;
 import com.gym.management.system.dto.request.MemberRequestDTO;
 import com.gym.management.system.dto.response.MemberResponseDTO;
-import com.gym.management.system.entity.Members;
-import com.gym.management.system.entity.Trainers;
+import com.gym.management.system.entity.Member;
+import com.gym.management.system.entity.Trainer;
 import com.gym.management.system.entity.User;
 import com.gym.management.system.enums.MemberStatus;
 import com.gym.management.system.enums.UserRoles;
@@ -66,7 +66,7 @@ public class MemberServiceImpl implements MemberService {
      */
     @Override
     public MemberResponseDTO getMemberById(Long id) {
-        Members member = memberRepository.findById(id)
+        Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Member not found with id: " + id));
         return memberDtoMapper.toResponse(member);
     }
@@ -100,12 +100,12 @@ public class MemberServiceImpl implements MemberService {
         User savedUser = userRepository.save(user);
 
         // Convert DTO to entity and set fields that client should not control
-        Members member = memberDtoMapper.toEntity(memberRequestDto);
+        Member member = memberDtoMapper.toEntity(memberRequestDto);
         member.setUser(savedUser);
         member.setJoinedDate(LocalDate.now());       // always today
         member.setStatus(MemberStatus.ACTIVE);       // always active on creation
 
-        Members saved = memberRepository.save(member);
+        Member saved = memberRepository.save(member);
         return memberDtoMapper.toResponse(saved);
     }
 
@@ -117,7 +117,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public MemberResponseDTO updateMember(Long id, MemberRequestDTO dto) {
 
-        Members member = memberRepository.findById(id)
+        Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Member not found with id: " + id));
 
         // Update all editable fields
@@ -139,7 +139,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional // ensures both member and user are deleted together
     public void deleteMember(Long id) {
 
-        Members member = memberRepository.findById(id)
+        Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Member not found with id: " + id));
 
         // Delete the linked user account as well
@@ -158,7 +158,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public MemberResponseDTO updateMemberStatus(Long id, MemberStatus status) {
 
-        Members member = memberRepository.findById(id)
+        Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Member not found with id: " + id));
 
         member.setStatus(status);
@@ -173,10 +173,10 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public MemberResponseDTO assignTrainer(Long memberId, Long trainerId) {
 
-        Members member = memberRepository.findById(memberId)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("Member not found with id: " + memberId));
 
-        Trainers trainer = trainerRepository.findById(trainerId)
+        Trainer trainer = trainerRepository.findById(trainerId)
                 .orElseThrow(() -> new NotFoundException("Trainer not found with id: " + trainerId));
 
         member.setTrainer(trainer);
@@ -218,7 +218,7 @@ public class MemberServiceImpl implements MemberService {
         }
 
         // Find the member linked to this login account
-        Members member = memberRepository.findByUserUsername(username)
+        Member member = memberRepository.findByUserUsername(username)
                 .orElseThrow(() -> new NotFoundException("Member profile not found for user: " + username));
 
         return memberDtoMapper.toResponse(member);
