@@ -1,29 +1,30 @@
 package com.gym.management.system.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 /**
- * DTO for creating or updating membership plans.
- * Carries plan details from client to service layer.
+ * DTO for creating or updating a membership plan.
+ *
+ * The active field is intentionally excluded — plans are always
+ * active on creation and toggled separately via PATCH /status endpoint.
  */
 @Data
 public class MembershipPlanRequestDTO {
 
-    // Name of the membership plan (e.g., Monthly, Yearly)
-    @NotBlank(message = "name is required")
+    // Name of the plan — must be unique
+    @NotBlank(message = "Plan name is required")
+    @Size(min = 2, max = 100, message = "Plan name must be between 2 and 100 characters")
     private String name;
 
-    // Duration of the plan in days
-    @NotNull(message = "enter days")
+    // Optional description of the plan
+    private String description;
+
+    // Duration in days — must be at least 1 day
+    @Min(value = 1, message = "Duration must be at least 1 day")
     private int durationDays;
 
-    // Price of the membership plan
-    @NotNull(message = "enter is required")
+    // Price must be greater than 0
+    @Positive(message = "Price must be a positive value")
     private double price;
-
-    // Indicates whether the plan is active
-    @NotBlank(message = "tell whether its active or not")
-    private boolean active;
 }
