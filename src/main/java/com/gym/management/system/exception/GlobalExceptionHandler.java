@@ -111,6 +111,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleGlobalException(Exception ex) {
 
+        // Print full stack trace to console so we can see the actual error
+        ex.printStackTrace();
+
         ErrorResponseDTO response = new ErrorResponseDTO(
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
