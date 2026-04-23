@@ -30,4 +30,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     // Get attendance records for a member within a date range
     List<Attendance> findByMemberMemberIdAndDateBetween(Long memberId, LocalDate startDate, LocalDate endDate);
+
+    // Count attendance records for a specific date
+    long countByDate(LocalDate date);
 }

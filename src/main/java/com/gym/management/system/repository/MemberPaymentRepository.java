@@ -7,7 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Repository for MemberPayment entity.
@@ -23,4 +26,21 @@ public interface MemberPaymentRepository extends JpaRepository<MemberPayment, Lo
 
     // Get all payments for a specific membership
     List<MemberPayment> findByMembershipMembershipId(Long membershipId);
+
+    // Sum of all paid payments in a date range — used for monthly revenue
+    @Query("SELECT SUM(p.amount) FROM MemberPayment p WHERE p.status = :status AND p.paymentDate BETWEEN :startDate AND :endDate")
+    Double sumAmountByStatusAndPaymentDateBetween(
+            @Param("status") PaymentStatus status,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
+    // Sum of all paid payments of all time — used for total revenue
+    @Query("SELECT SUM(p.amount) FROM MemberPayment p WHERE p.status = 'PAID'")
+    Double sumAllPaidAmounts();
+
+    // Count payments by status
+    long countByStatus(PaymentStatus status);
+
+    // Find all payments by status (non-paginated) — used for overdue list
+    List<MemberPayment> findByStatus(PaymentStatus status);
 }
