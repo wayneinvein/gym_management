@@ -15,8 +15,6 @@ import java.time.LocalDateTime;
  * A membership is created when a member subscribes to a plan.
  * A member can have multiple memberships over time (history).
  * ManyToOne with Member allows full membership history per member.
- * The amount paid is stored at subscription time — not read from plan
- * because plan price may change in future.
  */
 @Entity
 @Getter
@@ -37,11 +35,6 @@ public class Membership {
     // End date — calculated as startDate + plan.durationDays
     @Column(nullable = false)
     private LocalDate endDate;
-
-    // Amount paid at the time of subscription
-    // Stored separately so plan price changes don't affect historical records
-    @Column(nullable = false)
-    private double amountPaid;
 
     // Current status of this membership
     @Enumerated(EnumType.STRING)
