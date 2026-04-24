@@ -6,7 +6,9 @@ import com.gym.management.system.dto.response.MemberPaymentResponseDTO;
 import com.gym.management.system.entity.Member;
 import com.gym.management.system.entity.MemberPayment;
 import com.gym.management.system.entity.Membership;
+import com.gym.management.system.enums.PaymentMethod;
 import com.gym.management.system.enums.PaymentStatus;
+import com.gym.management.system.exception.InvalidInputException;
 import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.MemberPaymentRepository;
 import com.gym.management.system.repository.MemberRepository;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -133,6 +136,33 @@ public class MemberPaymentServiceImpl implements MemberPaymentService {
                 .orElseThrow(() -> new NotFoundException("Payment not found with id: " + paymentId));
 
         payment.setStatus(status);
+        return memberPaymentDTOMapper.toResponse(memberPaymentRepository.save(payment));
+    }
+
+    /**
+     * Marks a pending payment as paid.
+     * Called when admin receives payment from member.
+     * Updates payment method, date, and status to PAID.
+     */
+    @Override
+    public MemberPaymentResponseDTO markAsPaid(
+            Long paymentId, PaymentMethod method, LocalDate paymentDate, String notes) {
+
+        MemberPayment payment = memberPaymentRepository.findById(paymentId)
+                .orElseThrow(() -> new NotFoundException("Payment not found with id: " + paymentId));
+
+        // Only pending payments can be marked as paid
+        if (payment.getStatus() == PaymentStatus.PAID) {
+            throw new InvalidInputException("Payment is already marked as paid");
+        }
+
+        payment.setStatus(PaymentStatus.PAID);
+        payment.setPaymentMethod(method);
+        payment.setPaymentDate(paymentDate);
+        if (notes != null) {
+            payment.setNotes(notes);
+        }
+
         return memberPaymentDTOMapper.toResponse(memberPaymentRepository.save(payment));
     }
 }
