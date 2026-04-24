@@ -42,12 +42,14 @@ public class MemberPayment {
     private double amount;
 
     // Date the payment was made
-    @Column(name = "payment_date", nullable = false)
+    // null when payment is pending
+    @Column(name = "payment_date", nullable = true)
     private LocalDate paymentDate;
 
     // How the payment was made (CASH, CARD, UPI)
+    // null when payment is pending
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method", nullable = false)
+    @Column(name = "payment_method", nullable = true)
     private PaymentMethod paymentMethod;
 
     // Current status of the payment

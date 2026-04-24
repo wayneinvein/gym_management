@@ -28,4 +28,10 @@ public interface MembershipRepository extends JpaRepository<Membership, Long> {
 
     // Get memberships expiring before a given date — used for expiry alerts
     List<Membership> findByEndDateBeforeAndStatus(LocalDate date, MembershipStatus status);
+
+    // Count memberships by status
+    long countByStatus(MembershipStatus status);
+
+    // Count active memberships expiring before a date
+    long countByEndDateBeforeAndStatus(LocalDate date, MembershipStatus status);
 }

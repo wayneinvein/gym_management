@@ -2,9 +2,11 @@ package com.gym.management.system.service.interfaces;
 
 import com.gym.management.system.dto.request.MemberPaymentRequestDTO;
 import com.gym.management.system.dto.response.MemberPaymentResponseDTO;
+import com.gym.management.system.enums.PaymentMethod;
 import com.gym.management.system.enums.PaymentStatus;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -29,4 +31,7 @@ public interface MemberPaymentService {
 
     // Update payment status (e.g., mark as PAID, OVERDUE)
     MemberPaymentResponseDTO updatePaymentStatus(Long paymentId, PaymentStatus status);
+
+    // Mark a pending payment as paid with method and date
+    MemberPaymentResponseDTO markAsPaid(Long paymentId, PaymentMethod method, LocalDate paymentDate, String notes);
 }

@@ -18,4 +18,7 @@ public interface TrainerRepository extends JpaRepository<Trainer, Long> {
 
     // Find trainer by their linked user account's username
     Optional<Trainer> findByUserUsername(String username);
+
+    // Count active trainers
+    long countByActiveTrue();
 }

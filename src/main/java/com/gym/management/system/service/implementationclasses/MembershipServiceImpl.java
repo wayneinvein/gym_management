@@ -4,11 +4,14 @@ import com.gym.management.system.dto.mapper.MembershipDTOMapper;
 import com.gym.management.system.dto.request.MembershipRequestDTO;
 import com.gym.management.system.dto.response.MembershipResponseDTO;
 import com.gym.management.system.entity.Member;
+import com.gym.management.system.entity.MemberPayment;
 import com.gym.management.system.entity.Membership;
 import com.gym.management.system.entity.MembershipPlan;
 import com.gym.management.system.enums.MembershipStatus;
+import com.gym.management.system.enums.PaymentStatus;
 import com.gym.management.system.exception.InvalidInputException;
 import com.gym.management.system.exception.NotFoundException;
+import com.gym.management.system.repository.MemberPaymentRepository;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.MembershipPlanRepository;
 import com.gym.management.system.repository.MembershipRepository;
@@ -34,33 +37,30 @@ public class MembershipServiceImpl implements MembershipService {
     private final MemberRepository memberRepository;
     private final MembershipPlanRepository membershipPlanRepository;
     private final MembershipDTOMapper membershipDTOMapper;
+    private final MemberPaymentRepository memberPaymentRepository;
 
     /**
      * Creates a new membership for a member.
-     *
+
      * - Validates member and plan exist
      * - Checks plan is active
      * - Cancels any existing active membership before creating new one
      * - End date is auto-calculated from plan duration
-     * - Amount paid is taken from plan price at time of subscription
-     */
+     * */
     @Override
     public MembershipResponseDTO createMembership(Long memberId, Long planId, MembershipRequestDTO dto) {
 
-        // Fetch member
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("Member not found with id: " + memberId));
 
-        // Fetch plan
         MembershipPlan plan = membershipPlanRepository.findById(planId)
                 .orElseThrow(() -> new NotFoundException("Plan not found with id: " + planId));
 
-        // Plan must be active to assign to a member
         if (!plan.isActive()) {
             throw new InvalidInputException("Plan '" + plan.getName() + "' is not active");
         }
 
-        // If member has an existing active membership, cancel it before creating new one
+        // Cancel existing active membership if one exists
         membershipRepository.findByMemberMemberIdAndStatus(memberId, MembershipStatus.ACTIVE)
                 .ifPresent(existing -> {
                     existing.setStatus(MembershipStatus.CANCELLED);
@@ -72,15 +72,23 @@ public class MembershipServiceImpl implements MembershipService {
         membership.setMember(member);
         membership.setPlan(plan);
         membership.setStartDate(dto.getStartDate());
-
-        // End date = start date + plan duration in days
         membership.setEndDate(dto.getStartDate().plusDays(plan.getDurationDays()));
-
-        // Store plan price at time of subscription — not affected by future price changes
-        membership.setAmountPaid(plan.getPrice());
         membership.setStatus(MembershipStatus.ACTIVE);
 
-        return membershipDTOMapper.toResponse(membershipRepository.save(membership));
+        Membership saved = membershipRepository.save(membership);
+
+        // Auto create a PENDING payment record for this membership
+        // Admin will update it to PAID when money is received
+        MemberPayment payment = new MemberPayment();
+        payment.setMember(member);
+        payment.setMembership(saved);
+        payment.setAmount(plan.getPrice()); // use plan price as amount
+        payment.setStatus(PaymentStatus.PENDING);
+        payment.setPaymentDate(null);       // not paid yet
+        payment.setNotes("Auto-created on membership creation");
+        memberPaymentRepository.save(payment);
+
+        return membershipDTOMapper.toResponse(saved);
     }
 
     /**

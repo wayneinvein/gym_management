@@ -2,6 +2,7 @@ package com.gym.management.system.controller;
 
 import com.gym.management.system.dto.request.MemberPaymentRequestDTO;
 import com.gym.management.system.dto.response.MemberPaymentResponseDTO;
+import com.gym.management.system.enums.PaymentMethod;
 import com.gym.management.system.enums.PaymentStatus;
 import com.gym.management.system.service.interfaces.MemberPaymentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,10 +10,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -110,6 +114,23 @@ public class MemberPaymentController {
             @RequestParam PaymentStatus status) {
         return ResponseEntity.ok(
                 memberPaymentService.updatePaymentStatus(paymentId, status)
+        );
+    }
+
+    /**
+     * Marks a pending payment as paid.
+     * Admin calls this when member pays at counter.
+     */
+    @Operation(summary = "Mark payment as paid")
+    @PatchMapping("/{paymentId}/pay")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MemberPaymentResponseDTO> markAsPaid(
+            @PathVariable Long paymentId,
+            @RequestParam PaymentMethod paymentMethod,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate paymentDate,
+            @RequestParam(required = false) String notes) {
+        return ResponseEntity.ok(
+                memberPaymentService.markAsPaid(paymentId, paymentMethod, paymentDate, notes)
         );
     }
 }
