@@ -1,6 +1,5 @@
 package com.gym.management.system.dto.mapper;
 
-import com.gym.management.system.dto.request.MembershipRequestDTO;
 import com.gym.management.system.dto.response.MembershipResponseDTO;
 import com.gym.management.system.entity.Membership;
 import org.mapstruct.Mapper;

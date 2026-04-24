@@ -24,9 +24,6 @@ public class MembershipResponseDTO {
     // End date of the membership
     private LocalDate endDate;
 
-    // Amount paid at time of subscription
-    private double amountPaid;
-
     // Current status of the membership
     private MembershipStatus status;
 
