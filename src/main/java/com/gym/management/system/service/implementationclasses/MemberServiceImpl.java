@@ -17,6 +17,7 @@ import com.gym.management.system.repository.UserRepository;
 import com.gym.management.system.security.SecurityUtils;
 import com.gym.management.system.service.interfaces.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,9 @@ public class MemberServiceImpl implements MemberService {
     private final MemberDTOMapper memberDtoMapper;
     private final SecurityUtils securityUtils;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${default.member.password}")
+    private String defaultMemberPassword;
 
     /**
      * Returns a paginated and sorted list of all members.
@@ -95,7 +99,7 @@ public class MemberServiceImpl implements MemberService {
         // Username = phone number, Password = default "Gym@123"
         User user = new User();
         user.setUsername(memberRequestDto.getPhoneNumber());
-        user.setPassword(passwordEncoder.encode("Gym@123"));
+        user.setPassword(passwordEncoder.encode(defaultMemberPassword));
         user.setUserRole(UserRoles.MEMBER);
         User savedUser = userRepository.save(user);
 

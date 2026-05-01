@@ -15,6 +15,7 @@ import com.gym.management.system.repository.TrainerRepository;
 import com.gym.management.system.repository.UserRepository;
 import com.gym.management.system.service.interfaces.TrainerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,10 @@ public class TrainerServiceImpl implements TrainerService {
     private final TrainerDTOMapper trainerDTOMapper;
     private final MemberDTOMapper memberDTOMapper;
     private final PasswordEncoder passwordEncoder;
+
+    //environment variable stored in application.properties
+    @Value("${default.trainer.password}")
+    private String defaultTrainerPassword;
 
     /**
      * Returns list of all trainers.
@@ -83,7 +88,7 @@ public class TrainerServiceImpl implements TrainerService {
         // Username = phone number, Password = default "Trainer@123"
         User user = new User();
         user.setUsername(dto.getPhoneNumber());
-        user.setPassword(passwordEncoder.encode("Trainer@123"));
+        user.setPassword(passwordEncoder.encode(defaultTrainerPassword));
         user.setUserRole(UserRoles.TRAINER);
         User savedUser = userRepository.save(user);
 
