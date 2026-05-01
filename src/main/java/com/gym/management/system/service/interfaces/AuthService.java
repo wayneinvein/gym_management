@@ -1,6 +1,7 @@
 package com.gym.management.system.service.interfaces;
 
 import com.gym.management.system.dto.request.AuthRequestDTO;
+import com.gym.management.system.dto.request.ChangePasswordRequestDTO;
 import com.gym.management.system.dto.response.AuthResponseDTO;
 
 /**
@@ -24,4 +25,7 @@ public interface AuthService {
      * Logs out user by invalidating refresh token.
      */
     void logout(String refreshToken);
+
+    // Change password for currently logged-in user
+    void changePassword(String username, ChangePasswordRequestDTO dto);
 }

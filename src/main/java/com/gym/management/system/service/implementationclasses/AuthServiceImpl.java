@@ -1,9 +1,12 @@
 package com.gym.management.system.service.implementationclasses;
 
 import com.gym.management.system.dto.request.AuthRequestDTO;
+import com.gym.management.system.dto.request.ChangePasswordRequestDTO;
 import com.gym.management.system.dto.response.AuthResponseDTO;
 import com.gym.management.system.entity.RefreshToken;
 import com.gym.management.system.entity.User;
+import com.gym.management.system.exception.InvalidInputException;
+import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.exception.TokenException;
 import com.gym.management.system.repository.RefreshTokenRepository;
 import com.gym.management.system.repository.UserRepository;
@@ -13,6 +16,7 @@ import com.gym.management.system.service.interfaces.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -29,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenService refreshTokenService;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Authenticates user credentials and generates access + refresh tokens.
@@ -83,4 +88,38 @@ public class AuthServiceImpl implements AuthService {
             refreshTokenRepository.deleteByToken(token);
 
         }
+
+    /**
+     * Changes password for the currently logged-in user.
+     *
+     * Verifies current password before allowing change.
+     * Throws InvalidInputException if current password is wrong
+     * or new password and confirm password do not match.
+     */
+    @Override
+    public void changePassword(String username, ChangePasswordRequestDTO dto) {
+
+        // Fetch user by username from security context
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        // Verify current password matches what is stored in DB
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+            throw new InvalidInputException("Current password is incorrect");
+        }
+
+        // New password and confirm password must match
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            throw new InvalidInputException("New password and confirm password do not match");
+        }
+
+        // New password cannot be same as current password
+        if (passwordEncoder.matches(dto.getNewPassword(), user.getPassword())) {
+            throw new InvalidInputException("New password cannot be same as current password");
+        }
+
+        // Encode and save new password
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+    }
     }
