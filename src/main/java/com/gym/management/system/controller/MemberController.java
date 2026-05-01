@@ -36,6 +36,21 @@ public class MemberController {
     private final MemberService memberService;
 
     /**
+     * Creates a new member and auto-creates their login account.
+     * Default login: username = phone number, password = "Gym@123"
+     */
+    @Operation(summary = "Add new member", description = "Creates member and auto-creates login account")
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MemberResponseDTO> addMember(
+            @Valid @RequestBody MemberRequestDTO memberRequestDto) {
+        return new ResponseEntity<>(
+                memberService.addMember(memberRequestDto),
+                HttpStatus.CREATED
+        );
+    }
+
+    /**
      * Returns paginated and sorted list of all members.
      * Supports pagination via page/size and sorting via sortBy/sortDir params.
      */
@@ -61,21 +76,6 @@ public class MemberController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MemberResponseDTO> getMemberById(@PathVariable Long id) {
         return ResponseEntity.ok(memberService.getMemberById(id));
-    }
-
-    /**
-     * Creates a new member and auto-creates their login account.
-     * Default login: username = phone number, password = "Gym@123"
-     */
-    @Operation(summary = "Add new member", description = "Creates member and auto-creates login account")
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MemberResponseDTO> addMember(
-            @Valid @RequestBody MemberRequestDTO memberRequestDto) {
-        return new ResponseEntity<>(
-                memberService.addMember(memberRequestDto),
-                HttpStatus.CREATED
-        );
     }
 
     /**
