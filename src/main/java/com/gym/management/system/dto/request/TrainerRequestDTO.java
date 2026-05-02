@@ -10,10 +10,7 @@ import lombok.*;
  * Sensitive fields like salary, active status, and joinedDate
  * are included here since admin controls trainer creation fully.
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+
 @Data
 public class TrainerRequestDTO {
 

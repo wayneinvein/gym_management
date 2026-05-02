@@ -15,8 +15,6 @@ import java.time.LocalDate;
  * payment date, and method. Status defaults to PAID on creation.
  */
 @Data
-@RequiredArgsConstructor
-@NoArgsConstructor
 public class MemberPaymentRequestDTO {
 
     @NotNull(message = "Member ID is required")

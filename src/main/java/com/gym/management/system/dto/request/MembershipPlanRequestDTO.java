@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
  * active on creation and toggled separately via PATCH /status endpoint.
  */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class MembershipPlanRequestDTO {
 
     @NotBlank(message = "Plan name is required")

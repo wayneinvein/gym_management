@@ -13,10 +13,7 @@ import java.time.LocalDate;
  * Sensitive fields like status and joinedDate are NOT included here
  * — those are set automatically by the service, not by the client.
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class MemberRequestDTO {
 
     @NotBlank(message = "Name cannot be blank")

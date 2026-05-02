@@ -15,8 +15,6 @@ import java.time.LocalDate;
  * salary month, and status.
  */
 @Data
-@RequiredArgsConstructor
-@NoArgsConstructor
 public class TrainerPaymentRequestDTO {
 
     @NotNull(message = "Trainer ID is required")
