@@ -14,33 +14,28 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class TrainerRequestDTO {
 
-    // Full name of the trainer
     @NotBlank(message = "Trainer name is required")
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
+    @Pattern(regexp = "^[a-zA-Z ]+$", message = "Name must contain only letters and spaces")
     private String trainerName;
 
-    // Gender of the trainer
     @NotBlank(message = "Gender is required")
+    @Pattern(regexp = "^(Male|Female|Other)$", message = "Gender must be Male, Female or Other")
     private String trainerGender;
 
-    // 10-digit Indian phone number — also used as login username
     @NotBlank(message = "Phone number is required")
-    @Pattern(
-            regexp = "^[6-9]\\d{9}$",
-            message = "Invalid Indian phone number. Must be 10 digits starting with 6-9"
-    )
+    @Pattern(regexp = "^[6-9]\\d{9}$", message = "Invalid Indian phone number")
     private String phoneNumber;
 
-    // Optional email address
     @Email(message = "Invalid email format")
     private String email;
 
-    // Area of expertise
+    @Size(max = 100, message = "Specialization cannot exceed 100 characters")
     private String specialization;
 
-    // Monthly salary of the trainer
     @NotNull(message = "Salary is required")
     @Positive(message = "Salary must be a positive value")
     private Double salary;
