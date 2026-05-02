@@ -1,10 +1,11 @@
 package com.gym.management.system.dto.request;
 
 import com.gym.management.system.enums.PaymentStatus;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+
 import java.time.LocalDate;
 
 /**
@@ -14,28 +15,32 @@ import java.time.LocalDate;
  * salary month, and status.
  */
 @Data
+@RequiredArgsConstructor
+@NoArgsConstructor
 public class TrainerPaymentRequestDTO {
 
-    // Trainer receiving the payment
     @NotNull(message = "Trainer ID is required")
+    @Positive(message = "Trainer ID must be positive")
     private Long trainerId;
 
-    // Amount paid — must be positive
     @NotNull(message = "Amount is required")
     @Positive(message = "Amount must be positive")
+    @DecimalMax(value = "999999.99", message = "Amount cannot exceed 999999.99")
     private Double amount;
 
-    // Date the payment was made — null if status is PENDING
+    @PastOrPresent(message = "Payment date cannot be in the future")
     private LocalDate paymentDate;
 
-    // Month this salary is for (e.g., "APRIL_2026")
     @NotBlank(message = "Salary month is required")
+    @Pattern(
+            regexp = "^(JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER)_\\d{4}$",
+            message = "Salary month must be in format MONTH_YEAR e.g. APRIL_2026"
+    )
     private String salaryMonth;
 
-    // Payment status — PAID or PENDING
     @NotNull(message = "Payment status is required")
     private PaymentStatus status;
 
-    // Optional notes
+    @Size(max = 255, message = "Notes cannot exceed 255 characters")
     private String notes;
 }
