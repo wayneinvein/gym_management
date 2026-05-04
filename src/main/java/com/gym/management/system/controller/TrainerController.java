@@ -125,4 +125,16 @@ public class TrainerController {
         String username = securityUtils.getCurrentUsername();
         return ResponseEntity.ok(trainerService.getMyProfile(username));
     }
+
+    /**
+     * Allows logged-in trainer to update their own profile.
+     */
+    @Operation(summary = "Update my profile", description = "Trainer updates their own profile details")
+    @PutMapping("/me")
+    @PreAuthorize("hasRole('TRAINER')")
+    public ResponseEntity<TrainerResponseDTO> updateMyProfile(
+            @Valid @RequestBody TrainerRequestDTO dto) {
+        String username = securityUtils.getCurrentUsername();
+        return ResponseEntity.ok(trainerService.updateMyProfile(username, dto));
+    }
 }
