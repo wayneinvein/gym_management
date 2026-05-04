@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -43,4 +45,8 @@ public interface MemberPaymentRepository extends JpaRepository<MemberPayment, Lo
 
     // Find all payments by status (non-paginated) — used for overdue list
     List<MemberPayment> findByStatus(PaymentStatus status);
+
+    // Find payment by membership id and status
+    Optional<MemberPayment> findByMembershipMembershipIdAndStatus(
+            Long membershipId, PaymentStatus status);
 }

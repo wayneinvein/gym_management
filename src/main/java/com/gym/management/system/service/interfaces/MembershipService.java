@@ -2,6 +2,7 @@ package com.gym.management.system.service.interfaces;
 
 import com.gym.management.system.dto.request.MembershipRequestDTO;
 import com.gym.management.system.dto.response.MembershipResponseDTO;
+import com.gym.management.system.dto.response.MembershipSummaryResponseDTO;
 import com.gym.management.system.enums.MembershipStatus;
 import org.springframework.data.domain.Page;
 
@@ -32,4 +33,7 @@ public interface MembershipService {
 
     // Get memberships expiring in the next N days — used for dashboard alerts
     List<MembershipResponseDTO> getExpiringMemberships(int days);
+
+    // Get membership summary for logged-in member
+    MembershipSummaryResponseDTO getMembershipSummary(String username);
 }
