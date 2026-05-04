@@ -14,6 +14,7 @@ import com.gym.management.system.security.JwtUtil;
 import com.gym.management.system.service.interfaces.AuthService;
 import com.gym.management.system.service.interfaces.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
  * Handles user login, token refresh, and logout operations.
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
@@ -40,6 +42,9 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public AuthResponseDTO login(AuthRequestDTO request) {
+
+        log.info("Login attempt for username: {}", request.getUsername());
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -59,23 +64,35 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenRepository.deleteByUser(user);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
+        log.info("tokens generated");
+
         return new AuthResponseDTO(accessToken, refreshToken.getToken());
     }
 
     @Override
     public AuthResponseDTO refreshToken(String requestToken) {
+
+        log.info("Refresh token request received");
+
+        //verify refresh token is present
         RefreshToken oldToken = refreshTokenService.verifyRefreshToken(requestToken);
 
         // Get user from refresh token directly
         User user = oldToken.getUser();
 
+        //delete old token
         refreshTokenRepository.delete(oldToken);
+
+        //create new refresh token
         RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user);
 
+        //generate new access token
         String accessToken = jwtUtil.generateToken(
                 user.getUsername(),
                 user.getUserRole().name()
         );
+
+        log.info("new refresh token and its corresponding access token generated");
 
         return new AuthResponseDTO(accessToken, newRefreshToken.getToken());
     }
@@ -85,7 +102,9 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public void logout(String token) {
-            refreshTokenRepository.deleteByToken(token);
+
+        log.info("logout request received");
+        refreshTokenRepository.deleteByToken(token);
 
         }
 
@@ -99,14 +118,20 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void changePassword(String username, ChangePasswordRequestDTO dto) {
 
+        log.info("change password request received");
+
         // Fetch user by username from security context
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("User not found"));
+
+        log.info("user fetched from security context");
 
         // Verify current password matches what is stored in DB
         if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
             throw new InvalidInputException("Current password is incorrect");
         }
+
+        log.info("password verified against DB");
 
         // New password and confirm password must match
         if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
@@ -121,5 +146,6 @@ public class AuthServiceImpl implements AuthService {
         // Encode and save new password
         user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
         userRepository.save(user);
+        log.info("new password encoded and saved in DB");
     }
     }
