@@ -41,4 +41,7 @@ public interface MemberService {
 
     // Get all members assigned to a specific trainer
     List<MemberResponseDTO> getMembersByTrainer(Long trainerId);
+
+    // Member updates their own profile
+    MemberResponseDTO updateMyProfile(String username, MemberRequestDTO dto);
 }
