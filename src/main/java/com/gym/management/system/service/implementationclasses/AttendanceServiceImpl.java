@@ -10,6 +10,7 @@ import com.gym.management.system.repository.AttendanceRepository;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.service.interfaces.AttendanceService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -22,6 +23,7 @@ import java.util.List;
  * One check-in per member per day is enforced.
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AttendanceServiceImpl implements AttendanceService {
 
@@ -38,6 +40,8 @@ public class AttendanceServiceImpl implements AttendanceService {
      */
     @Override
     public AttendanceResponseDTO checkIn(Long memberId) {
+
+        log.info("check in request received");
 
         // Fetch member
         Member member = memberRepository.findById(memberId)
@@ -58,6 +62,8 @@ public class AttendanceServiceImpl implements AttendanceService {
         attendance.setCheckInTime(LocalTime.now()); // current time as check-in
         attendance.setCheckOutTime(null);            // not checked out yet
 
+        log.info("check in record created");
+
         return attendanceDTOMapper.toResponse(attendanceRepository.save(attendance));
     }
 
@@ -70,6 +76,8 @@ public class AttendanceServiceImpl implements AttendanceService {
      */
     @Override
     public AttendanceResponseDTO checkOut(Long memberId) {
+
+        log.info("check out request received");
 
         // Member must exist
         if (!memberRepository.existsById(memberId)) {
@@ -91,6 +99,8 @@ public class AttendanceServiceImpl implements AttendanceService {
         // Set check-out time to current time
         attendance.setCheckOutTime(LocalTime.now());
 
+        log.info("member checking out");
+
         return attendanceDTOMapper.toResponse(attendanceRepository.save(attendance));
     }
 
@@ -100,6 +110,8 @@ public class AttendanceServiceImpl implements AttendanceService {
      */
     @Override
     public List<AttendanceResponseDTO> getAttendanceByMember(Long memberId) {
+
+        log.info("get attendance request received");
 
         if (!memberRepository.existsById(memberId)) {
             throw new NotFoundException("Member not found with id: " + memberId);
@@ -116,6 +128,9 @@ public class AttendanceServiceImpl implements AttendanceService {
      */
     @Override
     public List<AttendanceResponseDTO> getTodayAttendance() {
+
+        log.info("today's attendance request received");
+
         return attendanceDTOMapper.toResponse(
                 attendanceRepository.findByDate(LocalDate.now())
         );
@@ -128,6 +143,8 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Override
     public List<AttendanceResponseDTO> getAttendanceByMemberAndDateRange(
             Long memberId, LocalDate startDate, LocalDate endDate) {
+
+        log.info("attendance according to date range request received");
 
         if (!memberRepository.existsById(memberId)) {
             throw new NotFoundException("Member not found with id: " + memberId);
@@ -149,6 +166,8 @@ public class AttendanceServiceImpl implements AttendanceService {
      */
     @Override
     public List<AttendanceResponseDTO> getMyAttendance(String username) {
+
+        log.info("getting attendance of a currently logged in user request received");
 
         // Find member linked to this login account
         Member member = memberRepository.findByUserUsername(username)
