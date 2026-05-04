@@ -15,6 +15,7 @@ import com.gym.management.system.repository.TrainerRepository;
 import com.gym.management.system.repository.UserRepository;
 import com.gym.management.system.service.interfaces.TrainerService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ import java.util.List;
  * active/inactive status, and fetching assigned members.
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TrainerServiceImpl implements TrainerService {
 
@@ -183,5 +185,34 @@ public class TrainerServiceImpl implements TrainerService {
         Trainer trainer = trainerRepository.findByUserUsername(username)
                 .orElseThrow(() -> new NotFoundException("Trainer profile not found"));
         return trainerDTOMapper.toResponse(trainer);
+    }
+
+    /**
+     * Allows logged-in trainer to update their own profile.
+     * Trainer can only update their own details — not other trainers.
+     */
+    @Override
+    public TrainerResponseDTO updateMyProfile(String username, TrainerRequestDTO dto) {
+
+        log.info("Trainer profile update request for username: {}", username);
+
+        Trainer trainer = trainerRepository.findByUserUsername(username)
+                .orElseThrow(() -> new NotFoundException("Trainer profile not found"));
+
+        // Check if new phone number is already taken by another trainer
+        if (!trainer.getPhoneNumber().equals(dto.getPhoneNumber()) &&
+                trainerRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
+            throw new AlreadyPresentException("Phone number already registered");
+        }
+
+        trainer.setTrainerName(dto.getTrainerName());
+        trainer.setTrainerGender(dto.getTrainerGender());
+        trainer.setPhoneNumber(dto.getPhoneNumber());
+        trainer.setEmail(dto.getEmail());
+        trainer.setSpecialization(dto.getSpecialization());
+
+        // Trainer cannot update their own salary — admin controls this
+        log.info("Trainer profile updated successfully for username: {}", username);
+        return trainerDTOMapper.toResponse(trainerRepository.save(trainer));
     }
 }

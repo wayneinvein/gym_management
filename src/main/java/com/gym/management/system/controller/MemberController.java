@@ -3,6 +3,7 @@ package com.gym.management.system.controller;
 import com.gym.management.system.dto.request.MemberRequestDTO;
 import com.gym.management.system.dto.response.MemberResponseDTO;
 import com.gym.management.system.enums.MemberStatus;
+import com.gym.management.system.security.SecurityUtils;
 import com.gym.management.system.service.interfaces.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,6 +35,7 @@ import java.util.List;
 public class MemberController {
 
     private final MemberService memberService;
+    private final SecurityUtils securityUtils;
 
     /**
      * Creates a new member and auto-creates their login account.
@@ -158,5 +160,17 @@ public class MemberController {
     @PreAuthorize("hasRole('MEMBER')")
     public ResponseEntity<MemberResponseDTO> getMyProfile() {
         return ResponseEntity.ok(memberService.getMyProfile());
+    }
+
+    /**
+     * Allows logged-in member to update their own profile.
+     */
+    @Operation(summary = "Update my profile", description = "Member updates their own profile details")
+    @PutMapping("/me")
+    @PreAuthorize("hasRole('MEMBER')")
+    public ResponseEntity<MemberResponseDTO> updateMyProfile(
+            @Valid @RequestBody MemberRequestDTO dto) {
+        String username = securityUtils.getCurrentUsername();
+        return ResponseEntity.ok(memberService.updateMyProfile(username, dto));
     }
 }

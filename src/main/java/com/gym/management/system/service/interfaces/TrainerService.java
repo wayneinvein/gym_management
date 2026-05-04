@@ -36,4 +36,7 @@ public interface TrainerService {
 
     // Get profile of currently logged-in trainer
     TrainerResponseDTO getMyProfile(String username);
+
+    // Trainer updates their own profile
+    TrainerResponseDTO updateMyProfile(String username, TrainerRequestDTO dto);
 }

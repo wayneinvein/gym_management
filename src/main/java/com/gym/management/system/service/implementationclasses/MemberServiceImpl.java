@@ -17,6 +17,7 @@ import com.gym.management.system.repository.UserRepository;
 import com.gym.management.system.security.SecurityUtils;
 import com.gym.management.system.service.interfaces.MemberService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +34,7 @@ import java.util.List;
  * auto user account creation, and fetching logged-in member profile.
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
 
@@ -226,5 +228,34 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(() -> new NotFoundException("Member profile not found for user: " + username));
 
         return memberDtoMapper.toResponse(member);
+    }
+
+    /**
+     * Allows logged-in member to update their own profile.
+     * Member can only update their own details — not other members.
+     */
+    @Override
+    public MemberResponseDTO updateMyProfile(String username, MemberRequestDTO dto) {
+
+        log.info("Member profile update request for username: {}", username);
+
+        Member member = memberRepository.findByUserUsername(username)
+                .orElseThrow(() -> new NotFoundException("Member profile not found"));
+
+        // Check if new phone number is already taken by another member
+        if (!member.getPhoneNumber().equals(dto.getPhoneNumber()) &&
+                memberRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
+            throw new AlreadyPresentException("Phone number already registered");
+        }
+
+        member.setMemberName(dto.getMemberName());
+        member.setMemberGender(dto.getMemberGender());
+        member.setPhoneNumber(dto.getPhoneNumber());
+        member.setEmail(dto.getEmail());
+        member.setAddress(dto.getAddress());
+        member.setDateOfBirth(dto.getDateOfBirth());
+
+        log.info("Member profile updated successfully for username: {}", username);
+        return memberDtoMapper.toResponse(memberRepository.save(member));
     }
 }
