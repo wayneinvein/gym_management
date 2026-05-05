@@ -2,7 +2,9 @@ package com.gym.management.system.controller;
 
 import com.gym.management.system.dto.request.MembershipRequestDTO;
 import com.gym.management.system.dto.response.MembershipResponseDTO;
+import com.gym.management.system.dto.response.MembershipSummaryResponseDTO;
 import com.gym.management.system.enums.MembershipStatus;
+import com.gym.management.system.security.SecurityUtils;
 import com.gym.management.system.service.interfaces.MembershipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,6 +32,7 @@ import java.util.List;
 public class MembershipController {
 
     private final MembershipService membershipService;
+    private final SecurityUtils securityUtils;
 
     /**
      * Creates a new membership for a member with a selected plan.
@@ -124,5 +127,18 @@ public class MembershipController {
     public ResponseEntity<List<MembershipResponseDTO>> getExpiringMemberships(
             @RequestParam(defaultValue = "7") int days) {
         return ResponseEntity.ok(membershipService.getExpiringMemberships(days));
+    }
+
+    /**
+     * Returns complete membership summary for logged-in member.
+     * Includes days completed, days remaining, and payment status.
+     */
+    @Operation(summary = "Get my membership summary",
+            description = "Returns membership details with day calculations for logged-in member")
+    @GetMapping("/me/summary")
+    @PreAuthorize("hasRole('MEMBER')")
+    public ResponseEntity<MembershipSummaryResponseDTO> getMembershipSummary() {
+        String username = securityUtils.getCurrentUsername();
+        return ResponseEntity.ok(membershipService.getMembershipSummary(username));
     }
 }

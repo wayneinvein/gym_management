@@ -3,6 +3,7 @@ package com.gym.management.system.service.implementationclasses;
 import com.gym.management.system.dto.mapper.MembershipDTOMapper;
 import com.gym.management.system.dto.request.MembershipRequestDTO;
 import com.gym.management.system.dto.response.MembershipResponseDTO;
+import com.gym.management.system.dto.response.MembershipSummaryResponseDTO;
 import com.gym.management.system.entity.Member;
 import com.gym.management.system.entity.MemberPayment;
 import com.gym.management.system.entity.Membership;
@@ -17,10 +18,12 @@ import com.gym.management.system.repository.MembershipPlanRepository;
 import com.gym.management.system.repository.MembershipRepository;
 import com.gym.management.system.service.interfaces.MembershipService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
@@ -30,6 +33,7 @@ import java.util.List;
  * cancellation, and expiry tracking.
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class MembershipServiceImpl implements MembershipService {
 
@@ -190,5 +194,64 @@ public class MembershipServiceImpl implements MembershipService {
                 .stream()
                 .map(membershipDTOMapper::toResponse)
                 .toList();
+    }
+
+    /**
+     * Returns a complete membership summary for the logged-in member.
+     *
+     * Calculates days completed, days remaining, and payment status
+     * based on the member's current active membership.
+     * Throws NotFoundException if member has no active membership.
+     */
+    @Override
+    public MembershipSummaryResponseDTO getMembershipSummary(String username) {
+
+        log.info("Membership summary request for username: {}", username);
+
+        // Find member linked to logged-in user
+        Member member = memberRepository.findByUserUsername(username)
+                .orElseThrow(() -> new NotFoundException("Member profile not found"));
+
+        // Find active membership
+        Membership membership = membershipRepository
+                .findByMemberMemberIdAndStatus(member.getMemberId(), MembershipStatus.ACTIVE)
+                .orElseThrow(() -> new NotFoundException("No active membership found"));
+
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = membership.getStartDate();
+        LocalDate endDate = membership.getEndDate();
+
+        // Calculate day stats
+        long totalDays = ChronoUnit.DAYS.between(startDate, endDate);
+        long daysCompleted = ChronoUnit.DAYS.between(startDate, today);
+        long daysRemaining = ChronoUnit.DAYS.between(today, endDate);
+
+        // Make sure values don't go negative
+        daysCompleted = Math.max(0, daysCompleted);
+        daysRemaining = Math.max(0, daysRemaining);
+
+        // Check payment status for this membership
+        MemberPayment pendingPayment = memberPaymentRepository
+                .findByMembershipMembershipIdAndStatus(
+                        membership.getMembershipId(), PaymentStatus.PENDING)
+                .orElse(null);
+
+        // Build summary
+        MembershipSummaryResponseDTO summary = new MembershipSummaryResponseDTO();
+        summary.setPlanName(membership.getPlan().getName());
+        summary.setPlanDescription(membership.getPlan().getDescription());
+        summary.setPlanPrice(membership.getPlan().getPrice());
+        summary.setStartDate(startDate);
+        summary.setEndDate(endDate);
+        summary.setStatus(membership.getStatus());
+        summary.setTotalDays(totalDays);
+        summary.setDaysCompleted(daysCompleted);
+        summary.setDaysRemaining(daysRemaining);
+        summary.setNextPaymentDue(endDate); // next renewal is due on end date
+        summary.setPaymentPending(pendingPayment != null);
+        summary.setAmountDue(pendingPayment != null ? pendingPayment.getAmount() : 0.0);
+
+        log.info("Membership summary generated for member id: {}", member.getMemberId());
+        return summary;
     }
 }
