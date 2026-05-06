@@ -31,4 +31,7 @@ public interface TrainerPaymentService {
 
     // Get all payments for a specific month (e.g., "APRIL_2026")
     List<TrainerPaymentResponseDTO> getPaymentsByMonth(String salaryMonth);
+
+    // Returns all unpaid trainer salaries (PENDING + OVERDUE) for admin to follow up
+    List<TrainerPaymentResponseDTO> getPendingDues();
 }

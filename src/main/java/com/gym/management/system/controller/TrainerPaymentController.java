@@ -123,4 +123,11 @@ public class TrainerPaymentController {
             @PathVariable String salaryMonth) {
         return ResponseEntity.ok(trainerPaymentService.getPaymentsByMonth(salaryMonth));
     }
+
+    // Returns all PENDING and OVERDUE trainer salary payments
+    @GetMapping("/pending-dues")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<TrainerPaymentResponseDTO>> getPendingDues() {
+        return ResponseEntity.ok(trainerPaymentService.getPendingDues());
+    }
 }
