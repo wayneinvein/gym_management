@@ -47,6 +47,8 @@ public interface MemberPaymentRepository extends JpaRepository<MemberPayment, Lo
     List<MemberPayment> findByStatus(PaymentStatus status);
 
     // Find payment by membership id and status
-    Optional<MemberPayment> findByMembershipMembershipIdAndStatus(
-            Long membershipId, PaymentStatus status);
+    Optional<MemberPayment> findByMembershipMembershipIdAndStatus(Long membershipId, PaymentStatus status);
+
+    // Fetch all payments whose status is in the given list (e.g. PENDING, OVERDUE)
+    List<MemberPayment> findByStatusIn(List<PaymentStatus> statuses);
 }

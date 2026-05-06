@@ -15,11 +15,13 @@ import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.MembershipRepository;
 import com.gym.management.system.service.interfaces.MemberPaymentService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service implementation for managing member payments.
@@ -28,6 +30,7 @@ import java.util.List;
  * Payment records are never deleted — only status is updated.
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class MemberPaymentServiceImpl implements MemberPaymentService {
 
@@ -164,5 +167,24 @@ public class MemberPaymentServiceImpl implements MemberPaymentService {
         }
 
         return memberPaymentDTOMapper.toResponse(memberPaymentRepository.save(payment));
+    }
+
+    /*
+     * Retrieves all member payments that are either PENDING or OVERDUE.
+     * PENDING → payment not yet collected after membership was created
+     * OVERDUE → admin manually marked it as overdue (membership expired, still unpaid)
+     * Maps each payment entity to a response DTO and returns the list.
+     */
+    @Override
+    public List<MemberPaymentResponseDTO> getPendingDues() {
+        log.info("Fetching all pending and overdue member payments");
+
+        // Fetch payments that are either PENDING or OVERDUE — both mean money not yet collected
+        List<MemberPayment> payments = memberPaymentRepository
+                .findByStatusIn(List.of(PaymentStatus.PENDING, PaymentStatus.OVERDUE));
+
+        return payments.stream()
+                .map(memberPaymentDTOMapper::toResponse)
+                .collect(Collectors.toList());
     }
 }
