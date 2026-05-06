@@ -133,4 +133,11 @@ public class MemberPaymentController {
                 memberPaymentService.markAsPaid(paymentId, paymentMethod, paymentDate, notes)
         );
     }
+
+    // Returns all PENDING and OVERDUE payments — admin uses this to track unpaid dues
+    @GetMapping("/pending-dues")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<MemberPaymentResponseDTO>> getPendingDues() {
+        return ResponseEntity.ok(memberPaymentService.getPendingDues());
+    }
 }

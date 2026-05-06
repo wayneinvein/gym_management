@@ -34,4 +34,7 @@ public interface MemberPaymentService {
 
     // Mark a pending payment as paid with method and date
     MemberPaymentResponseDTO markAsPaid(Long paymentId, PaymentMethod method, LocalDate paymentDate, String notes);
+
+    // Returns all unpaid dues (PENDING + OVERDUE) for admin to follow up
+    List<MemberPaymentResponseDTO> getPendingDues();
 }
