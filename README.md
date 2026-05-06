@@ -143,10 +143,10 @@ mvn spring-boot:run
 - API: `http://localhost:8080`
 - Swagger: `http://localhost:8080/swagger-ui/index.html`
 
-**5. Default admin login**
-```json
-POST /auth/login
-{ "username": "admin", "password": "admin123" }
+**5. First login**
+```
+Use the default admin credentials configured in your environment variables.
+
 ```
 
 ---
