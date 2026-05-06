@@ -12,9 +12,11 @@ import com.gym.management.system.repository.TrainerPaymentRepository;
 import com.gym.management.system.repository.TrainerRepository;
 import com.gym.management.system.service.interfaces.TrainerPaymentService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service implementation for managing trainer salary payments.
@@ -23,6 +25,7 @@ import java.util.List;
  * and payment status updates.
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TrainerPaymentServiceImpl implements TrainerPaymentService {
 
@@ -149,5 +152,24 @@ public class TrainerPaymentServiceImpl implements TrainerPaymentService {
         return trainerPaymentDTOMapper.toResponse(
                 trainerPaymentRepository.findBySalaryMonth(salaryMonth)
         );
+    }
+
+    /*
+     * Retrieves all trainer salary payments that are either PENDING or OVERDUE.
+     * PENDING → salary not yet paid for that month
+     * OVERDUE → admin manually marked it as overdue
+     * Maps each payment entity to a response DTO and returns the list.
+     */
+    @Override
+    public List<TrainerPaymentResponseDTO> getPendingDues() {
+
+        log.info("Fetching all pending and overdue trainer payments");
+
+        List<TrainerPayment> payments = trainerPaymentRepository
+                .findByStatusIn(List.of(PaymentStatus.PENDING, PaymentStatus.OVERDUE));
+
+        return payments.stream()
+                .map(trainerPaymentDTOMapper::toResponse)
+                .collect(Collectors.toList());
     }
 }

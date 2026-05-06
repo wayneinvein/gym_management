@@ -32,6 +32,9 @@ public interface TrainerPaymentRepository extends JpaRepository<TrainerPayment, 
     // Get all payments for a specific month
     List<TrainerPayment> findBySalaryMonth(String salaryMonth);
 
+    // Fetch all trainer payments whose status is in the given list
+    List<TrainerPayment> findByStatusIn(List<PaymentStatus> statuses);
+
     // Sum of all paid trainer salaries in a date range — used for monthly expenses
     @Query("SELECT SUM(p.amount) FROM TrainerPayment p WHERE p.status = :status AND p.paymentDate BETWEEN :startDate AND :endDate")
     Double sumAmountByStatusAndPaymentDateBetween(
