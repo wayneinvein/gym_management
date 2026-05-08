@@ -132,6 +132,10 @@ spring.jpa.hibernate.ddl-auto=update
 
 jwt.secret=<base64-encoded-256-bit-key>
 jwt.expiration=900000
+admin.username=yourusername
+admin.password=yourpassword
+default.member.password=yourmemberpassword
+default.trainer.password=yourtrainerpassword
 ```
 
 **3. Run**
@@ -167,16 +171,3 @@ com.gym.management.system
 ```
 
 ---
-
-##  Roadmap
-
-- [x] JWT Authentication + Refresh Token Rotation
-- [x] Member & Trainer Management
-- [x] Membership Lifecycle
-- [x] Payment Tracking (Member + Trainer)
-- [x] Attendance System
-- [x] Dashboard with Revenue & Profit Stats
-- [x] Pending Dues Endpoint
-- [ ] Unit Tests (JUnit 5 + Mockito)
-- [ ] Dockerfile + Docker Compose
-- [ ] Deploy on Railway / Render
