@@ -9,6 +9,7 @@ import com.gym.management.system.entity.Membership;
 import com.gym.management.system.enums.PaymentMethod;
 import com.gym.management.system.enums.PaymentStatus;
 import com.gym.management.system.exception.NotFoundException;
+import com.gym.management.system.exception.InvalidInputException;
 import com.gym.management.system.repository.MemberPaymentRepository;
 import com.gym.management.system.repository.MemberRepository;
 import com.gym.management.system.repository.MembershipRepository;
@@ -216,6 +217,54 @@ class MemberPaymentServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(responseDTO, result);
+        verify(memberPaymentRepository, times(1)).save(payment);
+    }
+    @Test
+    void markAsPaid_ShouldThrowNotFoundException_WhenPaymentNotFound() {
+
+        // Arrange
+        when(memberPaymentRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act + Assert
+        assertThrows(NotFoundException.class,
+                () -> memberPaymentService.markAsPaid(1L, PaymentMethod.CASH, LocalDate.now(), null));
+    }
+
+    @Test
+    void markAsPaid_ShouldThrowInvalidInputException_WhenPaymentAlreadyPaid() {
+
+        // Arrange — payment already has PAID status
+        MemberPayment payment = new MemberPayment();
+        payment.setStatus(PaymentStatus.PAID);
+
+        when(memberPaymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+
+        // Act + Assert
+        assertThrows(InvalidInputException.class,
+                () -> memberPaymentService.markAsPaid(1L, PaymentMethod.CASH, LocalDate.now(), null));
+    }
+
+    @Test
+    void markAsPaid_ShouldReturnDTO_WhenPaymentMarkedSuccessfully() {
+
+        // Arrange — payment is PENDING
+        MemberPayment payment = new MemberPayment();
+        payment.setStatus(PaymentStatus.PENDING);
+        MemberPaymentResponseDTO responseDTO = new MemberPaymentResponseDTO();
+
+        when(memberPaymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+        when(memberPaymentRepository.save(payment)).thenReturn(payment);
+        when(memberPaymentDTOMapper.toResponse(payment)).thenReturn(responseDTO);
+
+        // Act
+        MemberPaymentResponseDTO result = memberPaymentService.markAsPaid(
+                1L, PaymentMethod.CASH, LocalDate.now(), "Paid at counter");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(responseDTO, result);
+        assertEquals(PaymentStatus.PAID, payment.getStatus());
+        assertEquals(PaymentMethod.CASH, payment.getPaymentMethod());
         verify(memberPaymentRepository, times(1)).save(payment);
     }
 }
