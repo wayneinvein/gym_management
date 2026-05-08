@@ -187,4 +187,35 @@ class MemberPaymentServiceImplTest {
         assertEquals(responseDTO, result);
         verify(memberPaymentRepository, times(1)).save(any(MemberPayment.class));
     }
+
+    @Test
+    void updatePaymentStatus_ShouldThrowNotFoundException_WhenPaymentNotFound() {
+
+        // Arrange
+        when(memberPaymentRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act + Assert
+        assertThrows(NotFoundException.class,
+                () -> memberPaymentService.updatePaymentStatus(1L, PaymentStatus.OVERDUE));
+    }
+
+    @Test
+    void updatePaymentStatus_ShouldReturnDTO_WhenStatusUpdatedSuccessfully() {
+
+        // Arrange
+        MemberPayment payment = new MemberPayment();
+        MemberPaymentResponseDTO responseDTO = new MemberPaymentResponseDTO();
+
+        when(memberPaymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+        when(memberPaymentRepository.save(payment)).thenReturn(payment);
+        when(memberPaymentDTOMapper.toResponse(payment)).thenReturn(responseDTO);
+
+        // Act
+        MemberPaymentResponseDTO result = memberPaymentService.updatePaymentStatus(1L, PaymentStatus.OVERDUE);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(responseDTO, result);
+        verify(memberPaymentRepository, times(1)).save(payment);
+    }
 }
