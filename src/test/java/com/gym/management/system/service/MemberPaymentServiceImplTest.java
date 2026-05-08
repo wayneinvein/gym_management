@@ -267,4 +267,38 @@ class MemberPaymentServiceImplTest {
         assertEquals(PaymentMethod.CASH, payment.getPaymentMethod());
         verify(memberPaymentRepository, times(1)).save(payment);
     }
+
+    @Test
+    void getPaymentsByMember_ShouldThrowNotFoundException_WhenMemberNotFound() {
+
+        // Arrange
+        when(memberRepository.existsById(1L)).thenReturn(false);
+
+        // Act + Assert
+        assertThrows(NotFoundException.class,
+                () -> memberPaymentService.getPaymentsByMember(1L));
+    }
+
+    @Test
+    void getPaymentsByMember_ShouldReturnList_WhenMemberExists() {
+
+        // Arrange
+        MemberPayment payment1 = new MemberPayment();
+        MemberPayment payment2 = new MemberPayment();
+        MemberPaymentResponseDTO dto1 = new MemberPaymentResponseDTO();
+        MemberPaymentResponseDTO dto2 = new MemberPaymentResponseDTO();
+
+        when(memberRepository.existsById(1L)).thenReturn(true);
+        when(memberPaymentRepository.findByMemberMemberId(1L))
+                .thenReturn(List.of(payment1, payment2));
+        when(memberPaymentDTOMapper.toResponse(List.of(payment1, payment2)))
+                .thenReturn(List.of(dto1, dto2));
+
+        // Act
+        List<MemberPaymentResponseDTO> result = memberPaymentService.getPaymentsByMember(1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.size());
+    }
 }
