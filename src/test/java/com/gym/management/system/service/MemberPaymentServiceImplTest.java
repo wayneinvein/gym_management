@@ -4,6 +4,7 @@ import com.gym.management.system.dto.mapper.MemberPaymentDTOMapper;
 import com.gym.management.system.dto.response.MemberPaymentResponseDTO;
 import com.gym.management.system.entity.MemberPayment;
 import com.gym.management.system.enums.PaymentStatus;
+import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.MemberPaymentRepository;
 import com.gym.management.system.service.implementationclasses.MemberPaymentServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -13,9 +14,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -84,5 +85,33 @@ class MemberPaymentServiceImplTest {
         // Assert — verify repository was called exactly once with correct statuses
         verify(memberPaymentRepository, times(1))
                 .findByStatusIn(List.of(PaymentStatus.PENDING, PaymentStatus.OVERDUE));
+    }
+
+    @Test
+    void getPaymentById_ShouldReturnDTO_WhenPaymentExists() {
+
+        // Arrange
+        MemberPayment payment = new MemberPayment();
+        MemberPaymentResponseDTO dto = new MemberPaymentResponseDTO();
+
+        when(memberPaymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+        when(memberPaymentDTOMapper.toResponse(payment)).thenReturn(dto);
+
+        // Act
+        MemberPaymentResponseDTO result = memberPaymentService.getPaymentById(1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(dto, result);
+    }
+
+    @Test
+    void getPaymentById_ShouldThrowNotFoundException_WhenPaymentDoesNotExist() {
+
+        // Arrange — repository returns empty optional
+        when(memberPaymentRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act + Assert — verify exception is thrown
+        assertThrows(NotFoundException.class, () -> memberPaymentService.getPaymentById(1L));
     }
 }
