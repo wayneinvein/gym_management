@@ -19,6 +19,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -300,5 +303,25 @@ class MemberPaymentServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
+    }
+
+    @Test
+    void getAllPayments_ShouldReturnPagedResult() {
+
+        // Arrange
+        MemberPayment payment = new MemberPayment();
+        MemberPaymentResponseDTO dto = new MemberPaymentResponseDTO();
+        Page<MemberPayment> paymentPage = new PageImpl<>(List.of(payment));
+
+        when(memberPaymentRepository.findAll(any(PageRequest.class)))
+                .thenReturn(paymentPage);
+        when(memberPaymentDTOMapper.toResponse(payment)).thenReturn(dto);
+
+        // Act
+        Page<MemberPaymentResponseDTO> result = memberPaymentService.getAllPayments(0, 10, "createdAt", "asc");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
     }
 }
