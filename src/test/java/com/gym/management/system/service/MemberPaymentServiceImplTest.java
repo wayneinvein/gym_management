@@ -1,11 +1,17 @@
 package com.gym.management.system.service;
 
 import com.gym.management.system.dto.mapper.MemberPaymentDTOMapper;
+import com.gym.management.system.dto.request.MemberPaymentRequestDTO;
 import com.gym.management.system.dto.response.MemberPaymentResponseDTO;
+import com.gym.management.system.entity.Member;
 import com.gym.management.system.entity.MemberPayment;
+import com.gym.management.system.entity.Membership;
+import com.gym.management.system.enums.PaymentMethod;
 import com.gym.management.system.enums.PaymentStatus;
 import com.gym.management.system.exception.NotFoundException;
 import com.gym.management.system.repository.MemberPaymentRepository;
+import com.gym.management.system.repository.MemberRepository;
+import com.gym.management.system.repository.MembershipRepository;
 import com.gym.management.system.service.implementationclasses.MemberPaymentServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +34,12 @@ class MemberPaymentServiceImplTest {
 
     @Mock
     private MemberPaymentDTOMapper memberPaymentDTOMapper;
+
+    @Mock
+    private MemberRepository memberRepository;
+
+    @Mock
+    private MembershipRepository membershipRepository;
 
     @InjectMocks
     private MemberPaymentServiceImpl memberPaymentService;
@@ -113,5 +126,65 @@ class MemberPaymentServiceImplTest {
 
         // Act + Assert — verify exception is thrown
         assertThrows(NotFoundException.class, () -> memberPaymentService.getPaymentById(1L));
+    }
+
+    @Test
+    void recordPayment_ShouldThrowNotFoundException_WhenMemberNotFound() {
+
+        // Arrange
+        MemberPaymentRequestDTO dto = new MemberPaymentRequestDTO();
+        dto.setMemberId(1L);
+
+        // member does not exist
+        when(memberRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act + Assert
+        assertThrows(NotFoundException.class, () -> memberPaymentService.recordPayment(dto));
+    }
+
+    @Test
+    void recordPayment_ShouldThrowNotFoundException_WhenMembershipNotFound() {
+
+        // Arrange
+        MemberPaymentRequestDTO dto = new MemberPaymentRequestDTO();
+        dto.setMemberId(1L);
+        dto.setMembershipId(1L);
+
+        // member exists but membership does not
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(new Member()));
+        when(membershipRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Act + Assert
+        assertThrows(NotFoundException.class, () -> memberPaymentService.recordPayment(dto));
+    }
+
+    @Test
+    void recordPayment_ShouldReturnDTO_WhenPaymentRecordedSuccessfully() {
+
+        // Arrange
+        MemberPaymentRequestDTO dto = new MemberPaymentRequestDTO();
+        dto.setMemberId(1L);
+        dto.setMembershipId(1L);
+        dto.setAmount(1000.0);
+        dto.setPaymentDate(LocalDate.now());
+        dto.setPaymentMethod(PaymentMethod.CASH);
+
+        Member member = new Member();
+        Membership membership = new Membership();
+        MemberPayment savedPayment = new MemberPayment();
+        MemberPaymentResponseDTO responseDTO = new MemberPaymentResponseDTO();
+
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(membershipRepository.findById(1L)).thenReturn(Optional.of(membership));
+        when(memberPaymentRepository.save(any(MemberPayment.class))).thenReturn(savedPayment);
+        when(memberPaymentDTOMapper.toResponse(savedPayment)).thenReturn(responseDTO);
+
+        // Act
+        MemberPaymentResponseDTO result = memberPaymentService.recordPayment(dto);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(responseDTO, result);
+        verify(memberPaymentRepository, times(1)).save(any(MemberPayment.class));
     }
 }
