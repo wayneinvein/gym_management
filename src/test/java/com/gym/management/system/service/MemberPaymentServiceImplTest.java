@@ -16,7 +16,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MemberPaymentServiceImplTest {
@@ -56,4 +56,33 @@ class MemberPaymentServiceImplTest {
         assertEquals(2, result.size());
     }
 
+    @Test
+    void getPendingDues_ShouldReturnEmptyList_WhenNoPendingPaymentsExist() {
+
+        // Arrange — repository returns empty list
+        when(memberPaymentRepository.findByStatusIn(List.of(PaymentStatus.PENDING, PaymentStatus.OVERDUE)))
+                .thenReturn(List.of());
+
+        // Act
+        List<MemberPaymentResponseDTO> result = memberPaymentService.getPendingDues();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void getPendingDues_ShouldCallRepository_WithPendingAndOverdueStatus() {
+
+        // Arrange
+        when(memberPaymentRepository.findByStatusIn(List.of(PaymentStatus.PENDING, PaymentStatus.OVERDUE)))
+                .thenReturn(List.of());
+
+        // Act
+        memberPaymentService.getPendingDues();
+
+        // Assert — verify repository was called exactly once with correct statuses
+        verify(memberPaymentRepository, times(1))
+                .findByStatusIn(List.of(PaymentStatus.PENDING, PaymentStatus.OVERDUE));
+    }
 }
