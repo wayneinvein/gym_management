@@ -77,4 +77,67 @@ public class AuthServiceImplTest {
         refreshToken.setUser(user);
     }
 
+    // ════════════════════════════════════════════════════════════
+    // login() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void login_ShouldReturnAuthResponse_WhenCredentialsAreValid() {
+
+        // Arrange — authentication passes, user found, tokens generated
+        AuthRequestDTO request = new AuthRequestDTO();
+        request.setUsername("john_doe");
+        request.setPassword("rawPassword");
+
+        when(userRepository.findByUsername("john_doe")).thenReturn(Optional.of(user));
+        when(jwtUtil.generateToken("john_doe", "MEMBER")).thenReturn("fake-access-token");
+        when(refreshTokenService.createRefreshToken(user)).thenReturn(refreshToken);
+
+        // Act
+        AuthResponseDTO result = authService.login(request);
+
+        // Assert — both tokens should be present in response
+        assertNotNull(result);
+        assertEquals("fake-access-token", result.getAccessToken());
+        assertEquals("fake-refresh-token", result.getRefreshToken());
+
+        // Verify old refresh token was deleted before creating new one
+        verify(refreshTokenRepository).deleteByUser(user);
+        verify(refreshTokenService).createRefreshToken(user);
+    }
+
+    @Test
+    void login_ShouldThrowException_WhenCredentialsAreInvalid() {
+
+        // Arrange — authentication manager throws exception for bad credentials
+        AuthRequestDTO request = new AuthRequestDTO();
+        request.setUsername("john_doe");
+        request.setPassword("wrongPassword");
+
+        doThrow(new BadCredentialsException("Bad credentials"))
+                .when(authenticationManager)
+                .authenticate(any(UsernamePasswordAuthenticationToken.class));
+
+        // Act & Assert
+        assertThrows(BadCredentialsException.class,
+                () -> authService.login(request));
+
+        // Verify no tokens were created since auth failed
+        verifyNoInteractions(userRepository, refreshTokenService, jwtUtil);
+    }
+
+    @Test
+    void login_ShouldThrowTokenException_WhenUserNotFoundAfterAuthentication() {
+
+        // Arrange — auth passes but user somehow not found in DB
+        AuthRequestDTO request = new AuthRequestDTO();
+        request.setUsername("john_doe");
+        request.setPassword("rawPassword");
+
+        when(userRepository.findByUsername("john_doe")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(TokenException.class,
+                () -> authService.login(request));
+    }
 }
