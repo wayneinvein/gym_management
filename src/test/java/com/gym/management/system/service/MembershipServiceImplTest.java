@@ -85,4 +85,30 @@ public class MembershipServiceImplTest {
         // Fake response DTO (what service returns after mapping)
         responseDTO = new MembershipResponseDTO();
     }
+
+
+    // ════════════════════════════════════════════════════════════
+    // createMembership() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void createMembership_ShouldReturnResponse_WhenMemberAndPlanExist() {
+
+        // Arrange — tell fakes what to return
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(membershipPlanRepository.findById(10L)).thenReturn(Optional.of(activePlan));
+        when(membershipRepository.findByMemberMemberIdAndStatus(1L, MembershipStatus.ACTIVE))
+                .thenReturn(Optional.empty()); // no existing active membership
+        when(membershipRepository.save(any(Membership.class))).thenReturn(activeMembership);
+        when(membershipDTOMapper.toResponse(activeMembership)).thenReturn(responseDTO);
+
+        // Act — call the real method
+        MembershipResponseDTO result = membershipService.createMembership(1L, 10L, requestDTO);
+
+        // Assert — result should not be null
+        assertNotNull(result);
+
+        // Verify payment was auto-created with PENDING status
+        verify(memberPaymentRepository).save(any(MemberPayment.class));
+    }
 }
