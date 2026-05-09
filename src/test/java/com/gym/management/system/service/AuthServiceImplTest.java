@@ -140,4 +140,48 @@ public class AuthServiceImplTest {
         assertThrows(TokenException.class,
                 () -> authService.login(request));
     }
+
+    // ════════════════════════════════════════════════════════════
+    // refreshToken() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void refreshToken_ShouldReturnNewTokens_WhenRefreshTokenIsValid() {
+
+        // Arrange — old token is valid, new tokens are generated
+        RefreshToken newRefreshToken = new RefreshToken();
+        newRefreshToken.setToken("new-refresh-token");
+        newRefreshToken.setUser(user);
+
+        when(refreshTokenService.verifyRefreshToken("fake-refresh-token")).thenReturn(refreshToken);
+        when(refreshTokenService.createRefreshToken(user)).thenReturn(newRefreshToken);
+        when(jwtUtil.generateToken("john_doe", "MEMBER")).thenReturn("new-access-token");
+
+        // Act
+        AuthResponseDTO result = authService.refreshToken("fake-refresh-token");
+
+        // Assert — new tokens returned
+        assertNotNull(result);
+        assertEquals("new-access-token", result.getAccessToken());
+        assertEquals("new-refresh-token", result.getRefreshToken());
+
+        // Verify old token was deleted
+        verify(refreshTokenRepository).delete(refreshToken);
+    }
+
+    @Test
+    void refreshToken_ShouldThrowException_WhenRefreshTokenIsInvalid() {
+
+        // Arrange — token verification fails (expired or not found)
+        when(refreshTokenService.verifyRefreshToken("invalid-token"))
+                .thenThrow(new TokenException("Refresh token is invalid or expired"));
+
+        // Act & Assert
+        assertThrows(TokenException.class,
+                () -> authService.refreshToken("invalid-token"));
+
+        // Verify no new tokens were created
+        verify(refreshTokenRepository, never()).delete(any());
+        verify(refreshTokenService, never()).createRefreshToken(any());
+    }
 }
