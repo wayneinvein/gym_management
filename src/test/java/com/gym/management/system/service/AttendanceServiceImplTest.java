@@ -109,4 +109,64 @@ public class AttendanceServiceImplTest {
         assertThrows(InvalidInputException.class,
                 () -> attendanceService.checkIn(1L));
     }
+
+    // ════════════════════════════════════════════════════════════
+    // checkOut() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void checkOut_ShouldReturnResponse_WhenMemberHasCheckedInAndNotYetCheckedOut() {
+
+        // Arrange — member exists, has checked in, checkout time is null
+        when(memberRepository.existsById(1L)).thenReturn(true);
+        when(attendanceRepository.findByMemberMemberIdAndDate(1L, LocalDate.now()))
+                .thenReturn(Optional.of(attendance)); // attendance exists, checkOutTime is null
+        when(attendanceRepository.save(any(Attendance.class))).thenReturn(attendance);
+        when(attendanceDTOMapper.toResponse(attendance)).thenReturn(responseDTO);
+
+        // Act
+        AttendanceResponseDTO result = attendanceService.checkOut(1L);
+
+        // Assert
+        assertNotNull(result);
+        verify(attendanceRepository).save(any(Attendance.class));
+    }
+
+    @Test
+    void checkOut_ShouldThrowNotFoundException_WhenMemberDoesNotExist() {
+
+        // Arrange — member not in DB
+        when(memberRepository.existsById(99L)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> attendanceService.checkOut(99L));
+    }
+
+    @Test
+    void checkOut_ShouldThrowNotFoundException_WhenMemberHasNotCheckedInToday() {
+
+        // Arrange — member exists but no attendance record found for today
+        when(memberRepository.existsById(1L)).thenReturn(true);
+        when(attendanceRepository.findByMemberMemberIdAndDate(1L, LocalDate.now()))
+                .thenReturn(Optional.empty()); // no check-in record
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> attendanceService.checkOut(1L));
+    }
+
+    @Test
+    void checkOut_ShouldThrowInvalidInputException_WhenMemberAlreadyCheckedOut() {
+
+        // Arrange — member already has a check-out time set
+        attendance.setCheckOutTime(LocalTime.of(17, 0)); // already checked out
+        when(memberRepository.existsById(1L)).thenReturn(true);
+        when(attendanceRepository.findByMemberMemberIdAndDate(1L, LocalDate.now()))
+                .thenReturn(Optional.of(attendance));
+
+        // Act & Assert
+        assertThrows(InvalidInputException.class,
+                () -> attendanceService.checkOut(1L));
+    }
 }
