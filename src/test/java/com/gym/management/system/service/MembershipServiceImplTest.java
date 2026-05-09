@@ -171,4 +171,51 @@ public class MembershipServiceImplTest {
         assertThrows(InvalidInputException.class,
                 () -> membershipService.createMembership(1L, 10L, requestDTO));
     }
+
+    // ════════════════════════════════════════════════════════════
+    // getMembershipsByMemberId() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getMembershipsByMemberId_ShouldReturnList_WhenMemberExists() {
+
+        // Arrange
+        when(memberRepository.existsById(1L)).thenReturn(true);
+        when(membershipRepository.findByMemberMemberId(1L)).thenReturn(List.of(activeMembership));
+        when(membershipDTOMapper.toResponse(activeMembership)).thenReturn(responseDTO);
+
+        // Act
+        List<MembershipResponseDTO> result = membershipService.getMembershipsByMemberId(1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getMembershipsByMemberId_ShouldReturnEmptyList_WhenMemberHasNoMemberships() {
+
+        // Arrange — member exists but has no memberships
+        when(memberRepository.existsById(1L)).thenReturn(true);
+        when(membershipRepository.findByMemberMemberId(1L)).thenReturn(List.of());
+
+        // Act
+        List<MembershipResponseDTO> result = membershipService.getMembershipsByMemberId(1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void getMembershipsByMemberId_ShouldThrowNotFoundException_WhenMemberDoesNotExist() {
+
+        // Arrange — member not found
+        when(memberRepository.existsById(99L)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> membershipService.getMembershipsByMemberId(99L));
+    }
+
 }
