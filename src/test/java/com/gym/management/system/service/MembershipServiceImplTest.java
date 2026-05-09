@@ -218,4 +218,47 @@ public class MembershipServiceImplTest {
                 () -> membershipService.getMembershipsByMemberId(99L));
     }
 
+    // ════════════════════════════════════════════════════════════
+    // getActiveMembership() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getActiveMembership_ShouldReturnResponse_WhenActiveMembershipExists() {
+
+        // Arrange
+        when(memberRepository.existsById(1L)).thenReturn(true);
+        when(membershipRepository.findByMemberMemberIdAndStatus(1L, MembershipStatus.ACTIVE))
+                .thenReturn(Optional.of(activeMembership));
+        when(membershipDTOMapper.toResponse(activeMembership)).thenReturn(responseDTO);
+
+        // Act
+        MembershipResponseDTO result = membershipService.getActiveMembership(1L);
+
+        // Assert
+        assertNotNull(result);
+    }
+
+    @Test
+    void getActiveMembership_ShouldThrowNotFoundException_WhenMemberDoesNotExist() {
+
+        // Arrange
+        when(memberRepository.existsById(99L)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> membershipService.getActiveMembership(99L));
+    }
+
+    @Test
+    void getActiveMembership_ShouldThrowNotFoundException_WhenNoActiveMembershipFound() {
+
+        // Arrange — member exists but has no active membership
+        when(memberRepository.existsById(1L)).thenReturn(true);
+        when(membershipRepository.findByMemberMemberIdAndStatus(1L, MembershipStatus.ACTIVE))
+                .thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> membershipService.getActiveMembership(1L));
+    }
 }
