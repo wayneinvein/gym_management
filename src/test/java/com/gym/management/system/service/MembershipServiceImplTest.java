@@ -111,4 +111,28 @@ public class MembershipServiceImplTest {
         // Verify payment was auto-created with PENDING status
         verify(memberPaymentRepository).save(any(MemberPayment.class));
     }
+
+    @Test
+    void createMembership_ShouldCancelExistingMembership_WhenOneAlreadyExists() {
+
+        // Arrange — member already has an active membership
+        Membership existingMembership = new Membership();
+        existingMembership.setStatus(MembershipStatus.ACTIVE);
+
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(membershipPlanRepository.findById(10L)).thenReturn(Optional.of(activePlan));
+        when(membershipRepository.findByMemberMemberIdAndStatus(1L, MembershipStatus.ACTIVE))
+                .thenReturn(Optional.of(existingMembership)); // existing one found
+        when(membershipRepository.save(any(Membership.class))).thenReturn(activeMembership);
+        when(membershipDTOMapper.toResponse(activeMembership)).thenReturn(responseDTO);
+
+        // Act
+        membershipService.createMembership(1L, 10L, requestDTO);
+
+        // Assert — old membership status should be CANCELLED
+        assertEquals(MembershipStatus.CANCELLED, existingMembership.getStatus());
+
+        // save() called twice: once to cancel old, once to save new
+        verify(membershipRepository, times(2)).save(any(Membership.class));
+    }
 }
