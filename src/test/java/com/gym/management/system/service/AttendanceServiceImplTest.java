@@ -250,4 +250,77 @@ public class AttendanceServiceImplTest {
         assertNotNull(result);
         assertEquals(0, result.size());
     }
+
+    // ════════════════════════════════════════════════════════════
+    // getAttendanceByMemberAndDateRange() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getAttendanceByMemberAndDateRange_ShouldReturnList_WhenValidRangeProvided() {
+
+        // Arrange
+        LocalDate startDate = LocalDate.now().minusDays(7);
+        LocalDate endDate = LocalDate.now();
+
+        when(memberRepository.existsById(1L)).thenReturn(true);
+        when(attendanceRepository.findByMemberMemberIdAndDateBetween(1L, startDate, endDate))
+                .thenReturn(List.of(attendance));
+        when(attendanceDTOMapper.toResponse(List.of(attendance))).thenReturn(List.of(responseDTO));
+
+        // Act
+        List<AttendanceResponseDTO> result =
+                attendanceService.getAttendanceByMemberAndDateRange(1L, startDate, endDate);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getAttendanceByMemberAndDateRange_ShouldThrowNotFoundException_WhenMemberDoesNotExist() {
+
+        // Arrange
+        when(memberRepository.existsById(99L)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> attendanceService.getAttendanceByMemberAndDateRange(
+                        99L, LocalDate.now().minusDays(7), LocalDate.now()));
+    }
+
+    @Test
+    void getAttendanceByMemberAndDateRange_ShouldThrowInvalidInputException_WhenStartDateIsAfterEndDate() {
+
+        // Arrange — invalid range: start is after end
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = LocalDate.now().minusDays(5); // end before start
+
+        when(memberRepository.existsById(1L)).thenReturn(true);
+
+        // Act & Assert
+        assertThrows(InvalidInputException.class,
+                () -> attendanceService.getAttendanceByMemberAndDateRange(1L, startDate, endDate));
+    }
+
+    @Test
+    void getAttendanceByMemberAndDateRange_ShouldReturnEmptyList_WhenNoAttendanceInRange() {
+
+        // Arrange — valid range but no records found
+        LocalDate startDate = LocalDate.now().minusDays(30);
+        LocalDate endDate = LocalDate.now().minusDays(20);
+
+        when(memberRepository.existsById(1L)).thenReturn(true);
+        when(attendanceRepository.findByMemberMemberIdAndDateBetween(1L, startDate, endDate))
+                .thenReturn(List.of());
+        when(attendanceDTOMapper.toResponse(List.of())).thenReturn(List.of());
+
+        // Act
+        List<AttendanceResponseDTO> result =
+                attendanceService.getAttendanceByMemberAndDateRange(1L, startDate, endDate);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
 }
