@@ -351,4 +351,39 @@ public class MembershipServiceImplTest {
                 () -> membershipService.cancelMembership(100L));
     }
 
+    // ════════════════════════════════════════════════════════════
+    // getExpiringMemberships() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getExpiringMemberships_ShouldReturnList_WhenMembershipsExpiringSoon() {
+
+        // Arrange
+        when(membershipRepository.findByEndDateBeforeAndStatus(any(LocalDate.class), eq(MembershipStatus.ACTIVE)))
+                .thenReturn(List.of(activeMembership));
+        when(membershipDTOMapper.toResponse(activeMembership)).thenReturn(responseDTO);
+
+        // Act
+        List<MembershipResponseDTO> result = membershipService.getExpiringMemberships(7);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getExpiringMemberships_ShouldReturnEmptyList_WhenNoMembershipsExpiringSoon() {
+
+        // Arrange — nothing expiring in next 3 days
+        when(membershipRepository.findByEndDateBeforeAndStatus(any(LocalDate.class), eq(MembershipStatus.ACTIVE)))
+                .thenReturn(List.of());
+
+        // Act
+        List<MembershipResponseDTO> result = membershipService.getExpiringMemberships(3);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
 }
