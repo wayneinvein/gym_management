@@ -184,4 +184,18 @@ public class AuthServiceImplTest {
         verify(refreshTokenRepository, never()).delete(any());
         verify(refreshTokenService, never()).createRefreshToken(any());
     }
+
+    // ════════════════════════════════════════════════════════════
+    // logout() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void logout_ShouldDeleteRefreshToken_WhenCalled() {
+
+        // Act — logout with a token
+        authService.logout("fake-refresh-token");
+
+        // Assert — token should be deleted from DB
+        verify(refreshTokenRepository).deleteByToken("fake-refresh-token");
+    }
 }
