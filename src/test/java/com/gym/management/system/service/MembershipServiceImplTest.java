@@ -135,4 +135,15 @@ public class MembershipServiceImplTest {
         // save() called twice: once to cancel old, once to save new
         verify(membershipRepository, times(2)).save(any(Membership.class));
     }
+
+    @Test
+    void createMembership_ShouldThrowNotFoundException_WhenMemberDoesNotExist() {
+
+        // Arrange — member not found in DB
+        when(memberRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert — should throw NotFoundException
+        assertThrows(NotFoundException.class,
+                () -> membershipService.createMembership(99L, 10L, requestDTO));
+    }
 }
