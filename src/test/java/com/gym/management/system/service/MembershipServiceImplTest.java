@@ -261,4 +261,39 @@ public class MembershipServiceImplTest {
         assertThrows(NotFoundException.class,
                 () -> membershipService.getActiveMembership(1L));
     }
+
+    // ════════════════════════════════════════════════════════════
+    // getAllMemberships() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getAllMemberships_ShouldReturnPagedResult_WhenCalled() {
+
+        // Arrange — wrap membership in a Page object (what repository returns)
+        Page<Membership> membershipPage = new PageImpl<>(List.of(activeMembership));
+        when(membershipRepository.findAll(any(PageRequest.class))).thenReturn(membershipPage);
+        when(membershipDTOMapper.toResponse(activeMembership)).thenReturn(responseDTO);
+
+        // Act
+        Page<MembershipResponseDTO> result = membershipService.getAllMemberships(0, 10, "startDate", "asc");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+    }
+
+    @Test
+    void getAllMemberships_ShouldReturnEmptyPage_WhenNoMembershipsExist() {
+
+        // Arrange — empty page
+        when(membershipRepository.findAll(any(PageRequest.class))).thenReturn(Page.empty());
+
+        // Act
+        Page<MembershipResponseDTO> result = membershipService.getAllMemberships(0, 10, "startDate", "asc");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+    }
+
 }
