@@ -296,43 +296,59 @@ public class MembershipServiceImplTest {
         assertEquals(0, result.getTotalElements());
     }
 
-
     // ════════════════════════════════════════════════════════════
-    // getMembershipsByStatus() tests
+    // cancelMembership() tests
     // ════════════════════════════════════════════════════════════
 
     @Test
-    void getMembershipsByStatus_ShouldReturnFilteredPage_WhenStatusMatches() {
+    void cancelMembership_ShouldReturnResponse_WhenMembershipIsActive() {
 
         // Arrange
-        Page<Membership> page = new PageImpl<>(List.of(activeMembership));
-        when(membershipRepository.findByStatus(eq(MembershipStatus.ACTIVE), any(PageRequest.class)))
-                .thenReturn(page);
+        when(membershipRepository.findById(100L)).thenReturn(Optional.of(activeMembership));
+        when(membershipRepository.save(activeMembership)).thenReturn(activeMembership);
         when(membershipDTOMapper.toResponse(activeMembership)).thenReturn(responseDTO);
 
         // Act
-        Page<MembershipResponseDTO> result =
-                membershipService.getMembershipsByStatus(MembershipStatus.ACTIVE, 0, 10, "startDate", "asc");
+        MembershipResponseDTO result = membershipService.cancelMembership(100L);
 
-        // Assert
+        // Assert — result not null and status updated to CANCELLED
         assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
+        assertEquals(MembershipStatus.CANCELLED, activeMembership.getStatus());
     }
 
     @Test
-    void getMembershipsByStatus_ShouldReturnEmptyPage_WhenNoMatchingStatus() {
+    void cancelMembership_ShouldThrowNotFoundException_WhenMembershipDoesNotExist() {
 
-        // Arrange — no cancelled memberships found
-        when(membershipRepository.findByStatus(eq(MembershipStatus.CANCELLED), any(PageRequest.class)))
-                .thenReturn(Page.empty());
+        // Arrange
+        when(membershipRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act
-        Page<MembershipResponseDTO> result =
-                membershipService.getMembershipsByStatus(MembershipStatus.CANCELLED, 0, 10, "startDate", "asc");
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> membershipService.cancelMembership(999L));
+    }
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(0, result.getTotalElements());
+    @Test
+    void cancelMembership_ShouldThrowInvalidInputException_WhenMembershipIsAlreadyCancelled() {
+
+        // Arrange — membership already cancelled
+        activeMembership.setStatus(MembershipStatus.CANCELLED);
+        when(membershipRepository.findById(100L)).thenReturn(Optional.of(activeMembership));
+
+        // Act & Assert
+        assertThrows(InvalidInputException.class,
+                () -> membershipService.cancelMembership(100L));
+    }
+
+    @Test
+    void cancelMembership_ShouldThrowInvalidInputException_WhenMembershipIsExpired() {
+
+        // Arrange — expired memberships also cannot be cancelled
+        activeMembership.setStatus(MembershipStatus.EXPIRED);
+        when(membershipRepository.findById(100L)).thenReturn(Optional.of(activeMembership));
+
+        // Act & Assert
+        assertThrows(InvalidInputException.class,
+                () -> membershipService.cancelMembership(100L));
     }
 
 }
