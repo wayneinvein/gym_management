@@ -466,5 +466,3 @@ public class MembershipServiceImplTest {
                 () -> membershipService.getMembershipSummary("john_doe"));
     }
 }
-
-}
