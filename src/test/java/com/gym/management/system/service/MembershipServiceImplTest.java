@@ -296,4 +296,43 @@ public class MembershipServiceImplTest {
         assertEquals(0, result.getTotalElements());
     }
 
+
+    // ════════════════════════════════════════════════════════════
+    // getMembershipsByStatus() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getMembershipsByStatus_ShouldReturnFilteredPage_WhenStatusMatches() {
+
+        // Arrange
+        Page<Membership> page = new PageImpl<>(List.of(activeMembership));
+        when(membershipRepository.findByStatus(eq(MembershipStatus.ACTIVE), any(PageRequest.class)))
+                .thenReturn(page);
+        when(membershipDTOMapper.toResponse(activeMembership)).thenReturn(responseDTO);
+
+        // Act
+        Page<MembershipResponseDTO> result =
+                membershipService.getMembershipsByStatus(MembershipStatus.ACTIVE, 0, 10, "startDate", "asc");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+    }
+
+    @Test
+    void getMembershipsByStatus_ShouldReturnEmptyPage_WhenNoMatchingStatus() {
+
+        // Arrange — no cancelled memberships found
+        when(membershipRepository.findByStatus(eq(MembershipStatus.CANCELLED), any(PageRequest.class)))
+                .thenReturn(Page.empty());
+
+        // Act
+        Page<MembershipResponseDTO> result =
+                membershipService.getMembershipsByStatus(MembershipStatus.CANCELLED, 0, 10, "startDate", "asc");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+    }
+
 }
