@@ -386,4 +386,85 @@ public class MembershipServiceImplTest {
         assertEquals(0, result.size());
     }
 
+    // ════════════════════════════════════════════════════════════
+    // getMembershipSummary() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getMembershipSummary_ShouldReturnSummary_WhenActiveMembershipExists() {
+
+        // Arrange — membership started 10 days ago, ends in 20 days
+        activeMembership.setStartDate(LocalDate.now().minusDays(10));
+        activeMembership.setEndDate(LocalDate.now().plusDays(20));
+
+        when(memberRepository.findByUserUsername("john_doe")).thenReturn(Optional.of(member));
+        when(membershipRepository.findByMemberMemberIdAndStatus(1L, MembershipStatus.ACTIVE))
+                .thenReturn(Optional.of(activeMembership));
+        when(memberPaymentRepository.findByMembershipMembershipIdAndStatus(100L, PaymentStatus.PENDING))
+                .thenReturn(Optional.empty()); // no pending payment
+
+        // Act
+        MembershipSummaryResponseDTO result = membershipService.getMembershipSummary("john_doe");
+
+        // Assert — basic fields should be populated correctly
+        assertNotNull(result);
+        assertEquals("Gold Plan", result.getPlanName());
+        assertEquals(30L, result.getTotalDays());
+        assertEquals(10L, result.getDaysCompleted());
+        assertEquals(20L, result.getDaysRemaining());
+        assertFalse(result.isPaymentPending());
+        assertEquals(0.0, result.getAmountDue());
+    }
+
+    @Test
+    void getMembershipSummary_ShouldShowPendingPayment_WhenPaymentNotYetPaid() {
+
+        // Arrange — pending payment exists for this membership
+        MemberPayment pendingPayment = new MemberPayment();
+        pendingPayment.setAmount(999.0);
+        pendingPayment.setStatus(PaymentStatus.PENDING);
+
+        activeMembership.setStartDate(LocalDate.now().minusDays(10));
+        activeMembership.setEndDate(LocalDate.now().plusDays(20));
+
+        when(memberRepository.findByUserUsername("john_doe")).thenReturn(Optional.of(member));
+        when(membershipRepository.findByMemberMemberIdAndStatus(1L, MembershipStatus.ACTIVE))
+                .thenReturn(Optional.of(activeMembership));
+        when(memberPaymentRepository.findByMembershipMembershipIdAndStatus(100L, PaymentStatus.PENDING))
+                .thenReturn(Optional.of(pendingPayment));
+
+        // Act
+        MembershipSummaryResponseDTO result = membershipService.getMembershipSummary("john_doe");
+
+        // Assert — payment flag and amount should reflect pending payment
+        assertNotNull(result);
+        assertTrue(result.isPaymentPending());
+        assertEquals(999.0, result.getAmountDue());
+    }
+
+    @Test
+    void getMembershipSummary_ShouldThrowNotFoundException_WhenMemberNotFound() {
+
+        // Arrange — no member linked to this username
+        when(memberRepository.findByUserUsername("unknown")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> membershipService.getMembershipSummary("unknown"));
+    }
+
+    @Test
+    void getMembershipSummary_ShouldThrowNotFoundException_WhenNoActiveMembershipFound() {
+
+        // Arrange — member exists but has no active membership
+        when(memberRepository.findByUserUsername("john_doe")).thenReturn(Optional.of(member));
+        when(membershipRepository.findByMemberMemberIdAndStatus(1L, MembershipStatus.ACTIVE))
+                .thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> membershipService.getMembershipSummary("john_doe"));
+    }
+}
+
 }
