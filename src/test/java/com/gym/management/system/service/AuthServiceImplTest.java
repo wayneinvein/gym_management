@@ -198,4 +198,95 @@ public class AuthServiceImplTest {
         // Assert — token should be deleted from DB
         verify(refreshTokenRepository).deleteByToken("fake-refresh-token");
     }
+
+    // ════════════════════════════════════════════════════════════
+    // changePassword() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void changePassword_ShouldSaveNewPassword_WhenAllValidationsPass() {
+
+        // Arrange — current password matches, new passwords match, new != current
+        ChangePasswordRequestDTO dto = new ChangePasswordRequestDTO();
+        dto.setCurrentPassword("currentRaw");
+        dto.setNewPassword("newRaw");
+        dto.setConfirmPassword("newRaw");
+
+        when(userRepository.findByUsername("john_doe")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("currentRaw", "encodedPassword")).thenReturn(true);  // current password correct
+        when(passwordEncoder.matches("newRaw", "encodedPassword")).thenReturn(false);     // new != current
+        when(passwordEncoder.encode("newRaw")).thenReturn("newEncodedPassword");
+
+        // Act
+        authService.changePassword("john_doe", dto);
+
+        // Assert — new encoded password saved
+        verify(userRepository).save(user);
+        assertEquals("newEncodedPassword", user.getPassword());
+    }
+
+    @Test
+    void changePassword_ShouldThrowNotFoundException_WhenUserNotFound() {
+
+        // Arrange — no user linked to this username
+        ChangePasswordRequestDTO dto = new ChangePasswordRequestDTO();
+
+        when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> authService.changePassword("unknown", dto));
+    }
+
+    @Test
+    void changePassword_ShouldThrowInvalidInputException_WhenCurrentPasswordIsWrong() {
+
+        // Arrange — current password does not match stored password
+        ChangePasswordRequestDTO dto = new ChangePasswordRequestDTO();
+        dto.setCurrentPassword("wrongCurrent");
+        dto.setNewPassword("newRaw");
+        dto.setConfirmPassword("newRaw");
+
+        when(userRepository.findByUsername("john_doe")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrongCurrent", "encodedPassword")).thenReturn(false); // wrong password
+
+        // Act & Assert
+        assertThrows(InvalidInputException.class,
+                () -> authService.changePassword("john_doe", dto));
+    }
+
+    @Test
+    void changePassword_ShouldThrowInvalidInputException_WhenNewPasswordAndConfirmPasswordDoNotMatch() {
+
+        // Arrange — new password and confirm password are different
+        ChangePasswordRequestDTO dto = new ChangePasswordRequestDTO();
+        dto.setCurrentPassword("currentRaw");
+        dto.setNewPassword("newRaw");
+        dto.setConfirmPassword("differentRaw"); // mismatch
+
+        when(userRepository.findByUsername("john_doe")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("currentRaw", "encodedPassword")).thenReturn(true); // current password correct
+
+        // Act & Assert
+        assertThrows(InvalidInputException.class,
+                () -> authService.changePassword("john_doe", dto));
+    }
+
+    @Test
+    void changePassword_ShouldThrowInvalidInputException_WhenNewPasswordIsSameAsCurrentPassword() {
+
+        // Arrange — new password is the same as current password
+        ChangePasswordRequestDTO dto = new ChangePasswordRequestDTO();
+        dto.setCurrentPassword("currentRaw");
+        dto.setNewPassword("currentRaw");   // same as current
+        dto.setConfirmPassword("currentRaw");
+
+        when(userRepository.findByUsername("john_doe")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("currentRaw", "encodedPassword")).thenReturn(true); // current password correct
+        when(passwordEncoder.matches("currentRaw", "encodedPassword")).thenReturn(true); // new == current
+
+        // Act & Assert
+        assertThrows(InvalidInputException.class,
+                () -> authService.changePassword("john_doe", dto));
+    }
 }
