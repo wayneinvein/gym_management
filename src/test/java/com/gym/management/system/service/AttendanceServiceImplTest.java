@@ -216,4 +216,38 @@ public class AttendanceServiceImplTest {
         assertThrows(NotFoundException.class,
                 () -> attendanceService.getAttendanceByMember(99L));
     }
+
+    // ════════════════════════════════════════════════════════════
+    // getTodayAttendance() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getTodayAttendance_ShouldReturnList_WhenAttendanceRecordsExistForToday() {
+
+        // Arrange
+        when(attendanceRepository.findByDate(LocalDate.now())).thenReturn(List.of(attendance));
+        when(attendanceDTOMapper.toResponse(List.of(attendance))).thenReturn(List.of(responseDTO));
+
+        // Act
+        List<AttendanceResponseDTO> result = attendanceService.getTodayAttendance();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getTodayAttendance_ShouldReturnEmptyList_WhenNoOneCheckedInToday() {
+
+        // Arrange — nobody checked in today
+        when(attendanceRepository.findByDate(LocalDate.now())).thenReturn(List.of());
+        when(attendanceDTOMapper.toResponse(List.of())).thenReturn(List.of());
+
+        // Act
+        List<AttendanceResponseDTO> result = attendanceService.getTodayAttendance();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
 }
