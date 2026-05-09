@@ -158,4 +158,17 @@ public class MembershipServiceImplTest {
         assertThrows(NotFoundException.class,
                 () -> membershipService.createMembership(1L, 99L, requestDTO));
     }
+
+    @Test
+    void createMembership_ShouldThrowInvalidInputException_WhenPlanIsInactive() {
+
+        // Arrange — plan exists but is inactive
+        activePlan.setActive(false);
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(membershipPlanRepository.findById(10L)).thenReturn(Optional.of(activePlan));
+
+        // Act & Assert — should throw InvalidInputException
+        assertThrows(InvalidInputException.class,
+                () -> membershipService.createMembership(1L, 10L, requestDTO));
+    }
 }
