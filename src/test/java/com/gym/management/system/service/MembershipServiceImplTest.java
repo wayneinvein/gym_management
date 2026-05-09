@@ -146,4 +146,16 @@ public class MembershipServiceImplTest {
         assertThrows(NotFoundException.class,
                 () -> membershipService.createMembership(99L, 10L, requestDTO));
     }
+
+    @Test
+    void createMembership_ShouldThrowNotFoundException_WhenPlanDoesNotExist() {
+
+        // Arrange — member exists but plan does not
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(membershipPlanRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert — should throw NotFoundException
+        assertThrows(NotFoundException.class,
+                () -> membershipService.createMembership(1L, 99L, requestDTO));
+    }
 }
