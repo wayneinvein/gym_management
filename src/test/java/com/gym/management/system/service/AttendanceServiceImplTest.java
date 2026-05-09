@@ -63,4 +63,50 @@ public class AttendanceServiceImplTest {
         // Fake response DTO returned by mapper
         responseDTO = new AttendanceResponseDTO();
     }
+
+    // ════════════════════════════════════════════════════════════
+    // checkIn() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void checkIn_ShouldReturnResponse_WhenMemberHasNotCheckedInToday() {
+
+        // Arrange — member exists, no check-in yet today
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(attendanceRepository.findByMemberMemberIdAndDate(1L, LocalDate.now()))
+                .thenReturn(Optional.empty()); // no record for today
+        when(attendanceRepository.save(any(Attendance.class))).thenReturn(attendance);
+        when(attendanceDTOMapper.toResponse(attendance)).thenReturn(responseDTO);
+
+        // Act
+        AttendanceResponseDTO result = attendanceService.checkIn(1L);
+
+        // Assert
+        assertNotNull(result);
+        verify(attendanceRepository).save(any(Attendance.class));
+    }
+
+    @Test
+    void checkIn_ShouldThrowNotFoundException_WhenMemberDoesNotExist() {
+
+        // Arrange — member not found in DB
+        when(memberRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> attendanceService.checkIn(99L));
+    }
+
+    @Test
+    void checkIn_ShouldThrowInvalidInputException_WhenMemberAlreadyCheckedInToday() {
+
+        // Arrange — member exists and already has a check-in record for today
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(attendanceRepository.findByMemberMemberIdAndDate(1L, LocalDate.now()))
+                .thenReturn(Optional.of(attendance)); // already checked in
+
+        // Act & Assert
+        assertThrows(InvalidInputException.class,
+                () -> attendanceService.checkIn(1L));
+    }
 }
