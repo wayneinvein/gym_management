@@ -169,4 +169,51 @@ public class AttendanceServiceImplTest {
         assertThrows(InvalidInputException.class,
                 () -> attendanceService.checkOut(1L));
     }
+
+    // ════════════════════════════════════════════════════════════
+    // getAttendanceByMember() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getAttendanceByMember_ShouldReturnList_WhenMemberExists() {
+
+        // Arrange
+        when(memberRepository.existsById(1L)).thenReturn(true);
+        when(attendanceRepository.findByMemberMemberId(1L)).thenReturn(List.of(attendance));
+        when(attendanceDTOMapper.toResponse(List.of(attendance))).thenReturn(List.of(responseDTO));
+
+        // Act
+        List<AttendanceResponseDTO> result = attendanceService.getAttendanceByMember(1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getAttendanceByMember_ShouldReturnEmptyList_WhenMemberHasNoAttendance() {
+
+        // Arrange — member exists but has no attendance records
+        when(memberRepository.existsById(1L)).thenReturn(true);
+        when(attendanceRepository.findByMemberMemberId(1L)).thenReturn(List.of());
+        when(attendanceDTOMapper.toResponse(List.of())).thenReturn(List.of());
+
+        // Act
+        List<AttendanceResponseDTO> result = attendanceService.getAttendanceByMember(1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void getAttendanceByMember_ShouldThrowNotFoundException_WhenMemberDoesNotExist() {
+
+        // Arrange
+        when(memberRepository.existsById(99L)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> attendanceService.getAttendanceByMember(99L));
+    }
 }
