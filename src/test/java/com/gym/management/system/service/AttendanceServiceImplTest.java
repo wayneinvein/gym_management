@@ -323,4 +323,51 @@ public class AttendanceServiceImplTest {
         assertEquals(0, result.size());
     }
 
+    // ════════════════════════════════════════════════════════════
+    // getMyAttendance() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getMyAttendance_ShouldReturnList_WhenUsernameIsValid() {
+
+        // Arrange — logged-in user has a linked member profile
+        when(memberRepository.findByUserUsername("john_doe")).thenReturn(Optional.of(member));
+        when(attendanceRepository.findByMemberMemberId(member.getMemberId()))
+                .thenReturn(List.of(attendance));
+        when(attendanceDTOMapper.toResponse(List.of(attendance))).thenReturn(List.of(responseDTO));
+
+        // Act
+        List<AttendanceResponseDTO> result = attendanceService.getMyAttendance("john_doe");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getMyAttendance_ShouldThrowNotFoundException_WhenMemberProfileNotFound() {
+
+        // Arrange — no member linked to this username
+        when(memberRepository.findByUserUsername("unknown")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> attendanceService.getMyAttendance("unknown"));
+    }
+
+    @Test
+    void getMyAttendance_ShouldReturnEmptyList_WhenMemberHasNoAttendanceRecords() {
+
+        // Arrange — member exists but has never checked in
+        when(memberRepository.findByUserUsername("john_doe")).thenReturn(Optional.of(member));
+        when(attendanceRepository.findByMemberMemberId(member.getMemberId())).thenReturn(List.of());
+        when(attendanceDTOMapper.toResponse(List.of())).thenReturn(List.of());
+
+        // Act
+        List<AttendanceResponseDTO> result = attendanceService.getMyAttendance("john_doe");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
 }
