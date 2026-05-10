@@ -77,6 +77,7 @@ public class TrainerServiceImplTest {
         requestDTO = new TrainerRequestDTO();
         requestDTO.setTrainerName("Mike");
         requestDTO.setPhoneNumber("9876543210");
+        requestDTO.setSalary(30000.0);
 
         // Fake response DTO returned after mapping
         responseDTO = new TrainerResponseDTO();
