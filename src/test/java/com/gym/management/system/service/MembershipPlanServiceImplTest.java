@@ -240,4 +240,51 @@ public class MembershipPlanServiceImplTest {
                 () -> membershipPlanService.deletePlan(99L));
     }
 
+    // ════════════════════════════════════════════════════════════
+    // toggleStatus() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void toggleStatus_ShouldSetActiveToFalse_WhenPlanIsDeactivated() {
+
+        // Arrange — plan is currently active
+        when(membershipPlanRepository.findById(1L)).thenReturn(Optional.of(plan));
+        when(membershipPlanRepository.save(plan)).thenReturn(plan);
+        when(membershipPlanDTOMapper.toResponse(plan)).thenReturn(responseDTO);
+
+        // Act
+        membershipPlanService.toggleStatus(1L, false);
+
+        // Assert — plan should now be inactive
+        assertFalse(plan.isActive());
+        verify(membershipPlanRepository).save(plan);
+    }
+
+    @Test
+    void toggleStatus_ShouldSetActiveToTrue_WhenPlanIsReactivated() {
+
+        // Arrange — plan is currently inactive
+        plan.setActive(false);
+        when(membershipPlanRepository.findById(1L)).thenReturn(Optional.of(plan));
+        when(membershipPlanRepository.save(plan)).thenReturn(plan);
+        when(membershipPlanDTOMapper.toResponse(plan)).thenReturn(responseDTO);
+
+        // Act
+        membershipPlanService.toggleStatus(1L, true);
+
+        // Assert — plan should now be active again
+        assertTrue(plan.isActive());
+        verify(membershipPlanRepository).save(plan);
+    }
+
+    @Test
+    void toggleStatus_ShouldThrowNotFoundException_WhenPlanDoesNotExist() {
+
+        // Arrange
+        when(membershipPlanRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> membershipPlanService.toggleStatus(99L, false));
+    }
 }
