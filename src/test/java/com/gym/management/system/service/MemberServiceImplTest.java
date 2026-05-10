@@ -195,4 +195,36 @@ public class MemberServiceImplTest {
         verify(memberRepository, never()).save(any());
     }
 
+
+    // ════════════════════════════════════════════════════════════
+    // updateMember() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void updateMember_ShouldReturnUpdatedResponse_WhenMemberExists() {
+
+        // Arrange
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(memberRepository.save(member)).thenReturn(member);
+        when(memberDtoMapper.toResponse(member)).thenReturn(responseDTO);
+
+        // Act
+        MemberResponseDTO result = memberService.updateMember(1L, requestDTO);
+
+        // Assert
+        assertNotNull(result);
+        verify(memberRepository).save(member);
+    }
+
+    @Test
+    void updateMember_ShouldThrowNotFoundException_WhenMemberDoesNotExist() {
+
+        // Arrange
+        when(memberRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> memberService.updateMember(99L, requestDTO));
+    }
+
 }
