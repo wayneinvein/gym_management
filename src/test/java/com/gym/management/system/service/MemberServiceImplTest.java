@@ -503,6 +503,3 @@ public class MemberServiceImplTest {
                 () -> memberService.updateMyProfile("unknown", requestDTO));
     }
 }
-
-
-}
