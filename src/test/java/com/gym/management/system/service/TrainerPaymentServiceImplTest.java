@@ -249,4 +249,34 @@ public class TrainerPaymentServiceImplTest {
         assertNotNull(result);
         assertEquals(0, result.getTotalElements());
     }
+
+
+    // ════════════════════════════════════════════════════════════
+    // getPaymentById() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getPaymentById_ShouldReturnResponse_WhenPaymentExists() {
+
+        // Arrange
+        when(trainerPaymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+        when(trainerPaymentDTOMapper.toResponse(payment)).thenReturn(responseDTO);
+
+        // Act
+        TrainerPaymentResponseDTO result = trainerPaymentService.getPaymentById(1L);
+
+        // Assert
+        assertNotNull(result);
+    }
+
+    @Test
+    void getPaymentById_ShouldThrowNotFoundException_WhenPaymentDoesNotExist() {
+
+        // Arrange
+        when(trainerPaymentRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> trainerPaymentService.getPaymentById(99L));
+    }
 }
