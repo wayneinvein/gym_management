@@ -144,4 +144,18 @@ public class RefreshTokenServiceImplTest {
         // Assert — expired token should be deleted from DB before throwing
         verify(refreshTokenRepository).delete(expiredToken);
     }
+
+    // ════════════════════════════════════════════════════════════
+    // deleteByUser() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void deleteByUser_ShouldCallRepository_WhenCalled() {
+
+        // Act
+        refreshTokenService.deleteByUser(user);
+
+        // Assert — repository delete called with the correct user
+        verify(refreshTokenRepository).deleteByUser(user);
+    }
 }
