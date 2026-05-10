@@ -180,4 +180,35 @@ public class MembershipPlanServiceImplTest {
                 () -> membershipPlanService.getPlanById(99L));
     }
 
+    // ════════════════════════════════════════════════════════════
+    // updatePlan() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void updatePlan_ShouldReturnUpdatedResponse_WhenPlanExists() {
+
+        // Arrange
+        when(membershipPlanRepository.findById(1L)).thenReturn(Optional.of(plan));
+        when(membershipPlanRepository.save(plan)).thenReturn(plan);
+        when(membershipPlanDTOMapper.toResponse(plan)).thenReturn(responseDTO);
+
+        // Act
+        MembershipPlanResponseDTO result = membershipPlanService.updatePlan(1L, requestDTO);
+
+        // Assert
+        assertNotNull(result);
+        verify(membershipPlanRepository).save(plan);
+    }
+
+    @Test
+    void updatePlan_ShouldThrowNotFoundException_WhenPlanDoesNotExist() {
+
+        // Arrange
+        when(membershipPlanRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> membershipPlanService.updatePlan(99L, requestDTO));
+    }
+
 }
