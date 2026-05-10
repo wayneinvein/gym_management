@@ -124,4 +124,34 @@ public class MemberServiceImplTest {
         assertNotNull(result);
         assertEquals(0, result.getTotalElements());
     }
+
+    // ════════════════════════════════════════════════════════════
+    // getMemberById() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getMemberById_ShouldReturnResponse_WhenMemberExists() {
+
+        // Arrange
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(memberDtoMapper.toResponse(member)).thenReturn(responseDTO);
+
+        // Act
+        MemberResponseDTO result = memberService.getMemberById(1L);
+
+        // Assert
+        assertNotNull(result);
+    }
+
+    @Test
+    void getMemberById_ShouldThrowNotFoundException_WhenMemberDoesNotExist() {
+
+        // Arrange
+        when(memberRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> memberService.getMemberById(99L));
+    }
+
 }
