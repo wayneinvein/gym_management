@@ -311,4 +311,38 @@ public class TrainerPaymentServiceImplTest {
         assertThrows(NotFoundException.class,
                 () -> trainerPaymentService.updatePaymentStatus(99L, PaymentStatus.PAID));
     }
+
+    // ════════════════════════════════════════════════════════════
+    // getPaymentsByMonth() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getPaymentsByMonth_ShouldReturnList_WhenPaymentsExistForThatMonth() {
+
+        // Arrange
+        when(trainerPaymentRepository.findBySalaryMonth("2025-01")).thenReturn(List.of(payment));
+        when(trainerPaymentDTOMapper.toResponse(List.of(payment))).thenReturn(List.of(responseDTO));
+
+        // Act
+        List<TrainerPaymentResponseDTO> result = trainerPaymentService.getPaymentsByMonth("2025-01");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getPaymentsByMonth_ShouldReturnEmptyList_WhenNoPaymentsExistForThatMonth() {
+
+        // Arrange — no payments for this month
+        when(trainerPaymentRepository.findBySalaryMonth("2025-06")).thenReturn(List.of());
+        when(trainerPaymentDTOMapper.toResponse(List.of())).thenReturn(List.of());
+
+        // Act
+        List<TrainerPaymentResponseDTO> result = trainerPaymentService.getPaymentsByMonth("2025-06");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
 }
