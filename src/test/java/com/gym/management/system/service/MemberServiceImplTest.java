@@ -438,4 +438,71 @@ public class MemberServiceImplTest {
                 () -> memberService.getMyProfile());
     }
 
+    // ════════════════════════════════════════════════════════════
+    // updateMyProfile() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void updateMyProfile_ShouldReturnUpdatedResponse_WhenPhoneNumberIsUnchanged() {
+
+        // Arrange — member keeps the same phone number
+        requestDTO.setPhoneNumber("9876543210"); // same as member's current number
+
+        when(memberRepository.findByUserUsername("john_doe")).thenReturn(Optional.of(member));
+        when(memberRepository.save(member)).thenReturn(member);
+        when(memberDtoMapper.toResponse(member)).thenReturn(responseDTO);
+
+        // Act
+        MemberResponseDTO result = memberService.updateMyProfile("john_doe", requestDTO);
+
+        // Assert
+        assertNotNull(result);
+        verify(memberRepository).save(member);
+    }
+
+    @Test
+    void updateMyProfile_ShouldReturnUpdatedResponse_WhenNewPhoneNumberIsAvailable() {
+
+        // Arrange — member is changing to a new phone number that no one else has
+        requestDTO.setPhoneNumber("1111111111"); // new phone number
+
+        when(memberRepository.findByUserUsername("john_doe")).thenReturn(Optional.of(member));
+        when(memberRepository.existsByPhoneNumber("1111111111")).thenReturn(false); // not taken
+        when(memberRepository.save(member)).thenReturn(member);
+        when(memberDtoMapper.toResponse(member)).thenReturn(responseDTO);
+
+        // Act
+        MemberResponseDTO result = memberService.updateMyProfile("john_doe", requestDTO);
+
+        // Assert
+        assertNotNull(result);
+    }
+
+    @Test
+    void updateMyProfile_ShouldThrowAlreadyPresentException_WhenNewPhoneNumberIsTakenByAnotherMember() {
+
+        // Arrange — new phone number is already registered to someone else
+        requestDTO.setPhoneNumber("1111111111"); // different from current
+
+        when(memberRepository.findByUserUsername("john_doe")).thenReturn(Optional.of(member));
+        when(memberRepository.existsByPhoneNumber("1111111111")).thenReturn(true); // already taken
+
+        // Act & Assert
+        assertThrows(AlreadyPresentException.class,
+                () -> memberService.updateMyProfile("john_doe", requestDTO));
+    }
+
+    @Test
+    void updateMyProfile_ShouldThrowNotFoundException_WhenMemberProfileNotFound() {
+
+        // Arrange — no member linked to this username
+        when(memberRepository.findByUserUsername("unknown")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> memberService.updateMyProfile("unknown", requestDTO));
+    }
+}
+
+
 }
