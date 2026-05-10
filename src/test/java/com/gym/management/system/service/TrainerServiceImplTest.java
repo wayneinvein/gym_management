@@ -144,4 +144,65 @@ public class TrainerServiceImplTest {
         assertThrows(NotFoundException.class,
                 () -> trainerService.getTrainerById(99L));
     }
+
+    // ════════════════════════════════════════════════════════════
+    // addTrainer() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void addTrainer_ShouldReturnResponse_WhenPhoneNumberIsNotAlreadyRegistered() {
+
+        // Arrange — phone number is unique, user and trainer created successfully
+        when(trainerRepository.existsByPhoneNumber("9876543210")).thenReturn(false);
+        when(passwordEncoder.encode("Trainer@123")).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(new User());
+        when(trainerDTOMapper.toEntity(requestDTO)).thenReturn(trainer);
+        when(trainerRepository.save(any(Trainer.class))).thenReturn(trainer);
+        when(trainerDTOMapper.toResponse(trainer)).thenReturn(responseDTO);
+
+        // Act
+        TrainerResponseDTO result = trainerService.addTrainer(requestDTO);
+
+        // Assert
+        assertNotNull(result);
+
+        // Verify a user account was also created for this trainer
+        verify(userRepository).save(any(User.class));
+        verify(trainerRepository).save(any(Trainer.class));
+    }
+
+    @Test
+    void addTrainer_ShouldSetActiveToTrue_WhenTrainerIsCreated() {
+
+        // Arrange — trainer starts as inactive to verify service sets it to true
+        trainer.setActive(false);
+
+        when(trainerRepository.existsByPhoneNumber("9876543210")).thenReturn(false);
+        when(passwordEncoder.encode("Trainer@123")).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(new User());
+        when(trainerDTOMapper.toEntity(requestDTO)).thenReturn(trainer);
+        when(trainerRepository.save(any(Trainer.class))).thenReturn(trainer);
+        when(trainerDTOMapper.toResponse(trainer)).thenReturn(responseDTO);
+
+        // Act
+        trainerService.addTrainer(requestDTO);
+
+        // Assert — service should always set active=true on creation
+        assertTrue(trainer.isActive());
+    }
+
+    @Test
+    void addTrainer_ShouldThrowAlreadyPresentException_WhenPhoneNumberAlreadyRegistered() {
+
+        // Arrange — phone number already exists in DB
+        when(trainerRepository.existsByPhoneNumber("9876543210")).thenReturn(true);
+
+        // Act & Assert
+        assertThrows(AlreadyPresentException.class,
+                () -> trainerService.addTrainer(requestDTO));
+
+        // Verify no user or trainer was created
+        verifyNoInteractions(userRepository);
+        verify(trainerRepository, never()).save(any());
+    }
 }
