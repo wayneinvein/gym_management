@@ -90,4 +90,38 @@ public class MemberServiceImplTest {
         // Fake response DTO returned after mapping
         responseDTO = new MemberResponseDTO();
     }
+
+    // ════════════════════════════════════════════════════════════
+    // getAllMembers() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getAllMembers_ShouldReturnPagedResult_WhenMembersExist() {
+
+        // Arrange
+        Page<Member> memberPage = new PageImpl<>(List.of(member));
+        when(memberRepository.findAll(any(PageRequest.class))).thenReturn(memberPage);
+        when(memberDtoMapper.toResponse(member)).thenReturn(responseDTO);
+
+        // Act
+        Page<MemberResponseDTO> result = memberService.getAllMembers(0, 10, "memberName", "asc");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+    }
+
+    @Test
+    void getAllMembers_ShouldReturnEmptyPage_WhenNoMembersExist() {
+
+        // Arrange — no members in DB yet
+        when(memberRepository.findAll(any(PageRequest.class))).thenReturn(Page.empty());
+
+        // Act
+        Page<MemberResponseDTO> result = memberService.getAllMembers(0, 10, "memberName", "asc");
+
+        // Assert — empty page is valid, not an error
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+    }
 }
