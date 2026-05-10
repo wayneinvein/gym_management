@@ -237,4 +237,50 @@ public class TrainerServiceImplTest {
                 () -> trainerService.updateTrainer(99L, requestDTO));
     }
 
+    // ════════════════════════════════════════════════════════════
+    // deleteTrainer() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void deleteTrainer_ShouldDeleteTrainerAndLinkedUser_WhenTrainerExists() {
+
+        // Arrange — trainer has a linked user account
+        User linkedUser = new User();
+        trainer.setUser(linkedUser);
+
+        when(trainerRepository.findById(1L)).thenReturn(Optional.of(trainer));
+
+        // Act
+        trainerService.deleteTrainer(1L);
+
+        // Assert — both trainer and user should be deleted
+        verify(userRepository).delete(linkedUser);
+        verify(trainerRepository).delete(trainer);
+    }
+
+    @Test
+    void deleteTrainer_ShouldDeleteTrainerOnly_WhenNoLinkedUserExists() {
+
+        // Arrange — trainer has no linked user account
+        trainer.setUser(null);
+        when(trainerRepository.findById(1L)).thenReturn(Optional.of(trainer));
+
+        // Act
+        trainerService.deleteTrainer(1L);
+
+        // Assert — only trainer deleted, no user deletion attempted
+        verify(userRepository, never()).delete(any());
+        verify(trainerRepository).delete(trainer);
+    }
+
+    @Test
+    void deleteTrainer_ShouldThrowNotFoundException_WhenTrainerDoesNotExist() {
+
+        // Arrange
+        when(trainerRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> trainerService.deleteTrainer(99L));
+    }
 }
