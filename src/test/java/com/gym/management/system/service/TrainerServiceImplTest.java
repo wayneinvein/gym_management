@@ -329,4 +329,53 @@ public class TrainerServiceImplTest {
         assertThrows(NotFoundException.class,
                 () -> trainerService.updateTrainerStatus(99L, false));
     }
+
+    // ════════════════════════════════════════════════════════════
+    // getMembersByTrainer() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getMembersByTrainer_ShouldReturnList_WhenTrainerExistsAndHasMembers() {
+
+        // Arrange
+        Member member = new Member();
+        MemberResponseDTO memberResponseDTO = new MemberResponseDTO();
+
+        when(trainerRepository.existsById(1L)).thenReturn(true);
+        when(memberRepository.findByTrainerTrainerId(1L)).thenReturn(List.of(member));
+        when(memberDTOMapper.toResponse(member)).thenReturn(memberResponseDTO);
+
+        // Act
+        List<MemberResponseDTO> result = trainerService.getMembersByTrainer(1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getMembersByTrainer_ShouldReturnEmptyList_WhenTrainerHasNoAssignedMembers() {
+
+        // Arrange — trainer exists but no members assigned yet
+        when(trainerRepository.existsById(1L)).thenReturn(true);
+        when(memberRepository.findByTrainerTrainerId(1L)).thenReturn(List.of());
+
+        // Act
+        List<MemberResponseDTO> result = trainerService.getMembersByTrainer(1L);
+
+        // Assert — empty list is valid
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void getMembersByTrainer_ShouldThrowNotFoundException_WhenTrainerDoesNotExist() {
+
+        // Arrange
+        when(trainerRepository.existsById(99L)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> trainerService.getMembersByTrainer(99L));
+    }
 }
