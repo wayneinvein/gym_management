@@ -127,4 +127,40 @@ public class TrainerPaymentServiceImplTest {
         // Verify no payment was saved
         verify(trainerPaymentRepository, never()).save(any());
     }
+
+    // ════════════════════════════════════════════════════════════
+    // getAllPayments() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getAllPayments_ShouldReturnPagedResult_WhenPaymentsExist() {
+
+        // Arrange
+        Page<TrainerPayment> paymentPage = new PageImpl<>(List.of(payment));
+        when(trainerPaymentRepository.findAll(any(PageRequest.class))).thenReturn(paymentPage);
+        when(trainerPaymentDTOMapper.toResponse(payment)).thenReturn(responseDTO);
+
+        // Act
+        Page<TrainerPaymentResponseDTO> result =
+                trainerPaymentService.getAllPayments(0, 10, "paymentDate", "asc");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+    }
+
+    @Test
+    void getAllPayments_ShouldReturnEmptyPage_WhenNoPaymentsExist() {
+
+        // Arrange
+        when(trainerPaymentRepository.findAll(any(PageRequest.class))).thenReturn(Page.empty());
+
+        // Act
+        Page<TrainerPaymentResponseDTO> result =
+                trainerPaymentService.getAllPayments(0, 10, "paymentDate", "asc");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+    }
 }
