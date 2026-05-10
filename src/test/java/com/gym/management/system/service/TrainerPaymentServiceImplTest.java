@@ -163,4 +163,51 @@ public class TrainerPaymentServiceImplTest {
         assertNotNull(result);
         assertEquals(0, result.getTotalElements());
     }
+
+    // ════════════════════════════════════════════════════════════
+    // getPaymentsByTrainer() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getPaymentsByTrainer_ShouldReturnList_WhenTrainerExists() {
+
+        // Arrange
+        when(trainerRepository.existsById(1L)).thenReturn(true);
+        when(trainerPaymentRepository.findByTrainerTrainerId(1L)).thenReturn(List.of(payment));
+        when(trainerPaymentDTOMapper.toResponse(List.of(payment))).thenReturn(List.of(responseDTO));
+
+        // Act
+        List<TrainerPaymentResponseDTO> result = trainerPaymentService.getPaymentsByTrainer(1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getPaymentsByTrainer_ShouldReturnEmptyList_WhenTrainerHasNoPayments() {
+
+        // Arrange — trainer exists but has no payments recorded
+        when(trainerRepository.existsById(1L)).thenReturn(true);
+        when(trainerPaymentRepository.findByTrainerTrainerId(1L)).thenReturn(List.of());
+        when(trainerPaymentDTOMapper.toResponse(List.of())).thenReturn(List.of());
+
+        // Act
+        List<TrainerPaymentResponseDTO> result = trainerPaymentService.getPaymentsByTrainer(1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void getPaymentsByTrainer_ShouldThrowNotFoundException_WhenTrainerDoesNotExist() {
+
+        // Arrange
+        when(trainerRepository.existsById(99L)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> trainerPaymentService.getPaymentsByTrainer(99L));
+    }
 }
