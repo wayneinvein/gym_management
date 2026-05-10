@@ -205,4 +205,36 @@ public class TrainerServiceImplTest {
         verifyNoInteractions(userRepository);
         verify(trainerRepository, never()).save(any());
     }
+
+    // ════════════════════════════════════════════════════════════
+    // updateTrainer() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void updateTrainer_ShouldReturnUpdatedResponse_WhenTrainerExists() {
+
+        // Arrange
+        when(trainerRepository.findById(1L)).thenReturn(Optional.of(trainer));
+        when(trainerRepository.save(trainer)).thenReturn(trainer);
+        when(trainerDTOMapper.toResponse(trainer)).thenReturn(responseDTO);
+
+        // Act
+        TrainerResponseDTO result = trainerService.updateTrainer(1L, requestDTO);
+
+        // Assert
+        assertNotNull(result);
+        verify(trainerRepository).save(trainer);
+    }
+
+    @Test
+    void updateTrainer_ShouldThrowNotFoundException_WhenTrainerDoesNotExist() {
+
+        // Arrange
+        when(trainerRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> trainerService.updateTrainer(99L, requestDTO));
+    }
+
 }
