@@ -227,4 +227,51 @@ public class MemberServiceImplTest {
                 () -> memberService.updateMember(99L, requestDTO));
     }
 
+    // ════════════════════════════════════════════════════════════
+    // deleteMember() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void deleteMember_ShouldDeleteMemberAndLinkedUser_WhenMemberExists() {
+
+        // Arrange — member has a linked user account
+        User linkedUser = new User();
+        member.setUser(linkedUser);
+
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+
+        // Act
+        memberService.deleteMember(1L);
+
+        // Assert — both member and user should be deleted
+        verify(userRepository).delete(linkedUser);
+        verify(memberRepository).delete(member);
+    }
+
+    @Test
+    void deleteMember_ShouldDeleteMemberOnly_WhenNoLinkedUserExists() {
+
+        // Arrange — member has no linked user account
+        member.setUser(null);
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+
+        // Act
+        memberService.deleteMember(1L);
+
+        // Assert — only member deleted, no user deletion attempted
+        verify(userRepository, never()).delete(any());
+        verify(memberRepository).delete(member);
+    }
+
+    @Test
+    void deleteMember_ShouldThrowNotFoundException_WhenMemberDoesNotExist() {
+
+        // Arrange
+        when(memberRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> memberService.deleteMember(99L));
+    }
+
 }
