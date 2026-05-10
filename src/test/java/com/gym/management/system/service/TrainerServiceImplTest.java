@@ -81,4 +81,38 @@ public class TrainerServiceImplTest {
         // Fake response DTO returned after mapping
         responseDTO = new TrainerResponseDTO();
     }
+
+    // ════════════════════════════════════════════════════════════
+    // getAllTrainers() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getAllTrainers_ShouldReturnList_WhenTrainersExist() {
+
+        // Arrange
+        when(trainerRepository.findAll()).thenReturn(List.of(trainer));
+        when(trainerDTOMapper.toResponse(List.of(trainer))).thenReturn(List.of(responseDTO));
+
+        // Act
+        List<TrainerResponseDTO> result = trainerService.getAllTrainers();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getAllTrainers_ShouldReturnEmptyList_WhenNoTrainersExist() {
+
+        // Arrange — no trainers in DB yet
+        when(trainerRepository.findAll()).thenReturn(List.of());
+        when(trainerDTOMapper.toResponse(List.of())).thenReturn(List.of());
+
+        // Act
+        List<TrainerResponseDTO> result = trainerService.getAllTrainers();
+
+        // Assert — empty list is valid, not an error
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
 }
