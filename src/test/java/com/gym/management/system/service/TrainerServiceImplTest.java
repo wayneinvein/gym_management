@@ -378,4 +378,33 @@ public class TrainerServiceImplTest {
         assertThrows(NotFoundException.class,
                 () -> trainerService.getMembersByTrainer(99L));
     }
+
+    // ════════════════════════════════════════════════════════════
+    // getMyProfile() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getMyProfile_ShouldReturnResponse_WhenTrainerProfileExists() {
+
+        // Arrange — username comes from security context
+        when(trainerRepository.findByUserUsername("mike_trainer")).thenReturn(Optional.of(trainer));
+        when(trainerDTOMapper.toResponse(trainer)).thenReturn(responseDTO);
+
+        // Act
+        TrainerResponseDTO result = trainerService.getMyProfile("mike_trainer");
+
+        // Assert
+        assertNotNull(result);
+    }
+
+    @Test
+    void getMyProfile_ShouldThrowNotFoundException_WhenNoTrainerProfileLinkedToUser() {
+
+        // Arrange — no trainer linked to this username
+        when(trainerRepository.findByUserUsername("unknown")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> trainerService.getMyProfile("unknown"));
+    }
 }
