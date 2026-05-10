@@ -154,4 +154,45 @@ public class MemberServiceImplTest {
                 () -> memberService.getMemberById(99L));
     }
 
+    // ════════════════════════════════════════════════════════════
+    // addMember() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void addMember_ShouldReturnResponse_WhenPhoneNumberIsNotAlreadyRegistered() {
+
+        // Arrange — phone number is unique, user and member created successfully
+        when(memberRepository.existsByPhoneNumber("9876543210")).thenReturn(false);
+        when(passwordEncoder.encode("Gym@123")).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(new User());
+        when(memberDtoMapper.toEntity(requestDTO)).thenReturn(member);
+        when(memberRepository.save(any(Member.class))).thenReturn(member);
+        when(memberDtoMapper.toResponse(member)).thenReturn(responseDTO);
+
+        // Act
+        MemberResponseDTO result = memberService.addMember(requestDTO);
+
+        // Assert
+        assertNotNull(result);
+
+        // Verify a user account was also created for this member
+        verify(userRepository).save(any(User.class));
+        verify(memberRepository).save(any(Member.class));
+    }
+
+    @Test
+    void addMember_ShouldThrowAlreadyPresentException_WhenPhoneNumberAlreadyRegistered() {
+
+        // Arrange — phone number already exists in DB
+        when(memberRepository.existsByPhoneNumber("9876543210")).thenReturn(true);
+
+        // Act & Assert
+        assertThrows(AlreadyPresentException.class,
+                () -> memberService.addMember(requestDTO));
+
+        // Verify no user or member was created
+        verifyNoInteractions(userRepository);
+        verify(memberRepository, never()).save(any());
+    }
+
 }
