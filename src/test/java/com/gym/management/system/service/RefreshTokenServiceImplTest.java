@@ -54,4 +54,39 @@ public class RefreshTokenServiceImplTest {
         expiredToken.setUser(user);
         expiredToken.setExpiryDate(Instant.now().minus(1, ChronoUnit.DAYS));
     }
+
+    // ════════════════════════════════════════════════════════════
+    // createRefreshToken() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void createRefreshToken_ShouldReturnSavedToken_WhenCalled() {
+
+        // Arrange — repository returns saved token
+        when(refreshTokenRepository.save(any(RefreshToken.class))).thenReturn(validToken);
+
+        // Act
+        RefreshToken result = refreshTokenService.createRefreshToken(user);
+
+        // Assert — token should be saved and returned
+        assertNotNull(result);
+        verify(refreshTokenRepository).save(any(RefreshToken.class));
+    }
+
+    @Test
+    void createRefreshToken_ShouldSetTokenAndExpiryDate_WhenCalled() {
+
+        // Arrange — capture what gets saved to inspect its fields
+        when(refreshTokenRepository.save(any(RefreshToken.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        RefreshToken result = refreshTokenService.createRefreshToken(user);
+
+        // Assert — token string should not be null and expiry should be in the future
+        assertNotNull(result.getToken());
+        assertNotNull(result.getExpiryDate());
+        assertTrue(result.getExpiryDate().isAfter(Instant.now()));
+        assertEquals(user, result.getUser());
+    }
 }
