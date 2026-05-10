@@ -211,4 +211,33 @@ public class MembershipPlanServiceImplTest {
                 () -> membershipPlanService.updatePlan(99L, requestDTO));
     }
 
+
+    // ════════════════════════════════════════════════════════════
+    // deletePlan() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void deletePlan_ShouldDeletePlan_WhenPlanExists() {
+
+        // Arrange
+        when(membershipPlanRepository.findById(1L)).thenReturn(Optional.of(plan));
+
+        // Act
+        membershipPlanService.deletePlan(1L);
+
+        // Assert
+        verify(membershipPlanRepository).delete(plan);
+    }
+
+    @Test
+    void deletePlan_ShouldThrowNotFoundException_WhenPlanDoesNotExist() {
+
+        // Arrange
+        when(membershipPlanRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> membershipPlanService.deletePlan(99L));
+    }
+
 }
