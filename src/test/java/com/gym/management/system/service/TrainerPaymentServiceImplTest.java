@@ -74,4 +74,57 @@ public class TrainerPaymentServiceImplTest {
         // Fake response DTO returned after mapping
         responseDTO = new TrainerPaymentResponseDTO();
     }
+
+    // ════════════════════════════════════════════════════════════
+    // recordPayment() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void recordPayment_ShouldReturnResponse_WhenTrainerExistsAndNoDuplicateExists() {
+
+        // Arrange — trainer found, no existing payment for this month
+        when(trainerRepository.findById(1L)).thenReturn(Optional.of(trainer));
+        when(trainerPaymentRepository.findByTrainerTrainerIdAndSalaryMonth(1L, "2025-01"))
+                .thenReturn(Optional.empty()); // no duplicate
+        when(trainerPaymentRepository.save(any(TrainerPayment.class))).thenReturn(payment);
+        when(trainerPaymentDTOMapper.toResponse(payment)).thenReturn(responseDTO);
+
+        // Act
+        TrainerPaymentResponseDTO result = trainerPaymentService.recordPayment(requestDTO);
+
+        // Assert
+        assertNotNull(result);
+        verify(trainerPaymentRepository).save(any(TrainerPayment.class));
+    }
+
+    @Test
+    void recordPayment_ShouldThrowNotFoundException_WhenTrainerDoesNotExist() {
+
+        // Arrange — trainer not found in DB
+        when(trainerRepository.findById(99L)).thenReturn(Optional.empty());
+        requestDTO.setTrainerId(99L);
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> trainerPaymentService.recordPayment(requestDTO));
+
+        // Verify no payment was saved
+        verify(trainerPaymentRepository, never()).save(any());
+    }
+
+    @Test
+    void recordPayment_ShouldThrowAlreadyPresentException_WhenPaymentForSameMonthAlreadyExists() {
+
+        // Arrange — trainer found but payment for this month already recorded
+        when(trainerRepository.findById(1L)).thenReturn(Optional.of(trainer));
+        when(trainerPaymentRepository.findByTrainerTrainerIdAndSalaryMonth(1L, "2025-01"))
+                .thenReturn(Optional.of(payment)); // duplicate found
+
+        // Act & Assert
+        assertThrows(AlreadyPresentException.class,
+                () -> trainerPaymentService.recordPayment(requestDTO));
+
+        // Verify no payment was saved
+        verify(trainerPaymentRepository, never()).save(any());
+    }
 }
