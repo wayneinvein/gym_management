@@ -396,4 +396,46 @@ public class MemberServiceImplTest {
                 () -> memberService.getMembersByTrainer(99L));
     }
 
+    // ════════════════════════════════════════════════════════════
+    // getMyProfile() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getMyProfile_ShouldReturnResponse_WhenUserIsAuthenticated() {
+
+        // Arrange — username comes from security context
+        when(securityUtils.getCurrentUsername()).thenReturn("john_doe");
+        when(memberRepository.findByUserUsername("john_doe")).thenReturn(Optional.of(member));
+        when(memberDtoMapper.toResponse(member)).thenReturn(responseDTO);
+
+        // Act
+        MemberResponseDTO result = memberService.getMyProfile();
+
+        // Assert
+        assertNotNull(result);
+    }
+
+    @Test
+    void getMyProfile_ShouldThrowTokenException_WhenUserIsNotAuthenticated() {
+
+        // Arrange — security context returns null (not logged in)
+        when(securityUtils.getCurrentUsername()).thenReturn(null);
+
+        // Act & Assert
+        assertThrows(TokenException.class,
+                () -> memberService.getMyProfile());
+    }
+
+    @Test
+    void getMyProfile_ShouldThrowNotFoundException_WhenNoMemberProfileLinkedToUser() {
+
+        // Arrange — user is authenticated but has no member profile
+        when(securityUtils.getCurrentUsername()).thenReturn("john_doe");
+        when(memberRepository.findByUserUsername("john_doe")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> memberService.getMyProfile());
+    }
+
 }
