@@ -283,4 +283,50 @@ public class TrainerServiceImplTest {
         assertThrows(NotFoundException.class,
                 () -> trainerService.deleteTrainer(99L));
     }
+
+    // ════════════════════════════════════════════════════════════
+    // updateTrainerStatus() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void updateTrainerStatus_ShouldSetActiveToFalse_WhenTrainerIsDeactivated() {
+
+        // Arrange
+        when(trainerRepository.findById(1L)).thenReturn(Optional.of(trainer));
+        when(trainerRepository.save(trainer)).thenReturn(trainer);
+        when(trainerDTOMapper.toResponse(trainer)).thenReturn(responseDTO);
+
+        // Act
+        trainerService.updateTrainerStatus(1L, false);
+
+        // Assert — trainer should now be inactive
+        assertFalse(trainer.isActive());
+    }
+
+    @Test
+    void updateTrainerStatus_ShouldSetActiveToTrue_WhenTrainerIsReactivated() {
+
+        // Arrange — trainer is currently inactive
+        trainer.setActive(false);
+        when(trainerRepository.findById(1L)).thenReturn(Optional.of(trainer));
+        when(trainerRepository.save(trainer)).thenReturn(trainer);
+        when(trainerDTOMapper.toResponse(trainer)).thenReturn(responseDTO);
+
+        // Act
+        trainerService.updateTrainerStatus(1L, true);
+
+        // Assert — trainer should now be active again
+        assertTrue(trainer.isActive());
+    }
+
+    @Test
+    void updateTrainerStatus_ShouldThrowNotFoundException_WhenTrainerDoesNotExist() {
+
+        // Arrange
+        when(trainerRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> trainerService.updateTrainerStatus(99L, false));
+    }
 }
