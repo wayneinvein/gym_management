@@ -407,4 +407,69 @@ public class TrainerServiceImplTest {
         assertThrows(NotFoundException.class,
                 () -> trainerService.getMyProfile("unknown"));
     }
+
+    // ════════════════════════════════════════════════════════════
+    // updateMyProfile() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void updateMyProfile_ShouldReturnUpdatedResponse_WhenPhoneNumberIsUnchanged() {
+
+        // Arrange — trainer keeps the same phone number
+        requestDTO.setPhoneNumber("9876543210"); // same as trainer's current number
+
+        when(trainerRepository.findByUserUsername("mike_trainer")).thenReturn(Optional.of(trainer));
+        when(trainerRepository.save(trainer)).thenReturn(trainer);
+        when(trainerDTOMapper.toResponse(trainer)).thenReturn(responseDTO);
+
+        // Act
+        TrainerResponseDTO result = trainerService.updateMyProfile("mike_trainer", requestDTO);
+
+        // Assert
+        assertNotNull(result);
+        verify(trainerRepository).save(trainer);
+    }
+
+    @Test
+    void updateMyProfile_ShouldReturnUpdatedResponse_WhenNewPhoneNumberIsAvailable() {
+
+        // Arrange — trainer is changing to a new phone number that no one else has
+        requestDTO.setPhoneNumber("1111111111"); // new phone number
+
+        when(trainerRepository.findByUserUsername("mike_trainer")).thenReturn(Optional.of(trainer));
+        when(trainerRepository.existsByPhoneNumber("1111111111")).thenReturn(false); // not taken
+        when(trainerRepository.save(trainer)).thenReturn(trainer);
+        when(trainerDTOMapper.toResponse(trainer)).thenReturn(responseDTO);
+
+        // Act
+        TrainerResponseDTO result = trainerService.updateMyProfile("mike_trainer", requestDTO);
+
+        // Assert
+        assertNotNull(result);
+    }
+
+    @Test
+    void updateMyProfile_ShouldThrowAlreadyPresentException_WhenNewPhoneNumberIsTakenByAnotherTrainer() {
+
+        // Arrange — new phone number is already registered to someone else
+        requestDTO.setPhoneNumber("1111111111"); // different from current
+
+        when(trainerRepository.findByUserUsername("mike_trainer")).thenReturn(Optional.of(trainer));
+        when(trainerRepository.existsByPhoneNumber("1111111111")).thenReturn(true); // already taken
+
+        // Act & Assert
+        assertThrows(AlreadyPresentException.class,
+                () -> trainerService.updateMyProfile("mike_trainer", requestDTO));
+    }
+
+    @Test
+    void updateMyProfile_ShouldThrowNotFoundException_WhenTrainerProfileNotFound() {
+
+        // Arrange — no trainer linked to this username
+        when(trainerRepository.findByUserUsername("unknown")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> trainerService.updateMyProfile("unknown", requestDTO));
+    }
 }
