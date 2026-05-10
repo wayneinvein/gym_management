@@ -89,4 +89,59 @@ public class RefreshTokenServiceImplTest {
         assertTrue(result.getExpiryDate().isAfter(Instant.now()));
         assertEquals(user, result.getUser());
     }
+
+    // ════════════════════════════════════════════════════════════
+    // verifyRefreshToken() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void verifyRefreshToken_ShouldReturnToken_WhenTokenIsValidAndNotExpired() {
+
+        // Arrange — valid token found in DB
+        when(refreshTokenRepository.findByToken("valid-token")).thenReturn(Optional.of(validToken));
+
+        // Act
+        RefreshToken result = refreshTokenService.verifyRefreshToken("valid-token");
+
+        // Assert — valid token returned without deleting it
+        assertNotNull(result);
+        assertEquals("valid-token", result.getToken());
+        verify(refreshTokenRepository, never()).delete(any());
+    }
+
+    @Test
+    void verifyRefreshToken_ShouldThrowTokenException_WhenTokenDoesNotExist() {
+
+        // Arrange — token not found in DB
+        when(refreshTokenRepository.findByToken("unknown-token")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(TokenException.class,
+                () -> refreshTokenService.verifyRefreshToken("unknown-token"));
+    }
+
+    @Test
+    void verifyRefreshToken_ShouldThrowTokenException_WhenTokenIsExpired() {
+
+        // Arrange — expired token found in DB
+        when(refreshTokenRepository.findByToken("expired-token")).thenReturn(Optional.of(expiredToken));
+
+        // Act & Assert
+        assertThrows(TokenException.class,
+                () -> refreshTokenService.verifyRefreshToken("expired-token"));
+    }
+
+    @Test
+    void verifyRefreshToken_ShouldDeleteExpiredToken_WhenTokenIsExpired() {
+
+        // Arrange — expired token found in DB
+        when(refreshTokenRepository.findByToken("expired-token")).thenReturn(Optional.of(expiredToken));
+
+        // Act — exception is expected but we still want to verify deletion happened
+        assertThrows(TokenException.class,
+                () -> refreshTokenService.verifyRefreshToken("expired-token"));
+
+        // Assert — expired token should be deleted from DB before throwing
+        verify(refreshTokenRepository).delete(expiredToken);
+    }
 }
