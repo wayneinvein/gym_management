@@ -279,4 +279,36 @@ public class TrainerPaymentServiceImplTest {
         assertThrows(NotFoundException.class,
                 () -> trainerPaymentService.getPaymentById(99L));
     }
+
+    // ════════════════════════════════════════════════════════════
+    // updatePaymentStatus() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void updatePaymentStatus_ShouldReturnUpdatedResponse_WhenPaymentExists() {
+
+        // Arrange
+        when(trainerPaymentRepository.findById(1L)).thenReturn(Optional.of(payment));
+        when(trainerPaymentRepository.save(payment)).thenReturn(payment);
+        when(trainerPaymentDTOMapper.toResponse(payment)).thenReturn(responseDTO);
+
+        // Act
+        TrainerPaymentResponseDTO result =
+                trainerPaymentService.updatePaymentStatus(1L, PaymentStatus.PAID);
+
+        // Assert — status should be updated to PAID
+        assertNotNull(result);
+        assertEquals(PaymentStatus.PAID, payment.getStatus());
+    }
+
+    @Test
+    void updatePaymentStatus_ShouldThrowNotFoundException_WhenPaymentDoesNotExist() {
+
+        // Arrange
+        when(trainerPaymentRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> trainerPaymentService.updatePaymentStatus(99L, PaymentStatus.PAID));
+    }
 }
