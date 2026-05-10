@@ -210,4 +210,43 @@ public class TrainerPaymentServiceImplTest {
         assertThrows(NotFoundException.class,
                 () -> trainerPaymentService.getPaymentsByTrainer(99L));
     }
+
+
+    // ════════════════════════════════════════════════════════════
+    // getPaymentsByStatus() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getPaymentsByStatus_ShouldReturnFilteredPage_WhenStatusMatches() {
+
+        // Arrange
+        Page<TrainerPayment> page = new PageImpl<>(List.of(payment));
+        when(trainerPaymentRepository.findByStatus(eq(PaymentStatus.PENDING), any(PageRequest.class)))
+                .thenReturn(page);
+        when(trainerPaymentDTOMapper.toResponse(payment)).thenReturn(responseDTO);
+
+        // Act
+        Page<TrainerPaymentResponseDTO> result =
+                trainerPaymentService.getPaymentsByStatus(PaymentStatus.PENDING, 0, 10, "paymentDate", "asc");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+    }
+
+    @Test
+    void getPaymentsByStatus_ShouldReturnEmptyPage_WhenNoMatchingStatus() {
+
+        // Arrange — no paid payments found
+        when(trainerPaymentRepository.findByStatus(eq(PaymentStatus.PAID), any(PageRequest.class)))
+                .thenReturn(Page.empty());
+
+        // Act
+        Page<TrainerPaymentResponseDTO> result =
+                trainerPaymentService.getPaymentsByStatus(PaymentStatus.PAID, 0, 10, "paymentDate", "asc");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+    }
 }
