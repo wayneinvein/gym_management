@@ -345,4 +345,40 @@ public class TrainerPaymentServiceImplTest {
         assertNotNull(result);
         assertEquals(0, result.size());
     }
+
+
+    // ════════════════════════════════════════════════════════════
+    // getPendingDues() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getPendingDues_ShouldReturnList_WhenPendingOrOverduePaymentsExist() {
+
+        // Arrange — both PENDING and OVERDUE payments returned
+        when(trainerPaymentRepository.findByStatusIn(List.of(PaymentStatus.PENDING, PaymentStatus.OVERDUE)))
+                .thenReturn(List.of(payment));
+        when(trainerPaymentDTOMapper.toResponse(payment)).thenReturn(responseDTO);
+
+        // Act
+        List<TrainerPaymentResponseDTO> result = trainerPaymentService.getPendingDues();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getPendingDues_ShouldReturnEmptyList_WhenNoPendingOrOverduePaymentsExist() {
+
+        // Arrange — all payments are settled
+        when(trainerPaymentRepository.findByStatusIn(List.of(PaymentStatus.PENDING, PaymentStatus.OVERDUE)))
+                .thenReturn(List.of());
+
+        // Act
+        List<TrainerPaymentResponseDTO> result = trainerPaymentService.getPendingDues();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
 }
