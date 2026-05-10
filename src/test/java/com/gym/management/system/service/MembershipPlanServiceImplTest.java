@@ -62,4 +62,58 @@ public class MembershipPlanServiceImplTest {
         // Fake response DTO returned after mapping
         responseDTO = new MembershipPlanResponseDTO();
     }
+
+    // ════════════════════════════════════════════════════════════
+    // createPlan() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void createPlan_ShouldReturnResponse_WhenPlanNameIsUnique() {
+
+        // Arrange — plan name does not exist yet
+        when(membershipPlanRepository.existsByName("Gold Plan")).thenReturn(false);
+        when(membershipPlanDTOMapper.toEntity(requestDTO)).thenReturn(plan);
+        when(membershipPlanRepository.save(plan)).thenReturn(plan);
+        when(membershipPlanDTOMapper.toResponse(plan)).thenReturn(responseDTO);
+
+        // Act
+        MembershipPlanResponseDTO result = membershipPlanService.createPlan(requestDTO);
+
+        // Assert
+        assertNotNull(result);
+        verify(membershipPlanRepository).save(plan);
+    }
+
+    @Test
+    void createPlan_ShouldSetActiveToTrue_WhenPlanIsCreated() {
+
+        // Arrange — plan starts as inactive to verify service sets it to true
+        plan.setActive(false);
+
+        when(membershipPlanRepository.existsByName("Gold Plan")).thenReturn(false);
+        when(membershipPlanDTOMapper.toEntity(requestDTO)).thenReturn(plan);
+        when(membershipPlanRepository.save(plan)).thenReturn(plan);
+        when(membershipPlanDTOMapper.toResponse(plan)).thenReturn(responseDTO);
+
+        // Act
+        membershipPlanService.createPlan(requestDTO);
+
+        // Assert — service should always set active=true on creation
+        assertTrue(plan.isActive());
+    }
+
+    @Test
+    void createPlan_ShouldThrowAlreadyPresentException_WhenPlanNameAlreadyExists() {
+
+        // Arrange — plan name is already taken
+        when(membershipPlanRepository.existsByName("Gold Plan")).thenReturn(true);
+
+        // Act & Assert
+        assertThrows(AlreadyPresentException.class,
+                () -> membershipPlanService.createPlan(requestDTO));
+
+        // Verify no plan was saved
+        verify(membershipPlanRepository, never()).save(any());
+    }
+
 }
