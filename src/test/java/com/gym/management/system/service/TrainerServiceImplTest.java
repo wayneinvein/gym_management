@@ -115,4 +115,33 @@ public class TrainerServiceImplTest {
         assertNotNull(result);
         assertEquals(0, result.size());
     }
+
+    // ════════════════════════════════════════════════════════════
+    // getTrainerById() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getTrainerById_ShouldReturnResponse_WhenTrainerExists() {
+
+        // Arrange
+        when(trainerRepository.findById(1L)).thenReturn(Optional.of(trainer));
+        when(trainerDTOMapper.toResponse(trainer)).thenReturn(responseDTO);
+
+        // Act
+        TrainerResponseDTO result = trainerService.getTrainerById(1L);
+
+        // Assert
+        assertNotNull(result);
+    }
+
+    @Test
+    void getTrainerById_ShouldThrowNotFoundException_WhenTrainerDoesNotExist() {
+
+        // Arrange
+        when(trainerRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> trainerService.getTrainerById(99L));
+    }
 }
