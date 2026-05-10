@@ -116,4 +116,39 @@ public class MembershipPlanServiceImplTest {
         verify(membershipPlanRepository, never()).save(any());
     }
 
+
+    // ════════════════════════════════════════════════════════════
+    // getAllPlans() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void getAllPlans_ShouldReturnList_WhenPlansExist() {
+
+        // Arrange
+        when(membershipPlanRepository.findAll()).thenReturn(List.of(plan));
+        when(membershipPlanDTOMapper.toResponse(List.of(plan))).thenReturn(List.of(responseDTO));
+
+        // Act
+        List<MembershipPlanResponseDTO> result = membershipPlanService.getAllPlans();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getAllPlans_ShouldReturnEmptyList_WhenNoPlansExist() {
+
+        // Arrange — no plans in DB yet
+        when(membershipPlanRepository.findAll()).thenReturn(List.of());
+        when(membershipPlanDTOMapper.toResponse(List.of())).thenReturn(List.of());
+
+        // Act
+        List<MembershipPlanResponseDTO> result = membershipPlanService.getAllPlans();
+
+        // Assert — empty list is valid, not an error
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
 }
