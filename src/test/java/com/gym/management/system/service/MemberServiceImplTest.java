@@ -305,4 +305,49 @@ public class MemberServiceImplTest {
                 () -> memberService.updateMemberStatus(99L, MemberStatus.INACTIVE));
     }
 
+
+    // ════════════════════════════════════════════════════════════
+    // assignTrainer() tests
+    // ════════════════════════════════════════════════════════════
+
+    @Test
+    void assignTrainer_ShouldReturnResponse_WhenBothMemberAndTrainerExist() {
+
+        // Arrange
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(trainerRepository.findById(10L)).thenReturn(Optional.of(trainer));
+        when(memberRepository.save(member)).thenReturn(member);
+        when(memberDtoMapper.toResponse(member)).thenReturn(responseDTO);
+
+        // Act
+        MemberResponseDTO result = memberService.assignTrainer(1L, 10L);
+
+        // Assert — trainer should be assigned to member
+        assertNotNull(result);
+        assertEquals(trainer, member.getTrainer());
+    }
+
+    @Test
+    void assignTrainer_ShouldThrowNotFoundException_WhenMemberDoesNotExist() {
+
+        // Arrange
+        when(memberRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> memberService.assignTrainer(99L, 10L));
+    }
+
+    @Test
+    void assignTrainer_ShouldThrowNotFoundException_WhenTrainerDoesNotExist() {
+
+        // Arrange — member exists but trainer does not
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(trainerRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(NotFoundException.class,
+                () -> memberService.assignTrainer(1L, 99L));
+    }
+
 }
