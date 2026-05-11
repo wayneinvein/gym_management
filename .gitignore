@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Never push prod config or env files to GitHub
+application-prod.properties
+.env
