@@ -2,6 +2,7 @@ package com.gym.management.system.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -26,7 +27,11 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("Gym Management System APIs")
                         .version("1.0")
-                        .description("API Documentation BY Sandeep Tiwari"))
+                        .description("API Documentation")
+                        .contact(new Contact()
+                                .name("Sandeep Tiwari")
+                                .email("tiwarisandeep1909@gmail.com")
+                                .url("https://github.com/wayneinvein")))
 
                 // Enables global security requirement so all endpoints
                 // can use the configured JWT authentication
