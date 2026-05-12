@@ -21,6 +21,14 @@ A production-grade **REST API** for managing a gym's members, trainers, membersh
 | Logging | SLF4J |
 
 ---
+## Live API
+
+| | Link |
+|---|---|
+| Swagger UI | https://sandeeptiwari.up.railway.app/swagger-ui/index.html |
+| Base URL | https://sandeeptiwari.up.railway.app |
+
+---
 
 ##  Features
 
@@ -109,6 +117,20 @@ Logout → POST /auth/logout → refresh token deleted from DB
 
 ---
 
+## Testing
+
+Unit tests written for all 11 service classes using JUnit 5 and Mockito.
+
+```bash
+mvn test
+```
+
+- 150+ test cases covering happy path and edge cases
+- Mocked all external dependencies
+- Covers all business logic, validation, and exception scenarios
+
+---
+
 ##  Running Locally
 
 ### Prerequisites
@@ -123,20 +145,9 @@ Logout → POST /auth/logout → refresh token deleted from DB
 CREATE DATABASE gym_system;
 ```
 
-**2. Configure `application.properties`**
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/gym_system
-spring.datasource.username=root
-spring.datasource.password=yourpassword
-spring.jpa.hibernate.ddl-auto=update
-
-jwt.secret=<base64-encoded-256-bit-key>
-jwt.expiration=900000
-admin.username=yourusername
-admin.password=yourpassword
-default.member.password=yourmemberpassword
-default.trainer.password=yourtrainerpassword
-```
+**2. Configure `application-dev.properties`**
+Fill in your local MySQL credentials and JWT secret.
+These are gitignored and never pushed to GitHub.
 
 **3. Run**
 ```bash
@@ -151,6 +162,26 @@ mvn spring-boot:run
 ```
 Use the default admin credentials configured in your environment variables.
 
+```
+
+---
+
+## Running with Docker
+
+```bash
+docker build -t gym-management-app .
+
+docker run -p 8080:8080 \
+  -e SPRING_PROFILES_ACTIVE=prod \
+  -e DB_URL=jdbc:mysql://host:3306/gym_system \
+  -e DB_USERNAME=your_db_username \
+  -e DB_PASSWORD=your_db_password \
+  -e JWT_SECRET=your_jwt_secret \
+  -e ADMIN_USERNAME=your_admin_username \
+  -e ADMIN_PASSWORD=your_admin_password \
+  -e DEFAULT_MEMBER_PASSWORD=your_member_password \
+  -e DEFAULT_TRAINER_PASSWORD=your_trainer_password \
+  gym-management-app
 ```
 
 ---
